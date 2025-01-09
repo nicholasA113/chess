@@ -1,1 +1,1 @@
-# My notes
+# cs240 Notes

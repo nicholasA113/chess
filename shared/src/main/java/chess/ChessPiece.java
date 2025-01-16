@@ -70,9 +70,14 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         switch (this.pieceType) {
+            case KING:
+                KingMoves kingMoves = new KingMoves(board, myPosition);
+                kingMoves.addMoves(moves);
+                break;
             case BISHOP:
                 BishopMoves bishopMoves = new BishopMoves(board, myPosition);
                 bishopMoves.addMoves(moves);
+                break;
         }
         return moves;
     }

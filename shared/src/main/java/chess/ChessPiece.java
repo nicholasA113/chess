@@ -70,6 +70,22 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> moves = new ArrayList<>();
         switch (this.pieceType) {
+            case PAWN:
+                PawnMoves pawnMoves = new PawnMoves(board, myPosition);
+                pawMoves.addMoves(moves);
+                break;
+            case ROOK:
+                RookMoves rookMoves = new RookMoves(board, myPosition);
+                rookMoves.addMoves(moves);
+                break;
+            case QUEEN:
+                QueenMoves queenMoves = new QueenMoves(board, myPosition);
+                queenMoves.addMoves(moves);
+                break;
+            case KNIGHT:
+                KnightMoves knightMoves = new KnightMoves(board, myPosition);
+                knightMoves.addMoves(moves);
+                break;
             case KING:
                 KingMoves kingMoves = new KingMoves(board, myPosition);
                 kingMoves.addMoves(moves);

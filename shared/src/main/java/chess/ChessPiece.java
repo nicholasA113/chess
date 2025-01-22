@@ -72,7 +72,7 @@ public class ChessPiece {
         switch (this.pieceType) {
             case PAWN:
                 PawnMoves pawnMoves = new PawnMoves(board, myPosition);
-                pawMoves.addMoves(moves);
+                pawnMoves.addMoves(moves);
                 break;
             case ROOK:
                 RookMoves rookMoves = new RookMoves(board, myPosition);

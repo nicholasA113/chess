@@ -20,14 +20,33 @@ public class PawnMoves {
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE && currentRow < 6) {
             currentRow += 1;
             ChessPiece currentPiece = board.getPiece(new ChessPosition(currentRow, currentColumn));
+            if (currentPiece == null) {
+                moves.add(new ChessMove(myPosition,
+                        new ChessPosition(currentRow, currentColumn),
+                        null));
+            }
+            int[] colMoves = {1, -2};
+            for (int i = 0; i < colMoves.length; i++) {
+                currentColumn += colMoves[i];
+                if (currentRow < 1 || currentRow > 8 || currentColumn < 1 || currentColumn > 8){
+                    continue;
+                }
+                ChessPiece possibleEnemyPiece = board.getPiece(new ChessPosition(currentRow, currentColumn));
+                if (possibleEnemyPiece == null){
+                    continue;
+                }
+                if (possibleEnemyPiece.getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                    moves.add(new ChessMove(myPosition,
+                            new ChessPosition(currentRow, currentColumn),
+                            null));
+                }
+            }
             if (currentPiece != null) {
                 return;
             }
-            moves.add(new ChessMove(myPosition,
-                    new ChessPosition(currentRow, currentColumn),
-                    null));
             if (myPosition.getRow() == 2) {
                 currentRow += 1;
+                currentColumn += 1;
                 ChessPiece currentPiece2 = board.getPiece(new ChessPosition(currentRow, currentColumn));
                 if (currentPiece2 != null) {
                     return;
@@ -48,15 +67,34 @@ public class PawnMoves {
             }
         } else if (piece.getTeamColor() == ChessGame.TeamColor.BLACK && currentRow > 3) {
             currentRow -= 1;
-            ChessPiece blockedPiece = board.getPiece(new ChessPosition(currentRow, currentColumn));
-            if (blockedPiece != null) {
+            ChessPiece currentPiece = board.getPiece(new ChessPosition(currentRow, currentColumn));
+            if (currentPiece == null) {
+                moves.add(new ChessMove(myPosition,
+                        new ChessPosition(currentRow, currentColumn),
+                        null));
+            }
+            int[] colMoves = {1, -2};
+            for (int i = 0; i < colMoves.length; i++) {
+                currentColumn += colMoves[i];
+                if (currentRow < 1 || currentRow > 8 || currentColumn < 1 || currentColumn > 8){
+                    continue;
+                }
+                ChessPiece possibleEnemyPiece = board.getPiece(new ChessPosition(currentRow, currentColumn));
+                if (possibleEnemyPiece == null){
+                    continue;
+                }
+                if (possibleEnemyPiece.getTeamColor() != board.getPiece(myPosition).getTeamColor()) {
+                    moves.add(new ChessMove(myPosition,
+                            new ChessPosition(currentRow, currentColumn),
+                            null));
+                }
+            }
+            if (currentPiece != null) {
                 return;
             }
-            moves.add(new ChessMove(myPosition,
-                    new ChessPosition(currentRow, currentColumn),
-                    null));
             if (myPosition.getRow() == 7) {
                 currentRow -= 1;
+                currentColumn += 1;
                 ChessPiece blockedPiece2 = board.getPiece(new ChessPosition(currentRow, currentColumn));
                 if (blockedPiece2 != null) {
                     return;

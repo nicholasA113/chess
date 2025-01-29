@@ -30,8 +30,7 @@ public class KingMoves {
                 moves.add(new ChessMove(myPosition,
                         new ChessPosition(currentRow, currentCol),
                         null));
-            }
-            else if (chessPiece.getTeamColor() != board.getPiece(myPosition).getTeamColor()){
+            } else if (chessPiece.getTeamColor() != board.getPiece(myPosition).getTeamColor()){
                 moves.add(new ChessMove(myPosition,
                         new ChessPosition(currentRow, currentCol),
                         null));

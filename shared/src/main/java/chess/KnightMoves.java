@@ -22,7 +22,6 @@ public class KnightMoves {
 
             currentRow += rowMoves[i];
             currentCol += colMoves[i];
-
             if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8) {
                 continue;
             }

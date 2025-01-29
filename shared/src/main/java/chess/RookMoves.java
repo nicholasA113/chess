@@ -22,7 +22,6 @@ public class RookMoves {
             while (true){
                 currentRow += rowMoves[i];
                 currentCol += colMoves[i];
-
                 if (currentRow < 1 || currentRow > 8 || currentCol < 1 || currentCol > 8){
                     break;
                 }
@@ -37,8 +36,7 @@ public class RookMoves {
                             new ChessPosition(currentRow, currentCol),
                             null));
                     break;
-                }
-                else{
+                } else{
                     break;
                 }
             }

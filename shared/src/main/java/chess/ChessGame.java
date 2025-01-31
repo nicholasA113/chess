@@ -13,7 +13,7 @@ import java.util.Objects;
 public class ChessGame {
 
     private ChessBoard board = new ChessBoard();
-    private ChessGame.TeamColor team = TeamColor.WHITE;
+    private TeamColor team = TeamColor.WHITE;
 
     public ChessGame() {
         board.resetBoard();
@@ -33,6 +33,15 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         this.team = team;
+    }
+
+    public void switchTeam(TeamColor team){
+        if (team == TeamColor.WHITE){
+            setTeamTurn(TeamColor.BLACK);
+        }
+        else {
+            setTeamTurn(TeamColor.WHITE);
+        }
     }
 
     @Override
@@ -106,17 +115,16 @@ public class ChessGame {
                 board.addPiece(endPosition, new ChessPiece(team, promotionPiece));
                 board.addPiece(startPosition, null);
             }
+            else {
+                board.addPiece(endPosition, chessPiece);
+                board.addPiece(startPosition, null);
+            }
         }
         else {
             board.addPiece(endPosition, chessPiece);
             board.addPiece(startPosition, null);
         }
-        if (team == TeamColor.WHITE){
-            setTeamTurn(TeamColor.BLACK);
-        }
-        else {
-            setTeamTurn(TeamColor.WHITE);
-        }
+        switchTeam(team);
     }
 
     /**
@@ -125,8 +133,48 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+
+    /** For given team, find King and where his piece is, and get all valid moves.
+     * Get all the valid moves of every piece on opposing team.
+     * If King has a move not in opposing teams valid moves, return true. else, false.**/
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPosition = null;
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                ChessPiece chessPiece = board.getPiece(new ChessPosition(r, c));
+                if (chessPiece.getPieceType() == ChessPiece.PieceType.KING &&
+                        chessPiece.getTeamColor() == teamColor) {
+                    kingPosition = new ChessPosition(r, c);
+                    break;
+                }
+            }
+            if (kingPosition != null) {
+                break;
+            }
+        }
+        Collection<ChessMove> validKingMoves = validMoves(kingPosition);
+        switchTeam(teamColor);
+        Collection<ChessMove> otherTeamMoves = null;
+        for (int r = 1; r < 9; r++) {
+            for (int c = 1; c < 9; c++) {
+                ChessPiece chessPiece = board.getPiece(new ChessPosition(r, c));
+                if (chessPiece.getTeamColor() == getTeamTurn()) {
+                    ChessPosition piecePosition = new ChessPosition(r, c);
+                    Collection<ChessMove> validPieceMoves = validMoves(piecePosition);
+                    otherTeamMoves.addAll(validPieceMoves);
+                }
+            }
+        }
+        boolean isInCheck = false;
+        for (ChessMove kingMove : validKingMoves) {
+            for (ChessMove otherTeamMove : otherTeamMoves) {
+                if (kingMove == otherTeamMove) {
+                    isInCheck = true;
+                    break;
+                }
+            }
+        }
+        return isInCheck;
     }
 
     /**

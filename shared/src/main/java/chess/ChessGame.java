@@ -133,10 +133,6 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
-
-    /** For given team, find King and where his piece is, and get all valid moves.
-     * Get all the valid moves of every piece on opposing team.
-     * If King has a move not in opposing teams valid moves, return true. else, false.**/
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPosition = null;
         for (int r = 1; r < 9; r++) {
@@ -166,11 +162,18 @@ public class ChessGame {
             }
         }
         boolean isInCheck = false;
-        for (ChessMove kingMove : validKingMoves) {
-            for (ChessMove otherTeamMove : otherTeamMoves) {
-                if (kingMove == otherTeamMove) {
+        for (ChessMove otherTeamMove : otherTeamMoves) {
+            if (otherTeamMove.getEndPosition() == kingPosition){
+                isInCheck = true;
+            }
+        }
+        for (ChessMove kingMove : validKingMoves){
+            for (ChessMove otherTeamMove : otherTeamMoves){
+                if (otherTeamMove.getEndPosition() != kingMove.getEndPosition()){
                     isInCheck = true;
-                    break;
+                }
+                else{
+                    isInCheck = false;
                 }
             }
         }

@@ -17,6 +17,20 @@ public class ChessBoard {
 
     }
 
+    public ChessBoard copy(){
+        ChessBoard backupBoard = new ChessBoard();
+        for (int r=1; r<9; r++){
+            for (int c=1; c<9; c++){
+                if (board[r][c] != null){
+                    ChessPiece piece = board[r][c];
+                    ChessPiece newPiece = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
+                    backupBoard.addPiece(new ChessPosition(r, c), newPiece);
+                }
+            }
+        }
+        return backupBoard;
+    }
+
     /**
      * Adds a chess piece to the chessboard
      *

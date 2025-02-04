@@ -1,8 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -152,27 +150,29 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition kingPosition = getKingPosition(teamColor);
-        Collection<ChessMove> otherTeamMoves = getOtherTeamMoves(teamColor);
+        boolean inCheckmate = false;
+        if (isInCheck(teamColor)) {
 
-        Collection<ChessMove> kingMoves = validMoves(kingPosition);
+            ChessPosition kingPosition = getKingPosition(teamColor);
+            Collection<ChessMove> kingMoves = validMoves(kingPosition);
 
-        Collection<ChessPosition> kingEndPosition = new ArrayList<>();
-        Collection<ChessPosition> otherTeamEndPositions = new ArrayList<>();
-        for (ChessMove kingMove : kingMoves){
-            ChessPosition endPosition = kingMove.getEndPosition();
-            kingEndPosition.add(endPosition);
+            for (ChessMove kingMove : kingMoves) {
+                ChessBoard backupBoard = board.copy();
+                try{
+                    makeMove(kingMove);
+                }
+                catch (InvalidMoveException e){
+                    continue;
+                }
+                if (!isInCheck(teamColor)) {
+                    board = backupBoard;
+                    return inCheckmate;
+                }
+                board = backupBoard;
+            }
+            inCheckmate = true;
         }
-        for (ChessMove otherTeamMove : otherTeamMoves){
-            ChessPosition endPosition = otherTeamMove.getEndPosition();
-            otherTeamEndPositions.add(endPosition);
-        }
-
-        boolean inCheckMate = false;
-        if (otherTeamEndPositions.containsAll(kingEndPosition)){
-            inCheckMate = true;
-        }
-        return inCheckMate;
+        return inCheckmate;
     }
 
     /**

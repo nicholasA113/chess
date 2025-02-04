@@ -85,6 +85,21 @@ public class ChessGame {
             return validMoves;
         }
         validMoves.addAll(chessPiece.pieceMoves(board, startPosition));
+        Collection<ChessMove> invalidMoves = new ArrayList<>();
+        TeamColor currentTeam = team;
+        for (ChessMove move : validMoves){
+            ChessBoard backupBoard = board.copy();
+
+            team = chessPiece.getTeamColor();
+            make_temp_Move(move);
+
+            if (isInCheck(chessPiece.getTeamColor())){
+                invalidMoves.add(move);
+            }
+            board = backupBoard;
+        }
+        team = currentTeam;
+        validMoves.removeAll(invalidMoves);
         return validMoves;
     }
 
@@ -98,13 +113,15 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece chessPiece = board.getPiece(startPosition);
-
+        if (chessPiece == null){
+            throw new InvalidMoveException("No piece is found");
+        }
+        if (chessPiece.getTeamColor() != team){
+            throw new InvalidMoveException("Not the correct team's turn");
+        }
         Collection<ChessMove> valid_Moves = validMoves(startPosition);
         if (!valid_Moves.contains(move)) {
             throw new InvalidMoveException("Not a valid move");
-        }
-        if (chessPiece.getTeamColor() != getTeamTurn()) {
-            throw new InvalidMoveException("Not the current team's turn");
         }
         if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
             if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
@@ -236,11 +253,31 @@ public class ChessGame {
                 }
                 if (chessPiece.getTeamColor() != teamColor) {
                     ChessPosition piecePosition = new ChessPosition(r, c);
-                    Collection<ChessMove> validMoves = validMoves(piecePosition);
+                    Collection<ChessMove> validMoves = chessPiece.pieceMoves(board, piecePosition);
                     otherTeamMoves.addAll(validMoves);
                 }
             }
         }
         return otherTeamMoves;
+    }
+
+    public void make_temp_Move(ChessMove move){
+        ChessPosition startPosition = move.getStartPosition();
+        ChessPosition endPosition = move.getEndPosition();
+        ChessPiece chessPiece = board.getPiece(startPosition);
+
+        if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
+            if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+                board.addPiece(endPosition, new ChessPiece(team, promotionPiece));
+                board.addPiece(startPosition, null);
+            } else {
+                board.addPiece(endPosition, chessPiece);
+                board.addPiece(startPosition, null);
+            }
+        } else {
+            board.addPiece(endPosition, chessPiece);
+            board.addPiece(startPosition, null);
+        }
     }
 }

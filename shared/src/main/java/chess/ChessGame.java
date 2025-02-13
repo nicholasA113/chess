@@ -113,6 +113,7 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece chessPiece = board.getPiece(startPosition);
+
         if (chessPiece == null){
             throw new InvalidMoveException("No piece is found");
         }
@@ -169,11 +170,7 @@ public class ChessGame {
     public boolean isInCheckmate(TeamColor teamColor) {
         boolean inCheckmate = false;
         if (isInCheck(teamColor)) {
-
-            /**ChessPosition kingPosition = getKingPosition(teamColor);
-            Collection<ChessMove> kingMoves = validMoves(kingPosition);**/
             Collection<ChessMove> teamMoves = getTeamMoves(teamColor);
-
             for (ChessMove move : teamMoves) {
                 ChessBoard backupBoard = board.copy();
                 try{

@@ -12,7 +12,7 @@ public class userService {
 
     }
 
-    public void  logout(LogoutRequest l){
+    public LogoutResult logout(LogoutRequest l){
 
     }
 

@@ -3,7 +3,7 @@ package service;
 import model.GameData;
 import java.util.List;
 
-public class RequestResultRecords{
+public class requestResult {
 
     public record RegisterRequest(String username, String password, String email) {}
     public record RegisterResult(String username, String authToken) {}

@@ -1,6 +1,6 @@
 package service;
 
-import service.RequestResultRecords.*;
+import service.requestResult.*;
 
 public class clearService {
 

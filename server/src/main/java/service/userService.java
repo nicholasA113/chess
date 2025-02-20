@@ -3,7 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import service.RequestResultRecords.*;
+import service.requestResult.*;
 
 import java.util.UUID;
 

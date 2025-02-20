@@ -1,8 +1,8 @@
 package service;
 
-import service.requestResult.*;
+import service.RequestResult.*;
 
-public class gameService {
+public class GameService {
 
     public CreateGameResult createGame(CreateGameRequest c){
 

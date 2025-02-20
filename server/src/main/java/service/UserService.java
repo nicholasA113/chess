@@ -3,11 +3,11 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
-import service.requestResult.*;
+import service.RequestResult.*;
 
 import java.util.UUID;
 
-public class userService {
+public class UserService {
 
     public RegisterResult registerUser(RegisterRequest r){
         UserDataDAO userDataDAO = new UserDataDAO();

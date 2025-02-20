@@ -1,8 +1,8 @@
 package service;
 
-import service.requestResult.*;
+import service.RequestResult.*;
 
-public class clearService {
+public class ClearService {
 
     public ClearDataResult clearData(ClearDataRequest c){
 

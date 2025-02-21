@@ -15,6 +15,7 @@ public class LoginHandler {
         RequestResult.LoginRequest loginRequest = serializer.fromJson(loginRequestJson, RequestResult.LoginRequest.class);
         UserService userService = new UserService();
         RequestResult.LoginResult loginResult = userService.login(loginRequest);
+
         response.status(200);
         return serializer.toJson(loginResult);
     }

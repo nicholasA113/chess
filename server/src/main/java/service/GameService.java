@@ -14,8 +14,7 @@ public class GameService {
         if (authToken.username() == null){
             return null;
         }
-        GameDataDAO gameDataDAO = new GameDataDAO();
-        gameDataDAO.createGame(c.gameName());
+
     }
 
     public JoinGameResult joinGame(JoinGameRequest j){

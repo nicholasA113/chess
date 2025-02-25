@@ -9,6 +9,10 @@ public class AuthDataDAO implements AuthDataAccessInterface{
 
     private final Map<String, AuthData> authData = new HashMap<>();
 
+    public Map<String, AuthData> getAllAuthData(){
+        return authData;
+    }
+
     public void createAuth(AuthData auth){
         if (!authData.containsKey(auth.authToken())) {
             authData.put(auth.authToken(), auth);

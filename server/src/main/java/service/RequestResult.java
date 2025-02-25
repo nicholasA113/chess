@@ -1,7 +1,7 @@
 package service;
 
 import model.GameData;
-import java.util.List;
+import java.util.Map;
 
 public class RequestResult {
 
@@ -12,7 +12,7 @@ public class RequestResult {
     public record LogoutRequest(String authToken) {}
     public record LogoutResult() {}
     public record ListGamesRequest(String authToken) {}
-    public record ListGamesResult(List<GameData> GameData) {}
+    public record ListGamesResult(Map<Integer, GameData> GameData) {}
     public record CreateGameRequest(String authToken, String gameName) {}
     public record CreateGameResult(int gameID) {}
     public record JoinGameRequest(String authToken, String playerColor, int gameID) {}

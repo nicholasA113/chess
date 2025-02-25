@@ -9,6 +9,10 @@ public class UserDataDAO implements UserDataAccessInterface{
 
     private final Map<String, UserData> userData = new HashMap<>();
 
+    public Map<String, UserData> getAllUserData(){
+        return userData;
+    }
+
     public void insertUser(UserData user){
         if (!userData.containsKey(user.username())) {
             userData.put(user.username(), user);

@@ -9,11 +9,15 @@ import java.util.UUID;
 
 public class UserService {
 
+    UserDataDAO userDataDAO = new UserDataDAO();
+    AuthDataDAO authDataDAO = new AuthDataDAO();
+
     public RegisterResult registerUser(RegisterRequest r){
-        UserDataDAO userDataDAO = new UserDataDAO();
         UserData userdata = new UserData(r.username(), r.password(), r.email());
-        UserData user = userDataDAO.getUser(r.username());
-        if (user != null){
+        if (r.username() == null || r.password() == null || r.email() == null){
+            return null;
+        }
+        if (userDataDAO.getUser(r.username()) != null){
             return null;
         }
         userDataDAO.insertUser(userdata);
@@ -24,7 +28,6 @@ public class UserService {
     }
 
     public LoginResult login(LoginRequest l){
-        UserDataDAO userDataDAO = new UserDataDAO();
         UserData user = userDataDAO.getUser(l.username());
         if (user == null){
             return null;
@@ -36,7 +39,6 @@ public class UserService {
     }
 
     public LogoutResult logout(LogoutRequest l){
-        AuthDataDAO authDataDAO = new AuthDataDAO();
         AuthData authToken = authDataDAO.getAuth(l.authToken());
         if (authToken != null){
             authDataDAO.deleteAuth(l.authToken());

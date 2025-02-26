@@ -1,7 +1,9 @@
 package service.httpHandlers;
 
 import com.google.gson.Gson;
+import dataaccess.AuthDataDAO;
 import dataaccess.InvalidInputException;
+import dataaccess.UserDataDAO;
 import service.RequestResult;
 import service.UserService;
 import spark.Request;
@@ -14,14 +16,18 @@ public class LogoutHandler {
 
     Gson serializer = new Gson();
 
+    UserService userService = new UserService();
+
+    RequestResult.LogoutRequest logoutRequest;
+    RequestResult.LogoutResult logoutResult;
+    AuthDataDAO authDataDAO = new AuthDataDAO();
+
     public Object logoutHandler(Request request, Response response){
         String logoutRequestJson = request.body();
-        RequestResult.LogoutResult logoutResult;
 
-        RequestResult.LogoutRequest logoutRequest = serializer.fromJson(logoutRequestJson, RequestResult.LogoutRequest.class);
-        UserService userService = new UserService();
+        logoutRequest = serializer.fromJson(logoutRequestJson, RequestResult.LogoutRequest.class);
         try {
-            logoutResult = userService.logout(logoutRequest);
+            logoutResult = userService.logout(logoutRequest, authDataDAO);
             response.status(200);
             return serializer.toJson(logoutResult);
         }

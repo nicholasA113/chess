@@ -11,16 +11,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServiceClassTests {
 
+    RequestResult.RegisterRequest registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+            "123@bmail.com");
+    RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+            "123456");
+
+    UserService userServiceInstance = new UserService();
+
     @Test
     @DisplayName("Register Endpoint Valid Inputs")
     public void registerEndpointValid() {
-        /** Given **/
-        var registerServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername",
-                "password", "123@456.com");
-
         /** When **/
-        RequestResult.RegisterResult actualRegisterResult = registerServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult actualRegisterResult = userServiceInstance.registerUser(registerRequest);
 
         /** Then **/
         Assertions.assertNotNull(actualRegisterResult, "The register result should not be null");
@@ -32,13 +34,12 @@ public class ServiceClassTests {
     @DisplayName("Register Endpoint Invalid Inputs")
     public void registerEndpointInvalid(){
         /**  Given **/
-        var registerServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest(
+        var registerRequestNull = new RequestResult.RegisterRequest(
                 null, null, "123456@gmail.com");
 
         /** When **/
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                registerServiceInstance.registerUser(registerRequest));
+                userServiceInstance.registerUser(registerRequestNull));
 
         /** Then **/
         Assertions.assertEquals("Username, password, or email must not be null", exception.getMessage(),
@@ -49,16 +50,13 @@ public class ServiceClassTests {
     @DisplayName("User already taken")
     public void registerUserTaken(){
         /** Given**/
-        var registerServiceInstance = new UserService();
-        var registerRequest1 = new RequestResult.RegisterRequest(
-                "nicholasUsername", "password", "123456@gmail.com");
-        var registerRequest2 = new RequestResult.RegisterRequest(
+        var registerRequestUserTaken = new RequestResult.RegisterRequest(
                 "nicholasUsername", "Password123", "nicholas@gmail.com");
 
         /** When **/
-        RequestResult.RegisterResult registerResult1 = registerServiceInstance.registerUser(registerRequest1);
+        RequestResult.RegisterResult registerResult1 = userServiceInstance.registerUser(registerRequest);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                registerServiceInstance.registerUser(registerRequest2));
+                userServiceInstance.registerUser(registerRequestUserTaken));
 
         /** Then **/
         Assertions.assertNotNull(registerResult1, "First input should not be null");
@@ -69,16 +67,10 @@ public class ServiceClassTests {
     @Test
     @DisplayName("Login with valid credentials")
     public void loginValidInputs(){
-        /** Given **/
-        var loginServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
-                "123@bmail.com");
-        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
-                "123456");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = loginServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -91,16 +83,13 @@ public class ServiceClassTests {
     @DisplayName("Login with invalid password")
     public void loginInvalidPassword(){
         /** Given **/
-        var loginServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
-                "123@bmail.com");
-        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+        var loginRequestInvalidPassword = new RequestResult.LoginRequest("nicholasUsername",
                 "123");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                loginServiceInstance.login(loginRequest));
+                userServiceInstance.login(loginRequestInvalidPassword));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -112,16 +101,13 @@ public class ServiceClassTests {
     @DisplayName("Login with invalid username")
     public void loginInvalidUsername(){
         /** Given **/
-        var loginServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
-                "123@bmail.com");
-        var loginRequest = new RequestResult.LoginRequest("nicholas",
+        var loginRequestInvalidUsername = new RequestResult.LoginRequest("nicholas",
                 "123456");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                loginServiceInstance.login(loginRequest));
+                userServiceInstance.login(loginRequestInvalidUsername));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -131,21 +117,15 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Logout with valid authToken")
-    public void loginValidToken(){
-        /** Given **/
-        var logoutServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
-                "123@bmail.com");
-        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
-                "123456");
+    public void logoutValidToken(){
 
         /** When **/
-        RequestResult.RegisterResult registerResult = logoutServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = logoutServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken());
 
-        RequestResult.LogoutResult logoutResult = logoutServiceInstance.logout(logoutRequest);
+        RequestResult.LogoutResult logoutResult = userServiceInstance.logout(logoutRequest);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -155,22 +135,16 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Logout with invalid authToken")
-    public void loginInvalidToken(){
-        /** Given **/
-        var logoutServiceInstance = new UserService();
-        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
-                "123@bmail.com");
-        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
-                "123456");
+    public void logoutInvalidToken(){
 
         /** When **/
-        RequestResult.RegisterResult registerResult = logoutServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = logoutServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken()+1);
 
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                logoutServiceInstance.logout(logoutRequest));;
+                userServiceInstance.logout(logoutRequest));;
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");

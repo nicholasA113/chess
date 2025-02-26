@@ -1,6 +1,7 @@
 package service.httpHandlers;
 
 import com.google.gson.Gson;
+import dataaccess.AuthDataDAO;
 import dataaccess.InvalidInputException;
 import dataaccess.InvalidUsernameException;
 import dataaccess.UserDataDAO;
@@ -14,10 +15,13 @@ import java.util.Map;
 public class LoginHandler {
 
     Gson serializer = new Gson();
+
     UserService userService = new UserService();
+
     RequestResult.LoginRequest loginRequest;
     RequestResult.LoginResult loginResult;
-
+    UserDataDAO userDataDAO = new UserDataDAO();
+    AuthDataDAO authDataDAO = new AuthDataDAO();
 
     public Object loginHandler(Request request, Response response){
         String loginRequestJson = request.body();
@@ -31,7 +35,7 @@ public class LoginHandler {
         }
 
         try {
-            loginResult = userService.login(loginRequest);
+            loginResult = userService.login(loginRequest, userDataDAO, authDataDAO);
             response.status(200);
             return serializer.toJson(loginResult);
         }

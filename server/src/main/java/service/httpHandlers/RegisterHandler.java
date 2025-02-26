@@ -3,6 +3,7 @@ package service.httpHandlers;
 import com.google.gson.Gson;
 import dataaccess.InvalidInputException;
 import dataaccess.InvalidUsernameException;
+import dataaccess.UserDataDAO;
 import service.UserService;
 import service.RequestResult;
 import spark.Request;
@@ -13,12 +14,13 @@ import java.util.Map;
 public class RegisterHandler {
 
     Gson serializer = new Gson();
-    UserService userservice = new UserService();
 
-    public Object registerHandler(Request request, Response response){
+    RequestResult.RegisterRequest registerRequest;
+    RequestResult.RegisterResult registerResult;
+
+    public Object registerHandler(Request request, Response response,
+                                  UserDataDAO userDataDAO, UserService userService){
         String registerRequestJson = request.body();
-        RequestResult.RegisterRequest registerRequest;
-        RequestResult.RegisterResult registerResult;
 
         try {
             registerRequest = serializer.fromJson(registerRequestJson,
@@ -30,7 +32,7 @@ public class RegisterHandler {
         }
 
         try {
-            registerResult = userservice.registerUser(registerRequest);
+            registerResult = userService.registerUser(registerRequest, userDataDAO);
             response.status(200);
             return serializer.toJson(registerResult);
         }

@@ -10,10 +10,8 @@ import java.util.Map;
 
 public class GameService {
 
-    AuthDataDAO authDataDAO = new AuthDataDAO();
-    GameDataDAO gameDataDAO = new GameDataDAO();
-
-    public CreateGameResult createGame(CreateGameRequest c){
+    public CreateGameResult createGame(CreateGameRequest c,
+                                       AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
         AuthData authToken = authDataDAO.getAuth(c.authToken());
         if (authToken.username() == null){
             return null;
@@ -23,7 +21,8 @@ public class GameService {
         return new CreateGameResult(createdGame.gameID());
     }
 
-    public JoinGameResult joinGame(JoinGameRequest j){
+    public JoinGameResult joinGame(JoinGameRequest j, AuthDataDAO authDataDAO,
+                                   GameDataDAO gameDataDAO){
         AuthData authToken = authDataDAO.getAuth(j.authToken());
         if (authToken.username() == null){
             return null;
@@ -52,7 +51,8 @@ public class GameService {
         }
     }
 
-    public ListGamesResult listGames(ListGamesRequest l){
+    public ListGamesResult listGames(ListGamesRequest l, AuthDataDAO authDataDAO,
+                                     GameDataDAO gameDataDAO){
         AuthData authToken = authDataDAO.getAuth(l.authToken());
         if (authToken.username() == null){
             return null;

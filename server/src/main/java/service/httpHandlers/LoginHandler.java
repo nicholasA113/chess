@@ -16,24 +16,18 @@ public class LoginHandler {
 
     Gson serializer = new Gson();
 
-    UserService userService = new UserService();
-
     RequestResult.LoginRequest loginRequest;
     RequestResult.LoginResult loginResult;
-    UserDataDAO userDataDAO = new UserDataDAO();
-    AuthDataDAO authDataDAO = new AuthDataDAO();
 
-    public Object loginHandler(Request request, Response response){
+    public Object loginHandler(Request request, Response response,
+                               UserDataDAO userDataDAO, AuthDataDAO authDataDAO, UserService userService){
         String loginRequestJson = request.body();
 
-        try {loginRequest = serializer.fromJson(loginRequestJson,
+        loginRequest = serializer.fromJson(loginRequestJson,
                     RequestResult.LoginRequest.class);
-        }
-        catch (Exception e){
-            response.status(400);
-            return serializer.toJson(Map.of("Error", "Invalid request"));
-        }
 
+
+        /** Move Try/Catch blocks to Server **/
         try {
             loginResult = userService.login(loginRequest, userDataDAO, authDataDAO);
             response.status(200);
@@ -44,7 +38,7 @@ public class LoginHandler {
             return serializer.toJson(Map.of("Error", "Invalid credentials"));
         }
         catch (InvalidInputException e){
-            response.status(500);
+            response.status(401);
             return serializer.toJson(Map.of("Error", "Passwords do not match"));
         }
     }

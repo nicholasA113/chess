@@ -40,6 +40,9 @@ public class UserService {
     }
 
     public LogoutResult logout(LogoutRequest l, AuthDataDAO authDataDAO){
+        if (l == null){
+            return null;
+        }
         AuthData authToken = authDataDAO.getAuth(l.authToken());
         if (authToken != null) {
             authDataDAO.deleteAuth(l.authToken());

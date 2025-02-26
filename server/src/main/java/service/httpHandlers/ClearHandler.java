@@ -1,6 +1,9 @@
 package service.httpHandlers;
 
 import com.google.gson.Gson;
+import dataaccess.AuthDataDAO;
+import dataaccess.GameDataDAO;
+import dataaccess.UserDataDAO;
 import service.ClearService;
 import service.RequestResult;
 import spark.Request;
@@ -10,12 +13,14 @@ public class ClearHandler {
 
     Gson serializer = new Gson();
 
-    public Object clearHandler(Request request, Response response){
+    public Object clearHandler(Request request, Response response,
+                               UserDataDAO userDataDAO, AuthDataDAO authDataDAO,
+                               GameDataDAO gameDataDAO, ClearService clearService){
         String clearHandlerJson = request.body();
         RequestResult.ClearDataRequest clearDataRequest = serializer.fromJson(clearHandlerJson,
                 RequestResult.ClearDataRequest.class);
-        ClearService clearService = new ClearService();
-        RequestResult.ClearDataResult clearDataResult = clearService.clearData(clearDataRequest);
+        RequestResult.ClearDataResult clearDataResult = clearService.clearData(clearDataRequest,
+                userDataDAO, authDataDAO, gameDataDAO);
         response.status(200);
         return serializer.toJson(clearDataResult);
     }

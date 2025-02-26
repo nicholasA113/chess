@@ -1,7 +1,9 @@
 package service;
 
+import dataaccess.AuthDataDAO;
 import dataaccess.InvalidInputException;
 import dataaccess.InvalidUsernameException;
+import dataaccess.UserDataDAO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,12 +19,14 @@ public class ServiceClassTests {
             "123456");
 
     UserService userServiceInstance = new UserService();
+    UserDataDAO userDataDAO = new UserDataDAO();
+    AuthDataDAO authDataDAO = new AuthDataDAO();
 
     @Test
     @DisplayName("Register Endpoint Valid Inputs")
     public void registerEndpointValid() {
         /** When **/
-        RequestResult.RegisterResult actualRegisterResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult actualRegisterResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
 
         /** Then **/
         Assertions.assertNotNull(actualRegisterResult, "The register result should not be null");
@@ -39,7 +43,7 @@ public class ServiceClassTests {
 
         /** When **/
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.registerUser(registerRequestNull));
+                userServiceInstance.registerUser(registerRequestNull, userDataDAO));
 
         /** Then **/
         Assertions.assertEquals("Username, password, or email must not be null", exception.getMessage(),
@@ -54,9 +58,9 @@ public class ServiceClassTests {
                 "nicholasUsername", "Password123", "nicholas@gmail.com");
 
         /** When **/
-        RequestResult.RegisterResult registerResult1 = userServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult registerResult1 = userServiceInstance.registerUser(registerRequest, userDataDAO);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                userServiceInstance.registerUser(registerRequestUserTaken));
+                userServiceInstance.registerUser(registerRequestUserTaken, userDataDAO));
 
         /** Then **/
         Assertions.assertNotNull(registerResult1, "First input should not be null");
@@ -69,8 +73,8 @@ public class ServiceClassTests {
     public void loginValidInputs(){
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -87,9 +91,9 @@ public class ServiceClassTests {
                 "123");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.login(loginRequestInvalidPassword));
+                userServiceInstance.login(loginRequestInvalidPassword, userDataDAO, authDataDAO));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -105,9 +109,9 @@ public class ServiceClassTests {
                 "123456");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                userServiceInstance.login(loginRequestInvalidUsername));
+                userServiceInstance.login(loginRequestInvalidUsername, userDataDAO, authDataDAO));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -120,12 +124,12 @@ public class ServiceClassTests {
     public void logoutValidToken(){
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
 
         RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken());
 
-        RequestResult.LogoutResult logoutResult = userServiceInstance.logout(logoutRequest);
+        RequestResult.LogoutResult logoutResult = userServiceInstance.logout(logoutRequest, authDataDAO);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -138,13 +142,13 @@ public class ServiceClassTests {
     public void logoutInvalidToken(){
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
 
         RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken()+1);
 
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.logout(logoutRequest));;
+                userServiceInstance.logout(logoutRequest, authDataDAO));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");

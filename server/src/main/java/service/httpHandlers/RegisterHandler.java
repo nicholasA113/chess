@@ -22,14 +22,8 @@ public class RegisterHandler {
                                   UserDataDAO userDataDAO, UserService userService){
         String registerRequestJson = request.body();
 
-        try {
-            registerRequest = serializer.fromJson(registerRequestJson,
-                    RequestResult.RegisterRequest.class);
-        }
-        catch (Exception e){
-            response.status(400);
-            return serializer.toJson(Map.of("Error", "Username, password, and/or email are missing."));
-        }
+        registerRequest = serializer.fromJson(registerRequestJson,
+                RequestResult.RegisterRequest.class);
 
         try {
             registerResult = userService.registerUser(registerRequest, userDataDAO);
@@ -41,7 +35,7 @@ public class RegisterHandler {
             return serializer.toJson(Map.of("Error", "Username is already taken"));
         }
         catch (InvalidInputException e){
-            response.status(500);
+            response.status(400);
             return serializer.toJson(Map.of("Error", "Invalid inputs"));
         }
     }

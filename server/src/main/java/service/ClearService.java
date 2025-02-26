@@ -12,11 +12,9 @@ import java.util.Map;
 
 public class ClearService {
 
-    AuthDataDAO authDataDAO = new AuthDataDAO();
-    GameDataDAO gameDataDAO = new GameDataDAO();
-    UserDataDAO userDataDAO = new UserDataDAO();
+    public ClearDataResult clearData(ClearDataRequest c, UserDataDAO userDataDAO,
+                                     AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
 
-    public ClearDataResult clearData(ClearDataRequest c){
         Map<Integer, GameData> allGameData = gameDataDAO.getAllGames();
         for (GameData game : allGameData.values()){
             gameDataDAO.deleteGame(game.gameID());

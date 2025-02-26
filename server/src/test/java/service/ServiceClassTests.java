@@ -1,8 +1,11 @@
 package service;
 
+import dataaccess.InvalidInputException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class ServiceClassTests {
@@ -27,17 +30,18 @@ public class ServiceClassTests {
     @Test
     @DisplayName("Register Endpoint Invalid Inputs")
     public void registerEndpointInvalid(){
-        /** Given **/
+        /**  Given **/
         var registerServiceInstance = new UserService();
         var registerRequest = new RequestResult.RegisterRequest(
                 null, null, "123456@gmail.com");
 
         /** When **/
-        RequestResult.RegisterResult actualRegisterResult = registerServiceInstance.
-                registerUser(registerRequest);
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+                registerServiceInstance.registerUser(registerRequest));
 
         /** Then **/
-        Assertions.assertNull(actualRegisterResult, "Result should be null, even with some null inputs");
+        Assertions.assertEquals("Username, password, or email must not be null", exception.getMessage(),
+                "Exception message should indicate one of the one of the fields is missing");
     }
 
     @Test
@@ -51,15 +55,35 @@ public class ServiceClassTests {
                 "nicholasUsername", "Password123", "nicholas@gmail.com");
 
         /** When **/
-        RequestResult.RegisterResult registerResult1 = registerServiceInstance.
-                registerUser(registerRequest1);
-        RequestResult.RegisterResult registerResult2 = registerServiceInstance.
-                registerUser(registerRequest2);
+        RequestResult.RegisterResult registerResult1 = registerServiceInstance.registerUser(registerRequest1);
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+                registerServiceInstance.registerUser(registerRequest2));
 
         /** Then **/
-        Assertions.assertNotNull(registerResult1, "Register result 1 should not be null");
-        Assertions.assertNull(registerResult2, "Register should be null because it used" +
-                "the same username");
+        Assertions.assertNotNull(registerResult1, "First input should not be null");
+        Assertions.assertEquals("Username is already taken", exception.getMessage(),
+                "Error message should indicate that the username is already taken");
+    }
+
+    @Test
+    @DisplayName("Login with valid credentials")
+    public void loginValidInputs(){
+        /** Given **/
+        var loginServiceInstance = new UserService();
+        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+                "123@bmail.com");
+        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+                "123456");
+
+        /** When **/
+        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = loginServiceInstance.login(loginRequest);
+
+        /** Then **/
+        Assertions.assertNotNull(registerResult, "Register Result should not be null");
+        Assertions.assertNotNull(loginResult, "Login Result should not be null");
+        Assertions.assertEquals("nicholasUsername", loginResult.username(), "Usernames should match");
+        Assertions.assertNotNull(loginResult.authToken(), "Auth Token should not be null");
     }
 
 }

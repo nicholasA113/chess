@@ -6,25 +6,35 @@ import service.RequestResult;
 import spark.Request;
 import spark.Response;
 
+import java.util.Map;
+
 public class RegisterHandler {
 
     Gson serializer = new Gson();
+    UserService userservice = new UserService();
 
     public Object registerHandler(Request request, Response response){
         String registerRequestJson = request.body();
-        RequestResult.RegisterRequest registerRequest = serializer.fromJson(registerRequestJson,
-                RequestResult.RegisterRequest.class);
-        UserService userservice = new UserService();
-        RequestResult.RegisterResult registerResult = userservice.registerUser(registerRequest);
-        if (registerResult == null){
-            response.status(403);
-            return "{Username is already taken.}";
+        RequestResult.RegisterRequest registerRequest;
+        RequestResult.RegisterResult registerResult;
+
+        try {
+            registerRequest = serializer.fromJson(registerRequestJson,
+                    RequestResult.RegisterRequest.class);
         }
-        if (registerRequest.username() == null || registerRequest.password() == null ||
-                registerRequest.email() == null){
+        catch (Exception e){
             response.status(400);
-            return "{Bad Request: Username, password, and/or email are empty}";
+            return serializer.toJson(Map.of("Error", "Username, password, and/or email are missing."));
         }
+
+        try {
+            registerResult = userservice.registerUser(registerRequest);
+        }
+        catch (Exception e){
+            response.status(403);
+            return serializer.toJson(Map.of("Error", "Username is already taken"));
+        }
+
         response.status(200);
         return serializer.toJson(registerResult);
     }

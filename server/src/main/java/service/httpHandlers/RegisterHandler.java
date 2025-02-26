@@ -1,6 +1,8 @@
 package service.httpHandlers;
 
 import com.google.gson.Gson;
+import dataaccess.InvalidInputException;
+import dataaccess.InvalidUsernameException;
 import service.UserService;
 import service.RequestResult;
 import spark.Request;
@@ -29,14 +31,17 @@ public class RegisterHandler {
 
         try {
             registerResult = userservice.registerUser(registerRequest);
+            response.status(200);
+            return serializer.toJson(registerResult);
         }
-        catch (Exception e){
+        catch (InvalidUsernameException e){
             response.status(403);
             return serializer.toJson(Map.of("Error", "Username is already taken"));
         }
-
-        response.status(200);
-        return serializer.toJson(registerResult);
+        catch (InvalidInputException e){
+            response.status(500);
+            return serializer.toJson(Map.of("Error", "Invalid inputs"));
+        }
     }
 
 }

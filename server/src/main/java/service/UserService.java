@@ -32,7 +32,7 @@ public class UserService {
     public LoginResult login(LoginRequest l){
         UserData user = userDataDAO.getUser(l.username());
         if (user == null){
-            throw new InvalidUsernameException("Username is not found");
+            throw new InvalidUsernameException("Username is not found or incorrect");
         }
         if (!user.password().equals(l.password())){
             throw new InvalidInputException("Password does not match");
@@ -44,12 +44,12 @@ public class UserService {
 
     public LogoutResult logout(LogoutRequest l){
         AuthData authToken = authDataDAO.getAuth(l.authToken());
-        if (authToken != null){
+        if (authToken != null) {
             authDataDAO.deleteAuth(l.authToken());
-            return new LogoutResult();
+            return null;
         }
         else{
-            return null;
+            throw new InvalidInputException("AuthToken is invalid");
         }
     }
 

@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.InvalidInputException;
+import dataaccess.InvalidUsernameException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ public class ServiceClassTests {
 
         /** When **/
         RequestResult.RegisterResult registerResult1 = registerServiceInstance.registerUser(registerRequest1);
-        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+        InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
                 registerServiceInstance.registerUser(registerRequest2));
 
         /** Then **/
@@ -84,6 +85,98 @@ public class ServiceClassTests {
         Assertions.assertNotNull(loginResult, "Login Result should not be null");
         Assertions.assertEquals("nicholasUsername", loginResult.username(), "Usernames should match");
         Assertions.assertNotNull(loginResult.authToken(), "Auth Token should not be null");
+    }
+
+    @Test
+    @DisplayName("Login with invalid password")
+    public void loginInvalidPassword(){
+        /** Given **/
+        var loginServiceInstance = new UserService();
+        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+                "123@bmail.com");
+        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+                "123");
+
+        /** When **/
+        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+                loginServiceInstance.login(loginRequest));
+
+        /** Then **/
+        Assertions.assertNotNull(registerResult, "Register Result should not be null");
+        Assertions.assertEquals("Password does not match", exception.getMessage(),
+                "Error message should indicate that passwords do not match");
+    }
+
+    @Test
+    @DisplayName("Login with invalid username")
+    public void loginInvalidUsername(){
+        /** Given **/
+        var loginServiceInstance = new UserService();
+        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+                "123@bmail.com");
+        var loginRequest = new RequestResult.LoginRequest("nicholas",
+                "123456");
+
+        /** When **/
+        RequestResult.RegisterResult registerResult = loginServiceInstance.registerUser(registerRequest);
+        InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
+                loginServiceInstance.login(loginRequest));
+
+        /** Then **/
+        Assertions.assertNotNull(registerResult, "Register Result should not be null");
+        Assertions.assertEquals("Username is not found or incorrect", exception.getMessage(),
+                "Error message should indicate that username does not match");
+    }
+
+    @Test
+    @DisplayName("Logout with valid authToken")
+    public void loginValidToken(){
+        /** Given **/
+        var logoutServiceInstance = new UserService();
+        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+                "123@bmail.com");
+        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+                "123456");
+
+        /** When **/
+        RequestResult.RegisterResult registerResult = logoutServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = logoutServiceInstance.login(loginRequest);
+
+        RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken());
+
+        RequestResult.LogoutResult logoutResult = logoutServiceInstance.logout(logoutRequest);
+
+        /** Then **/
+        Assertions.assertNotNull(registerResult, "Register Result should not be null");
+        Assertions.assertNotNull(loginResult, "Login result should not be null");
+        Assertions.assertNull(logoutResult, "Logout result should return null");
+    }
+
+    @Test
+    @DisplayName("Logout with invalid authToken")
+    public void loginInvalidToken(){
+        /** Given **/
+        var logoutServiceInstance = new UserService();
+        var registerRequest = new RequestResult.RegisterRequest("nicholasUsername", "123456",
+                "123@bmail.com");
+        var loginRequest = new RequestResult.LoginRequest("nicholasUsername",
+                "123456");
+
+        /** When **/
+        RequestResult.RegisterResult registerResult = logoutServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = logoutServiceInstance.login(loginRequest);
+
+        RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(loginResult.authToken()+1);
+
+        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+                logoutServiceInstance.logout(logoutRequest));;
+
+        /** Then **/
+        Assertions.assertNotNull(registerResult, "Register Result should not be null");
+        Assertions.assertNotNull(loginResult, "Login result should not be null");
+        Assertions.assertEquals("AuthToken is invalid", exception.getMessage(),
+                "Error message should indicate that authToken is invalid");
     }
 
 }

@@ -29,10 +29,10 @@ public class PieceMoves {
         }
     }
 
-    public void queenBishopMoves(int[] rowMoves, int[] colMoves,
+    public void queenBishopRookMoves(int[] rowMoves, int[] colMoves,
                                  ChessPosition myPosition, ChessBoard board,
                                  ArrayList<ChessMove> moves){
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < rowMoves.length; i++) {
             int currentRow = myPosition.getRow();
             int currentCol = myPosition.getColumn();
 

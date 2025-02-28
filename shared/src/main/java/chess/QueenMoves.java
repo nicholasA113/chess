@@ -16,6 +16,6 @@ public class QueenMoves {
     public void addMoves(ArrayList<ChessMove> moves) {
         int[] rowMoves = {1,1,0,-1,-1,-1,0,1};
         int[] colMoves = {0,1,1,1,0,-1,-1,-1};
-        pieceMoves.queenBishopMoves(rowMoves, colMoves, myPosition, board, moves);
+        pieceMoves.queenBishopRookMoves(rowMoves, colMoves, myPosition, board, moves);
     }
 }

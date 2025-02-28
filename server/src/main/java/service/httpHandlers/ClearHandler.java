@@ -11,16 +11,19 @@ import spark.Response;
 
 public class ClearHandler {
 
-    Gson serializer = new Gson();
+    RequestResult.ClearDataRequest clearDataRequest;
+    RequestResult.ClearDataResult clearDataResult;
 
-    public Object clearHandler(Request request, Response response,
+    public Object clearHandler(Request request, Response response, Gson serializer,
                                UserDataDAO userDataDAO, AuthDataDAO authDataDAO,
                                GameDataDAO gameDataDAO, ClearService clearService){
+
         String clearHandlerJson = request.body();
-        RequestResult.ClearDataRequest clearDataRequest = serializer.fromJson(clearHandlerJson,
+        clearDataRequest = serializer.fromJson(clearHandlerJson,
                 RequestResult.ClearDataRequest.class);
-        RequestResult.ClearDataResult clearDataResult = clearService.clearData(clearDataRequest,
+        clearDataResult = clearService.clearData(clearDataRequest,
                 userDataDAO, authDataDAO, gameDataDAO);
+
         response.status(200);
         return serializer.toJson(clearDataResult);
     }

@@ -39,9 +39,6 @@ public class UserService {
     }
 
     public LogoutResult logout(String authToken, AuthDataDAO authDataDAO){
-        if (authToken == null){
-            throw new InvalidInputException("AuthToken is invalid");
-        }
         AuthData authData = authDataDAO.getAuth(authToken);
         if (authData == null || !authToken.equals(authData.authToken())){
             throw new InvalidInputException("AuthToken is invalid");

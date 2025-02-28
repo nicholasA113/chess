@@ -13,6 +13,10 @@ public class AuthDataDAO implements AuthDataAccessInterface{
         return authData;
     }
 
+    public void clearAllAuthData(){
+        authData.clear();
+    }
+
     public void createAuth(AuthData auth){
         if (!authData.containsKey(auth.authToken())) {
             authData.put(auth.authToken(), auth);

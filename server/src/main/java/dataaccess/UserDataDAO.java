@@ -12,6 +12,10 @@ public class UserDataDAO implements UserDataAccessInterface{
         return userData;
     }
 
+    public void clearAllUserData(){
+        userData.clear();
+    }
+
     public void insertUser(UserData user){
         for (UserData existingUser : userData){
             if (existingUser.username().equals(user.username())){

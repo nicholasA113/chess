@@ -26,6 +26,10 @@ public class GameDataDAO implements GameDataAccessInterface {
         return gameData;
     }
 
+    public void clearAllGameData(){
+        gameData.clear();
+    }
+
     public void createGame(String gameName){
         for (GameData game : gameData){
             if (game.gameName().equals(gameName)){

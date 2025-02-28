@@ -7,9 +7,6 @@ import service.RequestResult.*;
 import dataaccess.InvalidUsernameException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class GameService {
 
@@ -47,9 +44,6 @@ public class GameService {
         String whiteUsername = game.whiteUsername();
         String blackUsername = game.blackUsername();
 
-        AuthData whiteData = authDataDAO.getAuth(whiteUsername);
-        AuthData blackData = authDataDAO.getAuth(blackUsername);
-
         String username = authData.username();
 
         if (whiteUsername == null && j.playerColor().equals("WHITE")){
@@ -76,23 +70,12 @@ public class GameService {
     }
 
     public ListGamesResult listGames(String authToken, AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
-        if (authToken == null){
-            throw new InvalidUsernameException("Username is not valid");
+        AuthData authData = authDataDAO.getAuth(authToken);
+        if (authData == null){
+            throw new InvalidUsernameException("Username/AuthToken is not valid");
         }
         ArrayList<GameData> allGames = gameDataDAO.getAllGamesUser(authToken, authDataDAO);
-
-        List<GameData> validGames = new ArrayList<>();
-        AuthData authData = authDataDAO.getAuth(authToken);
-        String username = authData.username();
-        for (GameData game : allGames){
-            String whiteUsername = game.whiteUsername();
-            String blackUsername = game.blackUsername();
-
-            if (username.equals(whiteUsername) || username.equals(blackUsername)) {
-                validGames.add(game);
-            }
-        }
-        return new ListGamesResult(validGames);
+        return new ListGamesResult(allGames);
     }
 
 }

@@ -320,65 +320,45 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("List games but empty")
-    public void listGamesEmpty(){
+    public void listGamesInvalidAuthToken(){
         RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(
                 registerRequest, userDataDAO, authDataDAO);
         RequestResult.LoginResult loginResult = userServiceInstance.login(
                 loginRequest, userDataDAO, authDataDAO);
 
-        String authToken = loginResult.authToken();
+        String authToken = loginResult.authToken()+1;
 
-        InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
+        InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
                 gameServiceInstance.listGames(authToken, authDataDAO, gameDataDAO));
 
-        Assertions.assertEquals("There are no games to clear",
-                exception.getMessage(), "Message should indicate there are no games to clear");
+        Assertions.assertEquals("Username/AuthToken is not valid",
+                exception.getMessage(), "Message should indicate that the username/authToken is invalid");
     }
 
     @Test
-    @DisplayName("One game per color, but only print one game")
-    public void twoGamesReturnOneColor(){
+    @DisplayName("ClearGamesSuccessful")
+    public void clearGamesSuccess(){
         userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest,
-                userDataDAO, authDataDAO);
-
-        RequestResult.RegisterRequest registerRequest2 = new RequestResult.RegisterRequest("username1234", "password123",
-                "email@email.com");
-        RequestResult.LoginRequest loginRequest2 = new RequestResult.LoginRequest("username1234",
-                "password123");
-
-        userServiceInstance.registerUser(registerRequest2, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult2 = userServiceInstance.login(loginRequest2,
-                userDataDAO, authDataDAO);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
 
         String authToken = loginResult.authToken();
-        String authToken2 = loginResult2.authToken();
 
         RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
                 authToken, "Game Name Test");
-        RequestResult.CreateGameRequest createGameRequest2 = new RequestResult.CreateGameRequest(
-                authToken2, "Game Name Test2");
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
                 createGameRequest, authToken, authDataDAO, gameDataDAO);
-        RequestResult.CreateGameResult createGameResult2 = gameServiceInstance.createGame(
-                createGameRequest2, authToken2, authDataDAO, gameDataDAO);
 
-        RequestResult.JoinGameRequest joinGameRequest = new RequestResult.JoinGameRequest(authToken,
-                "WHITE", createGameResult.gameID());
+        RequestResult.JoinGameRequest joinGameRequest = new RequestResult.JoinGameRequest(
+                authToken, "WHITE", createGameResult.gameID());
+        gameServiceInstance.joinGame(joinGameRequest, authToken, authDataDAO, gameDataDAO);
 
-        RequestResult.JoinGameResult joinGameResult = gameServiceInstance.joinGame(
-                joinGameRequest, authToken, authDataDAO, gameDataDAO);
+        RequestResult.ClearDataRequest clearDataRequest = new RequestResult.ClearDataRequest();
+        RequestResult.ClearDataResult clearDataResult = clearServiceInstance.clearData(clearDataRequest, userDataDAO, authDataDAO, gameDataDAO);
 
-        RequestResult.JoinGameRequest joinGameRequest2 = new RequestResult.JoinGameRequest(
-                authToken2, "BLACK", createGameResult2.gameID());
-
-        RequestResult.JoinGameResult joinGameResult2 = gameServiceInstance.joinGame(
-                joinGameRequest2, authToken2, authDataDAO, gameDataDAO);
-
-        RequestResult.ListGamesResult listGamesResult = gameServiceInstance.listGames(authToken,
-                authDataDAO, gameDataDAO);
-
-        Assertions.assertNotNull(listGamesResult, "List games should not be null");
+        Assertions.assertTrue(userDataDAO.getAllUserData().isEmpty(), "User data should be empty");
+        Assertions.assertTrue(authDataDAO.getAllAuthData().isEmpty(), "Auth data should be empty");
+        Assertions.assertTrue(gameDataDAO.getAllGames().isEmpty(), "Game data should be empty");
     }
+
 
 }

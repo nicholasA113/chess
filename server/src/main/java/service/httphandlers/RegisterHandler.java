@@ -1,4 +1,4 @@
-package service.httpHandlers;
+package service.httphandlers;
 
 import com.google.gson.Gson;
 import dataaccess.AuthDataDAO;

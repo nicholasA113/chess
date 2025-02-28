@@ -91,7 +91,7 @@ public class ChessGame {
             ChessBoard backupBoard = board.copy();
 
             team = chessPiece.getTeamColor();
-            make_temp_Move(move);
+            makeTempMove(move);
 
             if (isInCheck(chessPiece.getTeamColor())){
                 invalidMoves.add(move);
@@ -120,8 +120,8 @@ public class ChessGame {
         if (chessPiece.getTeamColor() != team){
             throw new InvalidMoveException("Not the correct team's turn");
         }
-        Collection<ChessMove> valid_Moves = validMoves(startPosition);
-        if (!valid_Moves.contains(move)) {
+        Collection<ChessMove> validMoves = validMoves(startPosition);
+        if (!validMoves.contains(move)) {
             throw new InvalidMoveException("Not a valid move");
         }
         if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
@@ -275,7 +275,7 @@ public class ChessGame {
         return otherTeamMoves;
     }
 
-    public void make_temp_Move(ChessMove move){
+    public void makeTempMove(ChessMove move){
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece chessPiece = board.getPiece(startPosition);
@@ -296,7 +296,7 @@ public class ChessGame {
     }
 
     public Collection<ChessMove> getTeamMoves(TeamColor teamColor){
-        Collection<ChessMove> TeamMoves = new ArrayList<>();
+        Collection<ChessMove> teamMoves = new ArrayList<>();
         for (int r = 1; r < 9; r++) {
             for (int c = 1; c < 9; c++) {
                 ChessPiece chessPiece = board.getPiece(new ChessPosition(r, c));
@@ -306,10 +306,10 @@ public class ChessGame {
                 if (chessPiece.getTeamColor() == teamColor) {
                     ChessPosition piecePosition = new ChessPosition(r, c);
                     Collection<ChessMove> validMoves = chessPiece.pieceMoves(board, piecePosition);
-                    TeamMoves.addAll(validMoves);
+                    teamMoves.addAll(validMoves);
                 }
             }
         }
-        return TeamMoves;
+        return teamMoves;
     }
 }

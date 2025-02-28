@@ -124,19 +124,7 @@ public class ChessGame {
         if (!validMoves.contains(move)) {
             throw new InvalidMoveException("Not a valid move");
         }
-        if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
-            if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-                board.addPiece(endPosition, new ChessPiece(team, promotionPiece));
-                board.addPiece(startPosition, null);
-            } else {
-                board.addPiece(endPosition, chessPiece);
-                board.addPiece(startPosition, null);
-            }
-        } else {
-            board.addPiece(endPosition, chessPiece);
-            board.addPiece(startPosition, null);
-        }
+        topBottomBoardMoves(endPosition, chessPiece, move, startPosition);
         switchTeam(team);
     }
 
@@ -279,20 +267,7 @@ public class ChessGame {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
         ChessPiece chessPiece = board.getPiece(startPosition);
-
-        if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
-            if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
-                ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
-                board.addPiece(endPosition, new ChessPiece(team, promotionPiece));
-                board.addPiece(startPosition, null);
-            } else {
-                board.addPiece(endPosition, chessPiece);
-                board.addPiece(startPosition, null);
-            }
-        } else {
-            board.addPiece(endPosition, chessPiece);
-            board.addPiece(startPosition, null);
-        }
+        topBottomBoardMoves(endPosition, chessPiece, move, startPosition);
     }
 
     public Collection<ChessMove> getTeamMoves(TeamColor teamColor){
@@ -311,5 +286,22 @@ public class ChessGame {
             }
         }
         return teamMoves;
+    }
+
+    public void topBottomBoardMoves(ChessPosition endPosition, ChessPiece chessPiece,
+                                    ChessMove move, ChessPosition startPosition){
+        if (endPosition.getRow() == 1 || endPosition.getRow() == 8) {
+            if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+                ChessPiece.PieceType promotionPiece = move.getPromotionPiece();
+                board.addPiece(endPosition, new ChessPiece(team, promotionPiece));
+                board.addPiece(startPosition, null);
+            } else {
+                board.addPiece(endPosition, chessPiece);
+                board.addPiece(startPosition, null);
+            }
+        } else {
+            board.addPiece(endPosition, chessPiece);
+            board.addPiece(startPosition, null);
+        }
     }
 }

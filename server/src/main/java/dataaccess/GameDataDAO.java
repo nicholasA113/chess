@@ -1,32 +1,33 @@
 package dataaccess;
 
 import chess.ChessGame;
+import model.AuthData;
 import model.GameData;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
 public class GameDataDAO implements GameDataAccessInterface {
 
-    private final Map<Integer, GameData> gameData = new HashMap<>();
+    private final ArrayList<GameData> gameData = new ArrayList<>();
     private int id = 1;
 
-    public Map<Integer, GameData> getAllGamesUser(String username){
-        Map<Integer, GameData> userGames = new HashMap<>();
-        for (GameData game: gameData.values()){
-            if (username.equals(game.whiteUsername()) || username.equals(game.blackUsername())){
-                userGames.put(game.gameID(), game);
-            }
+    public ArrayList<GameData> getAllGamesUser(String authToken, AuthDataDAO authDataDAO){
+        ArrayList<GameData> userGames = new ArrayList<>();
+        for (GameData game: gameData){
+            userGames.add(game);
         }
         return userGames;
     }
 
-    public Map<Integer, GameData> getAllGames(){
+    public ArrayList<GameData> getAllGames(){
         return gameData;
     }
 
     public void createGame(String gameName){
-        for (GameData game : gameData.values()){
+        for (GameData game : gameData){
             if (game.gameName().equals(gameName)){
                 return;
             }
@@ -34,16 +35,24 @@ public class GameDataDAO implements GameDataAccessInterface {
         int id = generateGameID();
         GameData game = new GameData(id,
                 null, null, gameName, new ChessGame());
-        gameData.put(id, game);
+        gameData.add(game);
     }
 
     public GameData getGame(int gameID){
-        return gameData.get(gameID);
+        for (GameData game : gameData) {
+            if (game.gameID() == gameID) {
+                return game;
+            }
+        }
+        return null;
     }
 
     public void updateGame(GameData game){
-        if (gameData.containsKey(game.gameID())){
-            gameData.put(game.gameID(), game);
+        for (int i = 0; i < gameData.size(); i++) {
+            if (gameData.get(i).gameID() == game.gameID()) {
+                gameData.set(i, game);
+                return;
+            }
         }
     }
 

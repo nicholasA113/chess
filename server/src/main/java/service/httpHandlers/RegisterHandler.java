@@ -1,43 +1,27 @@
 package service.httpHandlers;
 
 import com.google.gson.Gson;
-import dataaccess.InvalidInputException;
-import dataaccess.InvalidUsernameException;
+import dataaccess.AuthDataDAO;
 import dataaccess.UserDataDAO;
 import service.UserService;
 import service.RequestResult;
 import spark.Request;
 import spark.Response;
 
-import java.util.Map;
-
 public class RegisterHandler {
-
-    Gson serializer = new Gson();
 
     RequestResult.RegisterRequest registerRequest;
     RequestResult.RegisterResult registerResult;
 
-    public Object registerHandler(Request request, Response response,
-                                  UserDataDAO userDataDAO, UserService userService){
-        String registerRequestJson = request.body();
+    public Object registerHandler(Request request, Response response, Gson serializer,
+                                  UserDataDAO userDataDAO, AuthDataDAO authDataDAO, UserService userService){
 
+        String registerRequestJson = request.body();
         registerRequest = serializer.fromJson(registerRequestJson,
                 RequestResult.RegisterRequest.class);
+        registerResult = userService.registerUser(registerRequest, userDataDAO, authDataDAO);
+        response.status(200);
+        return serializer.toJson(registerResult);
 
-        try {
-            registerResult = userService.registerUser(registerRequest, userDataDAO);
-            response.status(200);
-            return serializer.toJson(registerResult);
-        }
-        catch (InvalidUsernameException e){
-            response.status(403);
-            return serializer.toJson(Map.of("Error", "Username is already taken"));
-        }
-        catch (InvalidInputException e){
-            response.status(400);
-            return serializer.toJson(Map.of("Error", "Invalid inputs"));
-        }
     }
-
 }

@@ -10,16 +10,19 @@ import spark.Response;
 
 public class CreateGameHandler {
 
-    Gson serializer = new Gson();
+    RequestResult.CreateGameRequest createGameRequest;
+    RequestResult.CreateGameResult createGameResult;
 
-    public Object createGameHandler(Request request, Response response,
-                                    AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
+    public Object createGameHandler(Request request, Response response, Gson serializer,
+                                    AuthDataDAO authDataDAO, GameDataDAO gameDataDAO, GameService gameService){
         String createGameRequestJson = request.body();
-        RequestResult.CreateGameRequest createGameRequest = serializer.fromJson(
+        String authToken = request.headers("authorization");
+
+        createGameRequest = serializer.fromJson(
                 createGameRequestJson, RequestResult.CreateGameRequest.class);
-        GameService gameService = new GameService();
-        RequestResult.CreateGameResult createGameResult = gameService.createGame(
-                createGameRequest, authDataDAO, gameDataDAO);
+
+        createGameResult = gameService.createGame(
+                createGameRequest, authToken, authDataDAO, gameDataDAO);
         response.status(200);
         return serializer.toJson(createGameResult);
     }

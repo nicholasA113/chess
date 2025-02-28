@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class UserService {
 
-    public RegisterResult registerUser(RegisterRequest r, UserDataDAO userDataDAO){
+    public RegisterResult registerUser(RegisterRequest r, UserDataDAO userDataDAO, AuthDataDAO authDataDAO){
         UserData userdata = new UserData(r.username(), r.password(), r.email());
         if (r.username() == null || r.password() == null || r.email() == null){
             throw new InvalidInputException("Username, password, or email must not be null");
@@ -20,7 +20,6 @@ public class UserService {
             throw new InvalidUsernameException("Username is already taken");
         }
         userDataDAO.insertUser(userdata);
-        AuthDataDAO authDataDAO = new AuthDataDAO();
         String authToken = UUID.randomUUID().toString();
         authDataDAO.createAuth(new AuthData(authToken, r.username()));
         return new RegisterResult(r.username(), authToken);
@@ -39,18 +38,16 @@ public class UserService {
         return new LoginResult(l.username(), authToken);
     }
 
-    public LogoutResult logout(LogoutRequest l, AuthDataDAO authDataDAO){
-        if (l == null){
-            return null;
-        }
-        AuthData authToken = authDataDAO.getAuth(l.authToken());
-        if (authToken != null) {
-            authDataDAO.deleteAuth(l.authToken());
-            return null;
-        }
-        else{
+    public LogoutResult logout(String authToken, AuthDataDAO authDataDAO){
+        if (authToken == null){
             throw new InvalidInputException("AuthToken is invalid");
         }
+        AuthData authData = authDataDAO.getAuth(authToken);
+        if (authData == null || !authToken.equals(authData.authToken())){
+            throw new InvalidInputException("AuthToken is invalid");
+        }
+        authDataDAO.deleteAuth(authToken);
+        return null;
     }
 
 }

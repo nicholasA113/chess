@@ -8,6 +8,7 @@ import model.GameData;
 import model.UserData;
 import service.RequestResult.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 public class ClearService {
@@ -15,13 +16,13 @@ public class ClearService {
     public ClearDataResult clearData(ClearDataRequest c, UserDataDAO userDataDAO,
                                      AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
 
-        Map<Integer, GameData> allGameData = gameDataDAO.getAllGames();
-        for (GameData game : allGameData.values()){
+        ArrayList<GameData> allGameData = gameDataDAO.getAllGames();
+        for (GameData game : allGameData){
             gameDataDAO.deleteGame(game.gameID());
         }
 
-        Map<String, UserData> allUserData = userDataDAO.getAllUserData();
-        for (UserData user : allUserData.values()){
+        ArrayList<UserData> allUserData = userDataDAO.getAllUserData();
+        for (UserData user : allUserData){
             userDataDAO.deleteUser(user.username());
         }
 

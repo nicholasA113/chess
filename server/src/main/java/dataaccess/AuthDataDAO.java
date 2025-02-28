@@ -27,12 +27,6 @@ public class AuthDataDAO implements AuthDataAccessInterface{
         return authData.get(authToken);
     }
 
-    public void updateAuth(AuthData auth){
-        if (authData.containsKey(auth.authToken())){
-            authData.put(auth.authToken(), auth);
-        }
-    }
-
     public void deleteAuth(String authToken){
         authData.remove(authToken);
     }

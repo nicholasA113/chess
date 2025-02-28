@@ -33,17 +33,4 @@ public class UserDataDAO implements UserDataAccessInterface{
         }
         return null;
     }
-
-    public void updateUser(UserData user){
-        for (int i = 0; i < userData.size(); i++) {
-            if (userData.get(i).username().equals(user.username())) {
-                userData.set(i, user);
-                return;
-            }
-        }
-    }
-
-    public void deleteUser(String username){
-        userData.removeIf(user -> user.username().equals(username));
-    }
 }

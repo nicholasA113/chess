@@ -56,10 +56,6 @@ public class GameDataDAO implements GameDataAccessInterface {
         }
     }
 
-    public void deleteGame(int gameID){
-        gameData.remove(gameID);
-    }
-
     public int generateGameID(){
         return id++;
     }

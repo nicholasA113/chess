@@ -10,7 +10,7 @@ public class GameDataDAO implements GameDataAccessInterface {
     private final ArrayList<GameData> gameData = new ArrayList<>();
     private int id = 1;
 
-    public ArrayList<GameData> getAllGamesUser(String authToken, AuthDataDAO authDataDAO){
+    public ArrayList<GameData> getAllGamesUser(){
         ArrayList<GameData> userGames = new ArrayList<>();
         for (GameData game: gameData){
             userGames.add(game);

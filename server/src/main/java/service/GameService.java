@@ -74,7 +74,7 @@ public class GameService {
         if (authData == null){
             throw new InvalidUsernameException("Username/AuthToken is not valid");
         }
-        ArrayList<GameData> allGames = gameDataDAO.getAllGamesUser(authToken, authDataDAO);
+        ArrayList<GameData> allGames = gameDataDAO.getAllGamesUser();
         return new ListGamesResult(allGames);
     }
 

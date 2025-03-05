@@ -8,6 +8,7 @@ public interface AuthDataAccessInterface {
     void createAuth(AuthData auth);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
+
     Map<String, AuthData> getAllAuthData();
     void clearAllAuthData();
 }

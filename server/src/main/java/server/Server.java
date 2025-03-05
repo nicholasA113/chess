@@ -10,6 +10,8 @@ import spark.*;
 
 import java.util.Map;
 
+import dataaccess.DatabaseManager;
+
 public class Server {
 
     UserDataDAO userDataDAO = new UserDataDAO();

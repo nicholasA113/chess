@@ -1,36 +1,17 @@
 package dataaccess;
 
 import model.AuthData;
-import com.google.gson.Gson;
 
 import java.sql.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class SQLAuthDataDAO implements AuthDataAccessInterface{
 
-    private final String[] createAuthDataStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS authData (
-            'authToken' VARCHAR(256) PRIMARY KEY,
-            'username' VARCHAR(256) NOT NULL
-            );
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()){
-            for (String statement : createAuthDataStatements){
-                try (var preparedStatement = conn.prepareStatement(statement)){
-                    preparedStatement.executeUpdate();
-                }
-            }
-        }
-        catch (SQLException e){
-            throw new DataAccessException(
-                    String.format("Unable to configure database: %s", e.getMessage()));
-        }
+    public SQLAuthDataDAO() throws DataAccessException{
+        DatabaseManager databaseManager = new DatabaseManager();
+        databaseManager.configureDatabase();
     }
 
     public void createAuth(AuthData auth) throws DataAccessException {
@@ -43,24 +24,75 @@ public class SQLAuthDataDAO implements AuthDataAccessInterface{
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            throw new DataAccessException(
-                    String.format("Unable to insert auth data: %s", e.getMessage()));
+            throw new DataAccessException("Unable to insert auth data: " + e.getMessage());
         }
     }
 
-    public AuthData getAuth(String authToken) {
-        return null;
+    public AuthData getAuth(String authToken) throws DataAccessException{
+        String queryStatement = "SELECT authToken, username FROM authData WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(queryStatement);
+            preparedStatement.setString(1, authToken);
+            try (var result = preparedStatement.executeQuery()){
+                if (result.next()){
+                    return new AuthData(result.getString("authToken"),
+                            result.getString("username"));
+                }
+                else{
+                    return null;
+                }
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("Unable to get auth data: " + e.getMessage());
+        }
     }
 
-    public void deleteAuth(String authToken) {
-
+    public void deleteAuth(String authToken) throws DataAccessException{
+        String deleteStatement = "DELETE authToken, username FROM authData WHERE authToken = ?";
+        try(var conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(deleteStatement);
+            preparedStatement.setString(1, authToken);
+            int result = preparedStatement.executeUpdate();
+            if (result == 0){
+                throw new DataAccessException("No data was found to delete: ");
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("Error deleting auth data: " + e.getMessage());
+        }
     }
 
-    public Map<String, AuthData> getAllAuthData() {
-        return Map.of();
+    public Map<String, AuthData> getAllAuthData() throws DataAccessException{
+        String getAllStatement = "SELECT * FROM authData";
+        Map<String, AuthData> authDataList = new HashMap<>();
+
+        try (var conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(getAllStatement);
+            var result = preparedStatement.executeQuery();
+            while (result.next()){
+                String authToken = result.getString("authToken");
+                String username = result.getString("username");
+                authDataList.put(authToken, new AuthData(authToken, username));
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("Error getting all of the data: " + e.getMessage());
+        }
+        return authDataList;
     }
 
-    public void clearAllAuthData() {
-
+    public void clearAllAuthData() throws DataAccessException {
+        String deleteAllStatement = "DELETE FROM authData";
+        try (var conn = DatabaseManager.getConnection()){
+            var preparedStatement = conn.prepareStatement(deleteAllStatement);
+            int result = preparedStatement.executeUpdate();
+            if (result == 0){
+                throw new DataAccessException("No data was deleted");
+            }
+        }
+        catch (SQLException e){
+            throw new DataAccessException("Error deleting rows: " + e.getMessage());
+        }
     }
 }

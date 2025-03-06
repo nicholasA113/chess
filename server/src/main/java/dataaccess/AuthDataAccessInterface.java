@@ -6,9 +6,9 @@ import java.util.Map;
 
 public interface AuthDataAccessInterface {
     void createAuth(AuthData auth) throws DataAccessException;
-    AuthData getAuth(String authToken);
-    void deleteAuth(String authToken);
+    AuthData getAuth(String authToken) throws DataAccessException;
+    void deleteAuth(String authToken) throws DataAccessException;
 
-    Map<String, AuthData> getAllAuthData();
-    void clearAllAuthData();
+    Map<String, AuthData> getAllAuthData() throws DataAccessException;
+    void clearAllAuthData() throws DataAccessException;
 }

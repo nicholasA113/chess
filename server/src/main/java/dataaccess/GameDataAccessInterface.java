@@ -4,7 +4,7 @@ import model.GameData;
 
 import java.util.ArrayList;
 
-public interface GameDataAccessInterface {
+public interface GameDataAccessInterface{
     void createGame(String gameName);
     GameData getGame(int gameID);
     void updateGame(GameData game);

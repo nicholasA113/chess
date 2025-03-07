@@ -5,9 +5,9 @@ import model.UserData;
 import java.util.ArrayList;
 
 public interface UserDataAccessInterface {
-    void insertUser(UserData user);
-    UserData getUser(String username);
+    void insertUser(UserData user) throws DataAccessException;
+    UserData getUser(String username)throws DataAccessException;
 
-    void clearAllUserData();
-    ArrayList<UserData> getAllUserData();
+    void clearAllUserData()throws DataAccessException;
+    ArrayList<UserData> getAllUserData()throws DataAccessException;
 }

@@ -39,7 +39,7 @@ public class SQLAuthDataDAO implements AuthDataAccessInterface{
                             result.getString("username"));
                 }
                 else{
-                    return null;
+                    throw new DataAccessException("AuthToken is not found in the database");
                 }
             }
         }
@@ -49,14 +49,11 @@ public class SQLAuthDataDAO implements AuthDataAccessInterface{
     }
 
     public void deleteAuth(String authToken) throws DataAccessException{
-        String deleteStatement = "DELETE authToken, username FROM authData WHERE authToken = ?";
+        String deleteStatement = "DELETE FROM authData WHERE authToken = ?";
         try(var conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(deleteStatement);
             preparedStatement.setString(1, authToken);
-            int result = preparedStatement.executeUpdate();
-            if (result == 0){
-                throw new DataAccessException("No data was found to delete: ");
-            }
+            preparedStatement.executeUpdate();
         }
         catch (SQLException e){
             throw new DataAccessException("Error deleting auth data: " + e.getMessage());
@@ -86,10 +83,7 @@ public class SQLAuthDataDAO implements AuthDataAccessInterface{
         String deleteAllStatement = "DELETE FROM authData";
         try (var conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(deleteAllStatement);
-            int result = preparedStatement.executeUpdate();
-            if (result == 0){
-                throw new DataAccessException("No data was deleted");
-            }
+            preparedStatement.executeUpdate();
         }
         catch (SQLException e){
             throw new DataAccessException("Error deleting rows: " + e.getMessage());

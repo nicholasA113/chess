@@ -343,4 +343,84 @@ public class SQLDAOClassTests {
         Assertions.assertEquals("Game is not found in the database", exception.getMessage(),
                 "Assertion should throw a message");
     }
+
+    @Test
+    @DisplayName("Update game succeeds")
+    public void updateGameSucceeds() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+        int gameID = sqlGameDataDAO.getID("myGameName");
+        GameData game = sqlGameDataDAO.getGame(gameID);
+
+        sqlGameDataDAO.updateGame(new GameData(game.gameID(), "nicholasUsername",
+                game.blackUsername(), game.gameName(), game.game()));
+        GameData game2 = sqlGameDataDAO.getGame(gameID);
+
+        Assertions.assertNotNull(game2, "Game2 should not return null");
+        Assertions.assertNotEquals(game.whiteUsername(), game2.whiteUsername(),
+                "Usernames should no longer match");
+        Assertions.assertEquals("nicholasUsername", game2.whiteUsername(),
+                "WhiteUsername should be updated");
+    }
+
+    @Test
+    @DisplayName("Update game that doesn't exist")
+    public void updateGameNotExists(){
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlGameDataDAO.updateGame(new GameData(12,
+                        null, null,
+                        "someName", new ChessGame())));
+
+        Assertions.assertEquals("No game was found with given gameID", exception.getMessage(),
+                "Assertion should throw a message");
+    }
+
+    @Test
+    @DisplayName("Get gameID success")
+    public void getGameIDSucceeds() throws DataAccessException {
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+
+        int gameID = sqlGameDataDAO.getID("myGameName");
+
+        GameData gameData = sqlGameDataDAO.getGame(gameID);
+
+        Assertions.assertNotNull(gameData, "GameData should not return null");
+        Assertions.assertEquals(gameID, gameData.gameID(), "gameID's should match");
+    }
+
+    @Test
+    @DisplayName("Get gameID fails")
+    public void getGameIDFails(){
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlGameDataDAO.getID("myGameName"));
+
+        Assertions.assertEquals("ID not found in gameData", exception.getMessage(),
+                "Assertion should throw a message");
+    }
+
+    @Test
+    @DisplayName("Get all games succeeds")
+    public void getAllGamesSucceeds() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+        sqlGameDataDAO.createGame("myGameName2");
+
+        ArrayList<GameData> gameDataList = sqlGameDataDAO.getAllGames();
+
+        Assertions.assertNotNull(gameDataList, "GameDataList should not be null");
+        Assertions.assertEquals(2, gameDataList.size(), "There should " +
+                "be two games in the gameData list");
+    }
+
+    @Test
+    @DisplayName("Get all games but none exist")
+    public void getAllGamesNoneExist() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+
+    }
 }

@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -13,12 +14,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class SQLDAOClassTests {
 
     private SQLAuthDataDAO authDataSQL;
+    private SQLUserDataDAO userDataSQL;
+    private SQLGameDataDAO gameDataSQL;
 
     @BeforeEach
     public void setup() throws DataAccessException {
         try{
             authDataSQL = new SQLAuthDataDAO();
             authDataSQL.clearAllAuthData();
+
+            userDataSQL = new SQLUserDataDAO();
+            userDataSQL.clearAllUserData();
+
+            gameDataSQL = new SQLGameDataDAO();
+            gameDataSQL.clearAllGameData();
         }
         catch (DataAccessException e){
             throw new DataAccessException("Unable to setup: " + e.getMessage());
@@ -29,6 +38,8 @@ public class SQLDAOClassTests {
     public void teardown() throws DataAccessException{
         try{
             authDataSQL.clearAllAuthData();
+            userDataSQL.clearAllUserData();
+            gameDataSQL.clearAllGameData();
         }
         catch (DataAccessException e){
             throw new DataAccessException("Unable to tear down: " + e.getMessage());
@@ -150,5 +161,99 @@ public class SQLDAOClassTests {
         Map<String, AuthData> authDataList = sqlAuthDataDAO.getAllAuthData();
 
         Assertions.assertTrue(authDataList.isEmpty(), "No authData should be returned");
+    }
+
+    @Test
+    @DisplayName("Insert User Success")
+    public void insertUserSuccess() throws DataAccessException{
+        UserData userData = new UserData("nicholasUsername", "myPasswordIsSecret",
+                "email@email.org");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
+
+        sqlUserDataDAO.insertUser(userData);
+
+        UserData storedUserData = sqlUserDataDAO.getUser(userData.username());
+
+        Assertions.assertNotNull(storedUserData, "stored user data should contain something");
+        Assertions.assertNotEquals(userData.password(), storedUserData.password(),
+                "Stored password should be hashed");
+    }
+
+    @Test
+    @DisplayName("Insert User Fail")
+    public void insertUserFails() throws DataAccessException{
+        UserData userData = new UserData(null, "myPasswordIsSecret",
+                "email@email.org");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlUserDataDAO.insertUser(userData));
+
+        Assertions.assertEquals("Error inserting user into database: Column 'username' cannot be null", exception.getMessage(),
+                "an error message should be raise");
+    }
+
+    @Test
+    @DisplayName("Get User Success")
+    public void getUserSuccess() throws DataAccessException{
+        UserData userData1 = new UserData("nicholasUsername",
+                "myPasswordIsSecure", "email@email.com");
+        UserData userData2 = new UserData("myUsername",
+                "myPassword", "my@email.com");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
+
+        sqlUserDataDAO.insertUser(userData1);
+        sqlUserDataDAO.insertUser(userData2);
+
+        UserData result = sqlUserDataDAO.getUser(userData1.username());
+
+        Assertions.assertNotNull(result, "result should not be null");
+        Assertions.assertEquals(userData1.username(), result.username(),
+                "Resulting username should match existing one");
+    }
+
+    @Test
+    @DisplayName("Get user fails")
+    public void getUserFails() throws DataAccessException{
+        UserData userData1 = new UserData("nicholasUsername",
+                "myPasswordIsSecure", "email@email.com");
+        UserData userData2 = new UserData("myUsername",
+                "myPassword", "my@email.com");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
+
+        sqlUserDataDAO.insertUser(userData1);
+        sqlUserDataDAO.insertUser(userData2);
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlUserDataDAO.getUser("nicksusername"));
+
+        Assertions.assertEquals("Requested user is not in the database", exception.getMessage(),
+                "Assertion should return a message");
+    }
+
+    @Test
+    @DisplayName("Get all user succeeds")
+    public void getAllUsersSucceeds() throws DataAccessException{
+
+    }
+
+    @Test
+    @DisplayName("Get all users fails")
+    public void getAllUsersFails() throws DataAccessException{
+
+    }
+
+    @Test
+    @DisplayName("Create game succeeds")
+    public void createGameSuccess() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+
+        sqlGameDataDAO.createGame("myGameName");
+
+        int resultID = sqlGameDataDAO.getGameID();
+        GameData result = sqlGameDataDAO.getGame(resultID);
+
+        Assertions.assertNotNull(result, "Result should not be null");
+        Assertions.assertEquals(resultID, result.gameID(), "Result id's should match");
     }
 }

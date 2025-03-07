@@ -5,13 +5,13 @@ import model.GameData;
 import java.util.ArrayList;
 
 public interface GameDataAccessInterface{
-    void createGame(String gameName);
-    GameData getGame(int gameID);
-    void updateGame(GameData game);
+    void createGame(String gameName) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException;
+    void updateGame(GameData game) throws DataAccessException;
 
-    ArrayList<GameData> getAllGamesUser();
-    ArrayList<GameData> getAllGames();
-    void clearAllGameData();
-    int generateGameID();
-    int getGameID();
+    ArrayList<GameData> getAllGamesUser() throws DataAccessException;
+    ArrayList<GameData> getAllGames() throws DataAccessException;
+    void clearAllGameData() throws DataAccessException;
+    int generateGameID() throws DataAccessException;
+    int getGameID() throws DataAccessException;
 }

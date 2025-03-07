@@ -10,22 +10,6 @@ public class GameDataDAO implements GameDataAccessInterface {
     private final ArrayList<GameData> gameData = new ArrayList<>();
     private int id = 1;
 
-    public ArrayList<GameData> getAllGamesUser(){
-        ArrayList<GameData> userGames = new ArrayList<>();
-        for (GameData game: gameData){
-            userGames.add(game);
-        }
-        return userGames;
-    }
-
-    public ArrayList<GameData> getAllGames(){
-        return gameData;
-    }
-
-    public void clearAllGameData(){
-        gameData.clear();
-    }
-
     public void createGame(String gameName){
         for (GameData game : gameData){
             if (game.gameName().equals(gameName)){
@@ -54,6 +38,22 @@ public class GameDataDAO implements GameDataAccessInterface {
                 return;
             }
         }
+    }
+
+    public ArrayList<GameData> getAllGamesUser(){
+        ArrayList<GameData> userGames = new ArrayList<>();
+        for (GameData game: gameData){
+            userGames.add(game);
+        }
+        return userGames;
+    }
+
+    public ArrayList<GameData> getAllGames(){
+        return gameData;
+    }
+
+    public void clearAllGameData(){
+        gameData.clear();
     }
 
     public int generateGameID(){

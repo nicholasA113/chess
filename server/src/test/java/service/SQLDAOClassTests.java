@@ -421,6 +421,22 @@ public class SQLDAOClassTests {
     @DisplayName("Get all games but none exist")
     public void getAllGamesNoneExist() throws DataAccessException{
         SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        ArrayList<GameData> gameDataList = sqlGameDataDAO.getAllGames();
 
+        Assertions.assertTrue(gameDataList.isEmpty(), "gameDataList should be empty");
+    }
+
+    @Test
+    @DisplayName("Clearing multiple games")
+    public void clearAllGames() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+        sqlGameDataDAO.createGame("myGameName2");
+
+        sqlGameDataDAO.clearAllGameData();
+        ArrayList<GameData> gameDataList = sqlGameDataDAO.getAllGames();
+
+        Assertions.assertTrue(gameDataList.isEmpty(), "There should be no games " +
+                "after calling the clear all method");
     }
 }

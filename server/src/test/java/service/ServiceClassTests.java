@@ -2,9 +2,7 @@ package service;
 
 import dataaccess.*;
 import model.GameData;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -23,6 +21,25 @@ public class ServiceClassTests {
     UserDataDAO userDataDAO = new UserDataDAO();
     AuthDataDAO authDataDAO = new AuthDataDAO();
     GameDataDAO gameDataDAO = new GameDataDAO();
+
+    @BeforeEach
+    public void setup() throws DataAccessException {
+        authDataDAO = new AuthDataDAO();
+        authDataDAO.clearAllAuthData();
+
+        userDataDAO = new UserDataDAO();
+        userDataDAO.clearAllUserData();
+
+        gameDataDAO = new GameDataDAO();
+        gameDataDAO.clearAllGameData();
+    }
+
+    @AfterEach
+    public void teardown() throws DataAccessException{
+        authDataDAO.clearAllAuthData();
+        userDataDAO.clearAllUserData();
+        gameDataDAO.clearAllGameData();
+    }
 
     @Test
     @DisplayName("Register Endpoint Valid Inputs")

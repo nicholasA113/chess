@@ -9,9 +9,6 @@ public interface GameDataAccessInterface{
     GameData getGame(int gameID) throws DataAccessException;
     void updateGame(GameData game) throws DataAccessException;
 
-    ArrayList<GameData> getAllGamesUser() throws DataAccessException;
     ArrayList<GameData> getAllGames() throws DataAccessException;
     void clearAllGameData() throws DataAccessException;
-    int generateGameID() throws DataAccessException;
-    int getGameID() throws DataAccessException;
 }

@@ -25,6 +25,7 @@ public class Server {
     Gson serializer = new Gson();
 
     public int run(int desiredPort) {
+
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
         Spark.post("/user", (request, response) -> {

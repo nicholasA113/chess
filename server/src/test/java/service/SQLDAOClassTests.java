@@ -7,6 +7,7 @@ import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -234,13 +235,59 @@ public class SQLDAOClassTests {
     @Test
     @DisplayName("Get all user succeeds")
     public void getAllUsersSucceeds() throws DataAccessException{
+        UserData userData1 = new UserData("nickUsername",
+                "passWord", "email@email.com");
+        UserData userData2 = new UserData("nicholasUsername",
+                "passWord", "email@emails.com");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
 
+        sqlUserDataDAO.insertUser(userData1);
+        sqlUserDataDAO.insertUser(userData2);
+
+        ArrayList<UserData> userData = sqlUserDataDAO.getAllUserData();
+
+        Assertions.assertNotNull(userData, "userData should not be null");
+        boolean firstUser = false;
+        boolean secondUser = false;
+        for (UserData user : userData){
+            if (user.username().equals("nickUsername")) firstUser = true;
+            if (user.username().equals("nicholasUsername")) secondUser = true;
+
+            Assertions.assertNotEquals("passWord", user.password(), "Passwords" +
+                    "should not be matching");
+        }
+        Assertions.assertTrue(firstUser, "List should contain nickUsername");
+        Assertions.assertTrue(secondUser, "List should contain nicholasUsername");
     }
 
     @Test
     @DisplayName("Get all users fails")
-    public void getAllUsersFails() throws DataAccessException{
+    public void getAllUsersNoData() throws DataAccessException{
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
 
+        ArrayList<UserData> userData = sqlUserDataDAO.getAllUserData();
+
+        Assertions.assertTrue(userData.isEmpty(), "Expected empty user list but found users.");
+    }
+
+    @Test
+    @DisplayName("Clear multiple data success")
+    public void clearAllUsersSucceeds() throws DataAccessException{
+        UserData userData1 = new UserData("nickUsername",
+                "passWord", "email@email.com");
+        UserData userData2 = new UserData("nicholasUsername",
+                "passWord", "email@emails.com");
+        SQLUserDataDAO sqlUserDataDAO = new SQLUserDataDAO();
+
+        sqlUserDataDAO.insertUser(userData1);
+        sqlUserDataDAO.insertUser(userData2);
+
+        sqlUserDataDAO.clearAllUserData();
+
+        ArrayList<UserData> userData = sqlUserDataDAO.getAllUserData();
+
+        Assertions.assertTrue(userData.isEmpty(), "all userData should" +
+                "be gone after calling the clear all function");
     }
 
     @Test
@@ -250,10 +297,50 @@ public class SQLDAOClassTests {
 
         sqlGameDataDAO.createGame("myGameName");
 
-        int resultID = sqlGameDataDAO.getGameID();
+        int resultID = sqlGameDataDAO.getID("myGameName");
         GameData result = sqlGameDataDAO.getGame(resultID);
 
         Assertions.assertNotNull(result, "Result should not be null");
         Assertions.assertEquals(resultID, result.gameID(), "Result id's should match");
+    }
+
+    @Test
+    @DisplayName("Create game fails")
+    public void createGameAlreadyInDatabase() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlGameDataDAO.createGame("myGameName"));
+
+        Assertions.assertEquals("gameName already exists in database", exception.getMessage(),
+                "Assertion should throw a message");
+    }
+
+    @Test
+    @DisplayName("Get game succeeds")
+    public void getGameInDatabase() throws DataAccessException{
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+        sqlGameDataDAO.createGame("myGameName");
+        sqlGameDataDAO.createGame("myOtherName");
+
+        int gameID = sqlGameDataDAO.getID("myGameName");
+        GameData chessGameData = sqlGameDataDAO.getGame(gameID);
+
+        Assertions.assertNotNull(chessGameData, "gameData should not return null");
+        Assertions.assertEquals("myGameName", chessGameData.gameName(), "Game" +
+                " name should match");
+    }
+
+    @Test
+    @DisplayName("Get game fails")
+    public void getGameFails(){
+        SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlGameDataDAO.getGame(34));
+
+        Assertions.assertEquals("Game is not found in the database", exception.getMessage(),
+                "Assertion should throw a message");
     }
 }

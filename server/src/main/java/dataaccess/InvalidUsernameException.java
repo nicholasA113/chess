@@ -1,6 +1,6 @@
 package dataaccess;
 
-public class InvalidUsernameException extends RuntimeException {
+public class InvalidUsernameException extends DataAccessException {
     public InvalidUsernameException(String message) {
         super(message);
     }

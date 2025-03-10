@@ -1,22 +1,29 @@
 package service;
 
-import dataaccess.AuthDataDAO;
-import dataaccess.GameDataDAO;
-import dataaccess.InvalidAccessException;
-import dataaccess.UserDataDAO;
+import dataaccess.*;
 import service.RequestResult.*;
 
 public class ClearService {
 
-    public ClearDataResult clearData(ClearDataRequest c, UserDataDAO userDataDAO,
-                                     AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
+    AuthDataAccess authDataAccess;
+    UserDataAccess userDataAccess;
+    GameDataAccess gameDataAccess;
 
-        userDataDAO.clearAllUserData();
-        authDataDAO.clearAllAuthData();
-        gameDataDAO.clearAllGameData();
+    public ClearService(AuthDataAccess authDataAccess, UserDataAccess userDataAccess,
+                        GameDataAccess gameDataAccess){
+        this.authDataAccess = authDataAccess;
+        this.userDataAccess = userDataAccess;
+        this.gameDataAccess = gameDataAccess;
+    }
 
-        if (!gameDataDAO.getAllGames().isEmpty() || !userDataDAO.getAllUserData().isEmpty() ||
-                !authDataDAO.getAllAuthData().isEmpty()){
+    public ClearDataResult clearData(ClearDataRequest c) throws DataAccessException {
+
+        userDataAccess.clearAllUserData();
+        authDataAccess.clearAllAuthData();
+        gameDataAccess.clearAllGameData();
+
+        if (!gameDataAccess.getAllGames().isEmpty() || !userDataAccess.getAllUserData().isEmpty() ||
+                !authDataAccess.getAllAuthData().isEmpty()){
             throw new InvalidAccessException("Not all data was cleared");
         }
 

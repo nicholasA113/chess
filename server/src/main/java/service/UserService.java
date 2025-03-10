@@ -19,7 +19,7 @@ public class UserService {
         this.userDataAccess = userDataAccess;
     }
 
-    public RegisterResult registerUser(RegisterRequest r){
+    public RegisterResult registerUser(RegisterRequest r) throws DataAccessException {
         UserData userdata = new UserData(r.username(), r.password(), r.email());
         if (r.username() == null || r.password() == null || r.email() == null){
             throw new InvalidInputException("Username, password, or email must not be null");
@@ -33,7 +33,7 @@ public class UserService {
         return new RegisterResult(r.username(), authToken);
     }
 
-    public LoginResult login(LoginRequest l){
+    public LoginResult login(LoginRequest l) throws DataAccessException {
         UserData user = userDataAccess.getUser(l.username());
         if (user == null){
             throw new InvalidUsernameException("Username is not found or incorrect");
@@ -46,7 +46,7 @@ public class UserService {
         return new LoginResult(l.username(), authToken);
     }
 
-    public LogoutResult logout(String authToken){
+    public LogoutResult logout(String authToken) throws DataAccessException {
         AuthData authData = authDataAccess.getAuth(authToken);
         if (authData == null || !authToken.equals(authData.authToken())){
             throw new InvalidInputException("AuthToken is invalid");

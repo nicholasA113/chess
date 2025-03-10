@@ -2,10 +2,14 @@ package service.httphandlers;
 
 import com.google.gson.Gson;
 import dataaccess.AuthDataDAO;
+import dataaccess.DataAccessException;
+import dataaccess.InvalidInputException;
 import service.RequestResult;
 import service.UserService;
 import spark.Request;
 import spark.Response;
+
+import java.util.Map;
 
 
 public class LogoutHandler {
@@ -13,12 +17,19 @@ public class LogoutHandler {
     RequestResult.LogoutResult logoutResult;
 
     public Object logoutHandler(Request request, Response response, Gson serializer,
-                                AuthDataDAO authDataDAO, UserService userService){
+                                UserService userService){
+        try {
+            String authToken = request.headers("authorization");
+            logoutResult = userService.logout(authToken);
+        }
+        catch (DataAccessException e){
+            if (e instanceof InvalidInputException){
+                response.status(401);
+                return serializer.toJson(Map.of("message", "Error: AuthToken should not be null"));
+            }
+        }
 
-        String authToken = request.headers("authorization");
-        logoutResult = userService.logout(authToken, authDataDAO);
         response.status(200);
         return serializer.toJson(logoutResult);
-
     }
 }

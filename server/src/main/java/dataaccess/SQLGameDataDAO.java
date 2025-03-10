@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 
-public class SQLGameDataDAO implements GameDataAccessInterface{
+public class SQLGameDataDAO implements GameDataAccess {
 
     Gson serializer = new Gson();
 

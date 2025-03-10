@@ -5,7 +5,7 @@ import model.GameData;
 
 import java.util.ArrayList;
 
-public class GameDataDAO implements GameDataAccessInterface {
+public class GameDataDAO implements GameDataAccess {
 
     private final ArrayList<GameData> gameData = new ArrayList<>();
     private int id = 1;
@@ -40,14 +40,6 @@ public class GameDataDAO implements GameDataAccessInterface {
         }
     }
 
-    public ArrayList<GameData> getAllGamesUser(){
-        ArrayList<GameData> userGames = new ArrayList<>();
-        for (GameData game: gameData){
-            userGames.add(game);
-        }
-        return userGames;
-    }
-
     public ArrayList<GameData> getAllGames(){
         return gameData;
     }
@@ -60,8 +52,12 @@ public class GameDataDAO implements GameDataAccessInterface {
         return id++;
     }
 
-    public int getGameID(){
-        return id-1;
+    public int getID(String gameName){
+        for (GameData game : gameData){
+            if (game.gameName().equals(gameName)){
+                return game.gameID();
+            }
+        }
+        return -1;
     }
-
 }

@@ -10,21 +10,27 @@ import java.util.ArrayList;
 
 public class GameService {
 
-    public CreateGameResult createGame(CreateGameRequest c, String authToken,
-                                       AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
-        if (authDataDAO.getAuth(authToken) == null || c.gameName() == null){
+    private final AuthDataAccess authDataAccess;
+    private final GameDataAccess gameDataAccess;
+
+    public GameService(AuthDataAccess authDataAccess, GameDataAccess gameDataAccess){
+        this.authDataAccess = authDataAccess;
+        this.gameDataAccess = gameDataAccess;
+    }
+
+    public CreateGameResult createGame(CreateGameRequest c, String authToken) throws DataAccessException {
+        if (authDataAccess.getAuth(authToken) == null || c.gameName() == null){
             throw new InvalidInputException("AuthToken and/or Game Name is invalid or empty");
         }
-        gameDataDAO.createGame(c.gameName());
-        int id = gameDataDAO.getGameID();
-        GameData createdGame = gameDataDAO.getGame(id);
+        gameDataAccess.createGame(c.gameName());
+        int id = gameDataAccess.getID(c.gameName());
+        GameData createdGame = gameDataAccess.getGame(id);
         return new CreateGameResult(createdGame.gameID());
     }
 
-    public JoinGameResult joinGame(JoinGameRequest j, String authToken, AuthDataDAO authDataDAO,
-                                   GameDataDAO gameDataDAO){
-        AuthData authData = authDataDAO.getAuth(authToken);
-        GameData gameData = gameDataDAO.getGame(j.gameID());
+    public JoinGameResult joinGame(JoinGameRequest j, String authToken) throws DataAccessException {
+        AuthData authData = authDataAccess.getAuth(authToken);
+        GameData gameData = gameDataAccess.getGame(j.gameID());
         if (gameData == null || gameData.gameID() != j.gameID()){
             throw new InvalidAccessException("ID is invalid");
         }
@@ -37,10 +43,10 @@ public class GameService {
         if (!j.playerColor().equals("WHITE") && !j.playerColor().equals("BLACK")){
             throw new InvalidAccessException("Input is invalid");
         }
-        if (authDataDAO.getAuth(authToken) == null || !authToken.equals(authData.authToken())){
+        if (authDataAccess.getAuth(authToken) == null || !authToken.equals(authData.authToken())){
             throw new InvalidUsernameException("Username in invalid");
         }
-        GameData game = gameDataDAO.getGame(j.gameID());
+        GameData game = gameDataAccess.getGame(j.gameID());
         String whiteUsername = game.whiteUsername();
         String blackUsername = game.blackUsername();
 
@@ -52,7 +58,7 @@ public class GameService {
                     blackUsername,
                     game.gameName(),
                     game.game());
-            gameDataDAO.updateGame(updatedGame);
+            gameDataAccess.updateGame(updatedGame);
             return new JoinGameResult();
         }
         else if (blackUsername == null && j.playerColor().equals("BLACK")){
@@ -61,7 +67,7 @@ public class GameService {
                     username,
                     game.gameName(),
                     game.game());
-            gameDataDAO.updateGame(updatedGame);
+            gameDataAccess.updateGame(updatedGame);
             return new JoinGameResult();
         }
         else{
@@ -69,13 +75,12 @@ public class GameService {
         }
     }
 
-    public ListGamesResult listGames(String authToken, AuthDataDAO authDataDAO, GameDataDAO gameDataDAO){
-        AuthData authData = authDataDAO.getAuth(authToken);
+    public ListGamesResult listGames(String authToken) throws DataAccessException {
+        AuthData authData = authDataAccess.getAuth(authToken);
         if (authData == null){
             throw new InvalidUsernameException("Username/AuthToken is not valid");
         }
-        ArrayList<GameData> allGames = gameDataDAO.getAllGamesUser();
+        ArrayList<GameData> allGames = gameDataAccess.getAllGames();
         return new ListGamesResult(allGames);
     }
-
 }

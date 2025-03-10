@@ -4,7 +4,7 @@ import model.UserData;
 
 import java.util.ArrayList;
 
-public interface UserDataAccessInterface {
+public interface UserDataAccess {
     void insertUser(UserData user) throws DataAccessException;
     UserData getUser(String username)throws DataAccessException;
 

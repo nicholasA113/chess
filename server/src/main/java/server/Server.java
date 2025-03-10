@@ -10,8 +10,6 @@ import spark.*;
 
 import java.util.Map;
 
-import dataaccess.DatabaseManager;
-
 public class Server {
 
     UserDataDAO userDataDAO = new UserDataDAO();
@@ -25,11 +23,11 @@ public class Server {
     Gson serializer = new Gson();
 
     public int run(int desiredPort) {
-
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
         Spark.post("/user", (request, response) -> {
-            try{return new RegisterHandler().registerHandler(request, response, serializer, userDataDAO, authDataDAO, userService);
+            try{
+                return new RegisterHandler().registerHandler(request, response, serializer, userDataDAO, authDataDAO, userService);
             }
             catch (InvalidUsernameException e){
                 response.status(403);

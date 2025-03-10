@@ -4,7 +4,7 @@ import model.UserData;
 
 import java.util.ArrayList;
 
-public class UserDataDAO implements UserDataAccessInterface{
+public class UserDataDAO implements UserDataAccess {
 
     private final ArrayList<UserData> userData = new ArrayList<>();
 

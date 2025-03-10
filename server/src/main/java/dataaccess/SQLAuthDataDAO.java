@@ -7,7 +7,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SQLAuthDataDAO implements AuthDataAccessInterface{
+public class SQLAuthDataDAO implements AuthDataAccess {
 
     public SQLAuthDataDAO() throws DataAccessException{
         DatabaseManager databaseManager = new DatabaseManager();

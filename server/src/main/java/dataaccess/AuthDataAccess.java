@@ -4,7 +4,7 @@ import model.AuthData;
 
 import java.util.Map;
 
-public interface AuthDataAccessInterface {
+public interface AuthDataAccess {
     void createAuth(AuthData auth) throws DataAccessException;
     AuthData getAuth(String authToken) throws DataAccessException;
     void deleteAuth(String authToken) throws DataAccessException;

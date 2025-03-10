@@ -6,7 +6,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class SQLUserDataDAO implements UserDataAccessInterface{
+public class SQLUserDataDAO implements UserDataAccess {
 
     public SQLUserDataDAO() throws DataAccessException{
         DatabaseManager databaseManager = new DatabaseManager();

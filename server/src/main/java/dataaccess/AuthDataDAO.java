@@ -5,7 +5,7 @@ import model.AuthData;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AuthDataDAO implements AuthDataAccessInterface{
+public class AuthDataDAO implements AuthDataAccess {
 
     private final Map<String, AuthData> authData = new HashMap<>();
 

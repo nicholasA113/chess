@@ -75,25 +75,15 @@ public class Server {
                    gameService)
             );
 
-        Spark.get("/game", (request, response) -> {
-            try{return new ListGamesHandler().listGamesHandler(request, response, serializer, 
-                    authDataAccess, gameDataAccess, gameService);
-            }
-            catch (InvalidUsernameException e){
-                response.status(401);
-                return serializer.toJson(Map.of("message", "Error: Invalid username or authToken"));
-            }
-        });
+        Spark.get("/game", (request, response) ->
+            new ListGamesHandler().listGamesHandler(request, response, serializer,
+                    gameService)
+            );
 
-        Spark.delete("/db", (request, response) ->{
-            try{return new ClearHandler().clearHandler(request, response, serializer, 
-                    userDataAccess, authDataAccess, gameDataAccess, clearService);
-            }
-            catch (InvalidAccessException e){
-                response.status(500);
-                return serializer.toJson(Map.of("message", "Error: not all data was cleared"));
-            }
-        });
+        Spark.delete("/db", (request, response) ->
+            new ClearHandler().clearHandler(request, response, serializer,
+                    clearService)
+        );
 
         Spark.awaitInitialization();
         return Spark.port();

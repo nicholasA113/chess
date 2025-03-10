@@ -1,13 +1,13 @@
 package service.httphandlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDataDAO;
-import dataaccess.GameDataDAO;
-import dataaccess.UserDataDAO;
+import dataaccess.*;
 import service.ClearService;
 import service.RequestResult;
 import spark.Request;
 import spark.Response;
+
+import java.util.Map;
 
 public class ClearHandler {
 
@@ -15,15 +15,20 @@ public class ClearHandler {
     RequestResult.ClearDataResult clearDataResult;
 
     public Object clearHandler(Request request, Response response, Gson serializer,
-                               UserDataDAO userDataDAO, AuthDataDAO authDataDAO,
-                               GameDataDAO gameDataDAO, ClearService clearService){
+                               ClearService clearService){
 
-        String clearHandlerJson = request.body();
-        clearDataRequest = serializer.fromJson(clearHandlerJson,
-                RequestResult.ClearDataRequest.class);
-        clearDataResult = clearService.clearData(clearDataRequest,
-                userDataDAO, authDataDAO, gameDataDAO);
-
+        try {
+            String clearHandlerJson = request.body();
+            clearDataRequest = serializer.fromJson(clearHandlerJson,
+                    RequestResult.ClearDataRequest.class);
+            clearDataResult = clearService.clearData(clearDataRequest);
+        }
+        catch (DataAccessException e){
+            if (e instanceof InvalidAccessException){
+                response.status(500);
+                return serializer.toJson(Map.of("message", "Error: not all data was cleared"));
+            }
+        }
         response.status(200);
         return serializer.toJson(clearDataResult);
     }

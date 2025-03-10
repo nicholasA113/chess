@@ -9,43 +9,48 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServiceClassTests {
 
-    RequestResult.RegisterRequest registerRequest = new RequestResult.RegisterRequest("username123", "password123",
-            "email@email.com");
-    RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest("username123",
-            "password123");
+    RequestResult.RegisterRequest registerRequest =
+            new RequestResult.RegisterRequest("username123",
+                    "password123", "email@email.com");
+    RequestResult.LoginRequest loginRequest =
+            new RequestResult.LoginRequest("username123", "password123");
 
-    UserService userServiceInstance = new UserService();
-    GameService gameServiceInstance = new GameService();
-    ClearService clearServiceInstance = new ClearService();
+    private UserService userServiceInstance;
+    private GameService gameServiceInstance;
+    private ClearService clearServiceInstance;
 
-    UserDataDAO userDataDAO = new UserDataDAO();
-    AuthDataDAO authDataDAO = new AuthDataDAO();
-    GameDataDAO gameDataDAO = new GameDataDAO();
+    private UserDataDAO userDataDAO;
+    private AuthDataDAO authDataDAO;
+    private GameDataDAO gameDataDAO;
 
     @BeforeEach
-    public void setup() throws DataAccessException {
-        authDataDAO = new AuthDataDAO();
-        authDataDAO.clearAllAuthData();
-
+    public void setup(){
         userDataDAO = new UserDataDAO();
-        userDataDAO.clearAllUserData();
-
+        authDataDAO = new AuthDataDAO();
         gameDataDAO = new GameDataDAO();
+
+        userDataDAO.clearAllUserData();
+        authDataDAO.clearAllAuthData();
         gameDataDAO.clearAllGameData();
+
+        userServiceInstance = new UserService(authDataDAO, userDataDAO);
+        gameServiceInstance = new GameService(authDataDAO, gameDataDAO);
+        clearServiceInstance = new ClearService(authDataDAO, userDataDAO, gameDataDAO);
     }
 
     @AfterEach
-    public void teardown() throws DataAccessException{
-        authDataDAO.clearAllAuthData();
+    public void teardown() {
         userDataDAO.clearAllUserData();
+        authDataDAO.clearAllAuthData();
         gameDataDAO.clearAllGameData();
     }
 
     @Test
     @DisplayName("Register Endpoint Valid Inputs")
-    public void registerEndpointValid() {
+    public void registerEndpointValid() throws DataAccessException {
         /** When **/
-        RequestResult.RegisterResult actualRegisterResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult actualRegisterResult =
+                userServiceInstance.registerUser(registerRequest);
 
         /** Then **/
         Assertions.assertNotNull(actualRegisterResult, "The register result should not be null");
@@ -62,7 +67,7 @@ public class ServiceClassTests {
 
         /** When **/
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.registerUser(registerRequestNull, userDataDAO, authDataDAO));
+                userServiceInstance.registerUser(registerRequestNull));
 
         /** Then **/
         Assertions.assertEquals("Username, password, or email must not be null", exception.getMessage(),
@@ -71,15 +76,15 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("User already taken")
-    public void registerUserTaken(){
+    public void registerUserTaken() throws DataAccessException {
         /** Given**/
         var registerRequestUserTaken = new RequestResult.RegisterRequest(
                 "username123", "Password123", "nicholas@gmail.com");
 
         /** When **/
-        RequestResult.RegisterResult registerResult1 = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult1 = userServiceInstance.registerUser(registerRequest);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                userServiceInstance.registerUser(registerRequestUserTaken, userDataDAO, authDataDAO));
+                userServiceInstance.registerUser(registerRequestUserTaken));
 
         /** Then **/
         Assertions.assertNotNull(registerResult1, "First input should not be null");
@@ -89,11 +94,11 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Login with valid credentials")
-    public void loginValidInputs(){
+    public void loginValidInputs() throws DataAccessException{
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -104,15 +109,15 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Login with invalid password")
-    public void loginInvalidPassword(){
+    public void loginInvalidPassword() throws DataAccessException{
         /** Given **/
         var loginRequestInvalidPassword = new RequestResult.LoginRequest("username123",
                 "123");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.login(loginRequestInvalidPassword, userDataDAO, authDataDAO));
+                userServiceInstance.login(loginRequestInvalidPassword));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -122,15 +127,15 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Login with invalid username")
-    public void loginInvalidUsername(){
+    public void loginInvalidUsername() throws DataAccessException{
         /** Given **/
         var loginRequestInvalidUsername = new RequestResult.LoginRequest("nicholas",
                 "123456");
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                userServiceInstance.login(loginRequestInvalidUsername, userDataDAO, authDataDAO));
+                userServiceInstance.login(loginRequestInvalidUsername));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -140,15 +145,15 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Logout with valid authToken")
-    public void logoutValidToken(){
+    public void logoutValidToken() throws DataAccessException{
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         String authToken = loginResult.authToken();
 
-        RequestResult.LogoutResult logoutResult = userServiceInstance.logout(authToken, authDataDAO);
+        RequestResult.LogoutResult logoutResult = userServiceInstance.logout(authToken);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -158,16 +163,16 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Logout with invalid authToken")
-    public void logoutInvalidToken(){
+    public void logoutInvalidToken() throws DataAccessException{
 
         /** When **/
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
+        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         String authToken = loginResult.authToken()+1;
 
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                userServiceInstance.logout(authToken, authDataDAO));
+                userServiceInstance.logout(authToken));
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register Result should not be null");
@@ -178,12 +183,12 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Create game with authToken and gameName")
-    public void createGameValidInput(){
+    public void createGameValidInput() throws DataAccessException{
         /** When **/
         RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(
-                registerRequest, userDataDAO, authDataDAO);
+                registerRequest);
         RequestResult.LoginResult loginResult = userServiceInstance.login(
-                loginRequest, userDataDAO, authDataDAO);
+                loginRequest);
 
         String authToken = loginResult.authToken();
 
@@ -191,7 +196,7 @@ public class ServiceClassTests {
                 authToken, "Game Name Test");
 
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
-                createGameRequest, authToken, authDataDAO, gameDataDAO);
+                createGameRequest, authToken);
 
         /** Then **/
         Assertions.assertNotNull(registerResult, "Register result should not be null");
@@ -206,7 +211,7 @@ public class ServiceClassTests {
         RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
                 null, "Game Name Test");
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                gameServiceInstance.createGame(createGameRequest, null, authDataDAO, gameDataDAO));
+                gameServiceInstance.createGame(createGameRequest, null));
 
         Assertions.assertEquals("AuthToken and/or Game Name is invalid or empty", exception.getMessage(),
                 "Error should indicate an authToken is needed");
@@ -214,9 +219,9 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Create game with no game name")
-    public void createGameNoName(){
-        userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
+    public void createGameNoName() throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         String authToken = loginResult.authToken()+1;
 
@@ -224,7 +229,7 @@ public class ServiceClassTests {
                 authToken, "Game Name Test");
 
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                gameServiceInstance.createGame(createGameRequest, authToken, authDataDAO, gameDataDAO));
+                gameServiceInstance.createGame(createGameRequest, authToken));
 
         Assertions.assertEquals("AuthToken and/or Game Name is invalid or empty", exception.getMessage(),
                 "Error should indicate auth tokens do not match");
@@ -232,23 +237,22 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Join Game valid inputs")
-    public void joinGameValidInputs(){
-        userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest,
-                userDataDAO, authDataDAO);
+    public void joinGameValidInputs() throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         String authToken = loginResult.authToken();
         RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
                 authToken, "Chess Game #1");
 
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
-                createGameRequest, authToken, authDataDAO, gameDataDAO);
+                createGameRequest, authToken);
 
         RequestResult.JoinGameRequest joinGameRequest = new RequestResult.JoinGameRequest(authToken,
                 "WHITE", createGameResult.gameID());
 
         RequestResult.JoinGameResult joinGameResult = gameServiceInstance.joinGame(
-                joinGameRequest, authToken, authDataDAO, gameDataDAO);
+                joinGameRequest, authToken);
 
         GameData game = gameDataDAO.getGame(joinGameRequest.gameID());
         Assertions.assertNotNull(joinGameResult, "Join game result should not be null");
@@ -258,19 +262,17 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("Join game result invalid inputs")
-    public void joinGameInvalid(){
-        userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest,
-                userDataDAO, authDataDAO);
+    public void joinGameInvalid() throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         RequestResult.RegisterRequest registerRequest2 = new RequestResult.RegisterRequest("username1234", "password123",
                 "email@email.com");
         RequestResult.LoginRequest loginRequest2 = new RequestResult.LoginRequest("username1234",
                 "password123");
 
-        userServiceInstance.registerUser(registerRequest2, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult2 = userServiceInstance.login(loginRequest2,
-                userDataDAO, authDataDAO);
+        userServiceInstance.registerUser(registerRequest2);
+        RequestResult.LoginResult loginResult2 = userServiceInstance.login(loginRequest2);
 
         String authToken2 = loginResult2.authToken();
         String authToken = loginResult.authToken();
@@ -279,21 +281,21 @@ public class ServiceClassTests {
                 authToken, "Chess Game #1");
 
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
-                createGameRequest, authToken, authDataDAO, gameDataDAO);
+                createGameRequest, authToken);
 
 
         RequestResult.JoinGameRequest joinGameRequest1 = new RequestResult.JoinGameRequest(authToken,
                 "WHITE", createGameResult.gameID());
 
         RequestResult.JoinGameResult joinGameResult1 = gameServiceInstance.joinGame(
-                joinGameRequest1, authToken, authDataDAO, gameDataDAO);
+                joinGameRequest1, authToken);
 
         RequestResult.JoinGameRequest joinGameRequest2 = new RequestResult.JoinGameRequest(authToken2,
                 "WHITE", createGameResult.gameID());
 
 
         InvalidInputException exception = assertThrows(InvalidInputException.class, () ->
-                gameServiceInstance.joinGame(joinGameRequest2, authToken2, authDataDAO, gameDataDAO));
+                gameServiceInstance.joinGame(joinGameRequest2, authToken2));
 
         Assertions.assertNotNull(joinGameResult1, "First join game should not be null");
         Assertions.assertEquals("Both users are already taken for this game", exception.getMessage(),
@@ -302,11 +304,10 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("List all games")
-    public void listGamesSuccess(){
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(
-                registerRequest, userDataDAO, authDataDAO);
+    public void listGamesSuccess() throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
         RequestResult.LoginResult loginResult = userServiceInstance.login(
-                loginRequest, userDataDAO, authDataDAO);
+                loginRequest);
 
         String authToken = loginResult.authToken();
 
@@ -316,37 +317,36 @@ public class ServiceClassTests {
                 authToken, "Game Name Test2");
 
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
-                createGameRequest, authToken, authDataDAO, gameDataDAO);
+                createGameRequest, authToken);
         RequestResult.CreateGameResult createGameResult2 = gameServiceInstance.createGame(
-                createGameRequest2, authToken, authDataDAO, gameDataDAO);
+                createGameRequest2, authToken);
 
         RequestResult.JoinGameRequest joinGameRequest1 = new RequestResult.JoinGameRequest(authToken,
                 "WHITE", createGameResult.gameID());
         RequestResult.JoinGameRequest joinGameRequest2 = new RequestResult.JoinGameRequest(authToken,
                 "WHITE", createGameResult2.gameID());
 
-        RequestResult.JoinGameResult joinGameResult = gameServiceInstance.joinGame(
-                joinGameRequest1, authToken, authDataDAO, gameDataDAO);
-        RequestResult.JoinGameResult joinGameResult2 = gameServiceInstance.joinGame(
-                joinGameRequest2, authToken, authDataDAO, gameDataDAO);
+        gameServiceInstance.joinGame(
+                joinGameRequest1, authToken);
+        gameServiceInstance.joinGame(
+                joinGameRequest2, authToken);
 
-        RequestResult.ListGamesResult listGamesResult = gameServiceInstance.listGames(authToken, authDataDAO, gameDataDAO);
+        RequestResult.ListGamesResult listGamesResult = gameServiceInstance.listGames(authToken);
 
         Assertions.assertNotNull(listGamesResult, "Games should be listed");
     }
 
     @Test
     @DisplayName("List games but empty")
-    public void listGamesInvalidAuthToken(){
-        RequestResult.RegisterResult registerResult = userServiceInstance.registerUser(
-                registerRequest, userDataDAO, authDataDAO);
+    public void listGamesInvalidAuthToken() throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
         RequestResult.LoginResult loginResult = userServiceInstance.login(
-                loginRequest, userDataDAO, authDataDAO);
+                loginRequest);
 
         String authToken = loginResult.authToken()+1;
 
         InvalidUsernameException exception = assertThrows(InvalidUsernameException.class, () ->
-                gameServiceInstance.listGames(authToken, authDataDAO, gameDataDAO));
+                gameServiceInstance.listGames(authToken));
 
         Assertions.assertEquals("Username/AuthToken is not valid",
                 exception.getMessage(), "Message should indicate that the username/authToken is invalid");
@@ -354,23 +354,23 @@ public class ServiceClassTests {
 
     @Test
     @DisplayName("ClearGamesSuccessful")
-    public void clearGamesSuccess(){
-        userServiceInstance.registerUser(registerRequest, userDataDAO, authDataDAO);
-        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest, userDataDAO, authDataDAO);
+    public void clearGamesSuccess()throws DataAccessException{
+        userServiceInstance.registerUser(registerRequest);
+        RequestResult.LoginResult loginResult = userServiceInstance.login(loginRequest);
 
         String authToken = loginResult.authToken();
 
         RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
                 authToken, "Game Name Test");
         RequestResult.CreateGameResult createGameResult = gameServiceInstance.createGame(
-                createGameRequest, authToken, authDataDAO, gameDataDAO);
+                createGameRequest, authToken);
 
         RequestResult.JoinGameRequest joinGameRequest = new RequestResult.JoinGameRequest(
                 authToken, "WHITE", createGameResult.gameID());
-        gameServiceInstance.joinGame(joinGameRequest, authToken, authDataDAO, gameDataDAO);
+        gameServiceInstance.joinGame(joinGameRequest, authToken);
 
         RequestResult.ClearDataRequest clearDataRequest = new RequestResult.ClearDataRequest();
-        RequestResult.ClearDataResult clearDataResult = clearServiceInstance.clearData(clearDataRequest, userDataDAO, authDataDAO, gameDataDAO);
+        clearServiceInstance.clearData(clearDataRequest);
 
         Assertions.assertTrue(userDataDAO.getAllUserData().isEmpty(), "User data should be empty");
         Assertions.assertTrue(authDataDAO.getAllAuthData().isEmpty(), "Auth data should be empty");

@@ -20,6 +20,10 @@ public class RegisterHandler {
             String registerRequestJson = request.body();
             registerRequest = serializer.fromJson(registerRequestJson,
                     RequestResult.RegisterRequest.class);
+            if (registerRequest == null){
+                response.status(500);
+                return serializer.toJson(Map.of("message", "Error: Request is null"));
+            }
             registerResult = userService.registerUser(registerRequest);
         }
         catch (DataAccessException e){

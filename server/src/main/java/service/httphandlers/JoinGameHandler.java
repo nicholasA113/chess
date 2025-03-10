@@ -21,6 +21,10 @@ public class JoinGameHandler {
             String authToken = request.headers("authorization");
             joinGameRequest = serializer.fromJson(joinGameHandlerJson,
                     RequestResult.JoinGameRequest.class);
+            if (joinGameRequest == null){
+                response.status(500);
+                return serializer.toJson(Map.of("message", "Error: Request is null"));
+            }
             joinGameResult = gameService.joinGame(joinGameRequest, authToken);
         }
         catch (DataAccessException e){

@@ -21,6 +21,10 @@ public class CreateGameHandler {
             String authToken = request.headers("authorization");
             createGameRequest = serializer.fromJson(
                     createGameRequestJson, RequestResult.CreateGameRequest.class);
+            if (createGameRequest == null){
+                response.status(500);
+                return serializer.toJson(Map.of("message", "Error: Request is null"));
+            }
             createGameResult = gameService.createGame(createGameRequest, authToken);
         }
         catch (DataAccessException e){

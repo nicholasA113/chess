@@ -21,6 +21,10 @@ public class ClearHandler {
             String clearHandlerJson = request.body();
             clearDataRequest = serializer.fromJson(clearHandlerJson,
                     RequestResult.ClearDataRequest.class);
+            if (clearDataRequest == null){
+                response.status(500);
+                return serializer.toJson(Map.of("message", "Error: Request is null"));
+            }
             clearDataResult = clearService.clearData(clearDataRequest);
         }
         catch (DataAccessException e){
@@ -28,6 +32,8 @@ public class ClearHandler {
                 response.status(500);
                 return serializer.toJson(Map.of("message", "Error: not all data was cleared"));
             }
+            response.status(500);
+            return serializer.toJson(Map.of("message", "Error: Error clearing all the data"));
         }
         response.status(200);
         return serializer.toJson(clearDataResult);

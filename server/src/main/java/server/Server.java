@@ -8,8 +8,6 @@ import service.UserService;
 import service.httphandlers.*;
 import spark.*;
 
-import java.util.Map;
-
 public class Server {
 
     UserDataAccess userDataAccess;
@@ -24,22 +22,25 @@ public class Server {
 
     public void setUserDataAccess(UserDataAccess userDataAccess){
         this.userDataAccess = userDataAccess;
-        if (this.authDataAccess != null) {
-            this.userService = new UserService(authDataAccess, userDataAccess);
-        }
+        setUserService();
     }
 
     public void setAuthDataAccess(AuthDataAccess authDataAccess){
         this.authDataAccess = authDataAccess;
-        if (this.userDataAccess != null) {
-            this.userService = new UserService(authDataAccess, userDataAccess);
-        }
+        setUserService();
     }
 
     public void setGameDataAccess(GameDataAccess gameDataAccess){
         this.gameDataAccess = gameDataAccess;
         if (this.authDataAccess != null) {
             this.gameService = new GameService(authDataAccess, gameDataAccess);
+        }
+    }
+
+    public void setUserService(){
+        if (this.userDataAccess != null &&
+                this.gameDataAccess != null && this.userService == null){
+            this.userService = new UserService(authDataAccess, userDataAccess);
         }
     }
 

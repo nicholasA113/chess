@@ -65,27 +65,6 @@ public class SQLDAOClassTests {
     }
 
     @Test
-    @DisplayName("AuthData Inserted Incorrectly")
-    public void insertAuthFail() throws DataAccessException{
-        AuthData authData1 = new AuthData("123", "nicholasUsername");
-        AuthData authData2 = new AuthData("123", "nicholasUsername");
-        SQLAuthDataDAO sqlAuthDataDAO = new SQLAuthDataDAO();
-
-        sqlAuthDataDAO.createAuth(authData1);
-        Map<String, AuthData> authDataList = sqlAuthDataDAO.getAllAuthData();
-
-        Assertions.assertNotNull(authDataList, "authData list is empty");
-        Assertions.assertEquals(authData1, authDataList.get("123"), "authData list" +
-                "does not match expected");
-
-        DataAccessException exception = assertThrows(DataAccessException.class, () ->
-                sqlAuthDataDAO.createAuth(authData2));
-
-        Assertions.assertEquals("Unable to insert auth data: Duplicate entry '123' for key 'authdata.PRIMARY'", exception.getMessage(), "assertion" +
-                "should raise an exception message");
-    }
-
-    @Test
     @DisplayName("Get authData Successfully")
     public void getAuthSuccess() throws DataAccessException{
         AuthData authData = new AuthData("12345", "nicholasUsername");

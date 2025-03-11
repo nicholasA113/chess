@@ -248,9 +248,12 @@ public class SQLDAOClassTests {
         boolean firstUser = false;
         boolean secondUser = false;
         for (UserData user : userData){
-            if (user.username().equals("nickUsername")) firstUser = true;
-            if (user.username().equals("nicholasUsername")) secondUser = true;
-
+            if (user.username().equals("nickUsername")){
+                firstUser = true;
+            }
+            if (user.username().equals("nicholasUsername")){
+                secondUser = true;
+            }
             Assertions.assertNotEquals("passWord", user.password(), "Passwords" +
                     "should not be matching");
         }

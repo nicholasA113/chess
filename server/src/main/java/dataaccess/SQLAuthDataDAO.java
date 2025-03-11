@@ -9,6 +9,11 @@ import java.util.Map;
 
 public class SQLAuthDataDAO implements AuthDataAccess {
 
+    public SQLAuthDataDAO() throws DataAccessException{
+        DatabaseManager databaseManager = new DatabaseManager();
+        databaseManager.configureDatabase();
+    }
+
     public void createAuth(AuthData auth) throws DataAccessException {
         String statement = "INSERT INTO authData (authToken, username) VALUES (?, ?)";
         try (var conn = DatabaseManager.getConnection()) {

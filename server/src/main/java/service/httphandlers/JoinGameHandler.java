@@ -28,10 +28,6 @@ public class JoinGameHandler {
             joinGameResult = gameService.joinGame(joinGameRequest, authToken);
         }
         catch (DataAccessException e){
-            if (e instanceof InvalidUsernameException){
-                response.status(401);
-                return serializer.toJson(Map.of("message", "Error: Invalid username"));
-            }
             if (e instanceof InvalidInputException){
                 response.status(403);
                 return serializer.toJson(Map.of("message", "Error: Usernames are already taken"));
@@ -40,6 +36,8 @@ public class JoinGameHandler {
                 response.status(400);
                 return serializer.toJson(Map.of("message", "Error: invalid playerColor requested"));
             }
+            response.status(401);
+            return serializer.toJson(Map.of("message", "Error: Invalid username"));
         }
         response.status(200);
         return serializer.toJson(joinGameResult);

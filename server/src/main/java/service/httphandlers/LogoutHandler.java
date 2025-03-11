@@ -23,10 +23,8 @@ public class LogoutHandler {
             logoutResult = userService.logout(authToken);
         }
         catch (DataAccessException e){
-            if (e instanceof InvalidInputException){
-                response.status(401);
-                return serializer.toJson(Map.of("message", "Error: AuthToken should not be null"));
-            }
+            response.status(401);
+            return serializer.toJson(Map.of("message", "Error: AuthToken should not be null"));
         }
 
         response.status(200);

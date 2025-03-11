@@ -57,7 +57,7 @@ public class SQLGameDataDAO implements GameDataAccess {
                                 gameName, chessGame);
                     }
                     else{
-                        throw new DataAccessException("Game is not found in the database");
+                        throw new InvalidAccessException("Game is not found in the database");
                     }
                 }
             }

@@ -32,10 +32,8 @@ public class CreateGameHandler {
                 response.status(400);
                 return serializer.toJson(Map.of("message", "Error: Invalid username"));
             }
-            if (e instanceof InvalidInputException){
-                response.status(401);
-                return serializer.toJson(Map.of("message", "Error: AuthToken and/or Game Name is invalid or empty"));
-            }
+            response.status(401);
+            return serializer.toJson(Map.of("message", "Error: AuthToken and/or Game Name is invalid or empty"));
         }
         response.status(200);
         return serializer.toJson(createGameResult);

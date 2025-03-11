@@ -8,11 +8,6 @@ import java.util.ArrayList;
 
 public class SQLUserDataDAO implements UserDataAccess {
 
-    public SQLUserDataDAO() throws DataAccessException{
-        DatabaseManager databaseManager = new DatabaseManager();
-        databaseManager.configureDatabase();
-    }
-
     public void insertUser(UserData user) throws DataAccessException{
         String insertStatement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
         String hashedPassword = BCrypt.hashpw(user.password(), BCrypt.gensalt());

@@ -53,7 +53,10 @@ public class SQLAuthDataDAO implements AuthDataAccess {
         try(var conn = DatabaseManager.getConnection()){
             var preparedStatement = conn.prepareStatement(deleteStatement);
             preparedStatement.setString(1, authToken);
-            preparedStatement.executeUpdate();
+            var result = preparedStatement.executeUpdate();
+            if (result == 0){
+                throw new DataAccessException("AuthToken not found in database to delete");
+            }
         }
         catch (SQLException e){
             throw new DataAccessException("Error deleting auth data: " + e.getMessage());

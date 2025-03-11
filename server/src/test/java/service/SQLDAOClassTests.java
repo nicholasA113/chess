@@ -131,8 +131,21 @@ public class SQLDAOClassTests {
     }
 
     @Test
+    public void deleteAuthNotExists() throws DataAccessException{
+        AuthData authData = new AuthData("authToken123", "nicholasUsername");
+        SQLAuthDataDAO sqlAuthDataDAO = new SQLAuthDataDAO();
+
+        sqlAuthDataDAO.createAuth(authData);
+        DataAccessException exception = assertThrows(DataAccessException.class, () ->
+                sqlAuthDataDAO.deleteAuth(authData.authToken()+1));
+
+        Assertions.assertEquals("AuthToken not found in database to delete", exception.getMessage(),
+                "Exception should raise a message");
+    }
+
+    @Test
     @DisplayName("Getting multiple authData succeeds")
-    public void getMultipleAuthDataPass() throws DataAccessException{
+    public void getMultipleAuthData() throws DataAccessException{
         AuthData authData1 = new AuthData("authToken123", "nicholasUsername");
         AuthData authData2 = new AuthData("12345", "userUserName");
         SQLAuthDataDAO sqlAuthDataDAO = new SQLAuthDataDAO();
@@ -145,6 +158,22 @@ public class SQLDAOClassTests {
         Assertions.assertNotNull(authDataList,"authData should not be null");
         Assertions.assertEquals(2, authDataList.size(), "the expected number of elements" +
                 "are not allotted to");
+    }
+
+    @Test
+    public void getMultipleAuthButNoneExist() throws DataAccessException{
+        AuthData authData1 = new AuthData("authToken123", "nicholasUsername");
+        AuthData authData2 = new AuthData("12345", "userUserName");
+        SQLAuthDataDAO sqlAuthDataDAO = new SQLAuthDataDAO();
+
+        sqlAuthDataDAO.createAuth(authData1);
+        sqlAuthDataDAO.createAuth(authData2);
+        sqlAuthDataDAO.deleteAuth(authData1.authToken());
+        sqlAuthDataDAO.deleteAuth(authData2.authToken());
+
+        Map<String, AuthData> authData = sqlAuthDataDAO.getAllAuthData();
+
+        Assertions.assertTrue(authData.isEmpty(), "authData should be null");
     }
 
     @Test

@@ -18,10 +18,6 @@ public class ClearService {
 
     public ClearDataResult clearData(ClearDataRequest c) throws DataAccessException {
 
-        if (c == null){
-            throw new DataAccessException("There is no data to clear");
-        }
-
         userDataAccess.clearAllUserData();
         authDataAccess.clearAllAuthData();
         gameDataAccess.clearAllGameData();

@@ -225,11 +225,9 @@ public class SQLDAOClassTests {
         sqlUserDataDAO.insertUser(userData1);
         sqlUserDataDAO.insertUser(userData2);
 
-        DataAccessException exception = assertThrows(DataAccessException.class, () ->
-                sqlUserDataDAO.getUser("nicksusername"));
+        UserData user = sqlUserDataDAO.getUser("nicksusername");
 
-        Assertions.assertEquals("Requested user is not in the database", exception.getMessage(),
-                "Assertion should return a message");
+        Assertions.assertNull(user, "User should return null");
     }
 
     @Test

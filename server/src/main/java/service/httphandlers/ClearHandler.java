@@ -21,10 +21,6 @@ public class ClearHandler {
             String clearHandlerJson = request.body();
             clearDataRequest = serializer.fromJson(clearHandlerJson,
                     RequestResult.ClearDataRequest.class);
-            if (clearDataRequest == null){
-                response.status(500);
-                return serializer.toJson(Map.of("message", "Error: Request is null"));
-            }
             clearDataResult = clearService.clearData(clearDataRequest);
         }
         catch (DataAccessException e){

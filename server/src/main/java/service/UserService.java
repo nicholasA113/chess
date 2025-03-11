@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import service.RequestResult.*;
 import dataaccess.InvalidInputException;
 import dataaccess.InvalidUsernameException;
@@ -38,9 +39,19 @@ public class UserService {
         if (user == null){
             throw new InvalidUsernameException("Username is not found or incorrect");
         }
-        if (!user.password().equals(l.password())){
-            throw new InvalidInputException("Password does not match");
+
+        boolean isHashedPassword = user.password().length() == 60;
+        if (isHashedPassword){
+            if (!BCrypt.checkpw(l.password(), user.password())){
+                throw new InvalidInputException("Password does not match");
+            }
         }
+        else{
+            if (!l.password().equals(user.password())){
+                throw new InvalidInputException("Password does not match");
+            }
+        }
+
         String authToken = UUID.randomUUID().toString();
         authDataAccess.createAuth(new AuthData(authToken, l.username()));
         return new LoginResult(l.username(), authToken);

@@ -41,7 +41,7 @@ public class SQLUserDataDAO implements UserDataAccess {
                             result.getString("email"));
                 }
                 else{
-                    throw new DataAccessException("Requested user is not in the database");
+                    return null;
                 }
             }
         }

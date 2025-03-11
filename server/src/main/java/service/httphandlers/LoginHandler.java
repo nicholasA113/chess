@@ -22,7 +22,7 @@ public class LoginHandler {
             String loginRequestJson = request.body();
             loginRequest = serializer.fromJson(loginRequestJson,
                     RequestResult.LoginRequest.class);
-            if (loginRequest == null){
+            if (loginRequest == null || userService == null){
                 response.status(500);
                 return serializer.toJson(Map.of("message", "Error: Request is null"));
             }

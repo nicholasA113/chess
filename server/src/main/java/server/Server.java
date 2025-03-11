@@ -10,6 +10,10 @@ import spark.*;
 
 public class Server {
 
+    SQLUserDataDAO sqlUserDataDAO;
+    SQLAuthDataDAO sqlAuthDataDAO;
+    SQLGameDataDAO sqlGameDataDAO;
+
     UserDataAccess userDataAccess;
     AuthDataAccess authDataAccess;
     GameDataAccess gameDataAccess;
@@ -22,12 +26,10 @@ public class Server {
 
     public void setUserDataAccess(UserDataAccess userDataAccess){
         this.userDataAccess = userDataAccess;
-        setUserService();
     }
 
     public void setAuthDataAccess(AuthDataAccess authDataAccess){
         this.authDataAccess = authDataAccess;
-        setUserService();
     }
 
     public void setGameDataAccess(GameDataAccess gameDataAccess){
@@ -35,11 +37,7 @@ public class Server {
         if (this.authDataAccess != null) {
             this.gameService = new GameService(authDataAccess, gameDataAccess);
         }
-    }
-
-    public void setUserService(){
-        if (this.userDataAccess != null &&
-                this.gameDataAccess != null && this.userService == null){
+        if (this.authDataAccess != null && this.userDataAccess != null){
             this.userService = new UserService(authDataAccess, userDataAccess);
         }
     }
@@ -50,6 +48,21 @@ public class Server {
     }
 
     public int run(int desiredPort) {
+
+        try{
+            sqlUserDataDAO = new SQLUserDataDAO();
+            sqlAuthDataDAO = new SQLAuthDataDAO();
+            sqlGameDataDAO = new SQLGameDataDAO();
+        }
+        catch (Exception e){
+            System.out.println("Error getting sqlUSerDataDAO");
+        }
+
+        setUserDataAccess(sqlUserDataDAO);
+        setAuthDataAccess(sqlAuthDataDAO);
+        setGameDataAccess(sqlGameDataDAO);
+        setClearService(sqlAuthDataDAO, sqlUserDataDAO, sqlGameDataDAO);
+
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
 

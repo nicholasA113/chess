@@ -3,7 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
-import service.RequestResult.*;
+import requestresultrecords.RequestResult.*;
 import dataaccess.InvalidUsernameException;
 
 import java.util.ArrayList;

@@ -1,10 +1,8 @@
 package service.httphandlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDataDAO;
 import dataaccess.DataAccessException;
-import dataaccess.InvalidInputException;
-import service.RequestResult;
+import requestresultrecords.RequestResult;
 import service.UserService;
 import spark.Request;
 import spark.Response;

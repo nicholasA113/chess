@@ -3,7 +3,7 @@ package service.httphandlers;
 import com.google.gson.Gson;
 import dataaccess.*;
 import service.UserService;
-import service.RequestResult;
+import requestresultrecords.RequestResult;
 import spark.Request;
 import spark.Response;
 

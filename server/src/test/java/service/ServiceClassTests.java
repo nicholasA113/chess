@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.GameData;
 import org.junit.jupiter.api.*;
+import requestresultrecords.RequestResult;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

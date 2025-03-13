@@ -1,7 +1,7 @@
 package service;
 
 import dataaccess.*;
-import service.RequestResult.*;
+import requestresultrecords.RequestResult.*;
 
 public class ClearService {
 

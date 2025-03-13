@@ -1,13 +1,11 @@
 package service.httphandlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDataDAO;
 import dataaccess.*;
-import dataaccess.UserDataDAO;
 import service.UserService;
 import spark.Request;
 import spark.Response;
-import service.RequestResult;
+import requestresultrecords.RequestResult;
 
 import java.util.Map;
 

@@ -1,12 +1,9 @@
 package service.httphandlers;
 
 import com.google.gson.Gson;
-import dataaccess.AuthDataDAO;
 import dataaccess.DataAccessException;
-import dataaccess.GameDataDAO;
-import dataaccess.InvalidUsernameException;
 import service.GameService;
-import service.RequestResult;
+import requestresultrecords.RequestResult;
 import spark.Request;
 import spark.Response;
 

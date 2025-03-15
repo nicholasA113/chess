@@ -48,13 +48,25 @@ public class ServerFacade {
                 body, CreateGameResult.class, header);
     }
 
-
+    public void joinGame(String authToken, String playerColor, int id) throws Exception{
+        var path = "/game";
+        Map<String, String> header = Map.of("authorization", authToken);
+        Map<String, String> body = Map.ofEntries(
+                Map.entry("playerColor", playerColor),
+                Map.entry("gameID", String.valueOf(id)));
+        this.makeRequest("PUT", path, body, JoinGameResult.class, header);
+    }
 
     public ListGamesResult listGames(String authToken) throws Exception {
         var path = "/game";
         Map<String, String> header = Map.of("authorization", authToken);
         return this.makeRequest("GET", path, null,
                 ListGamesResult.class, header);
+    }
+
+    public void clearData() throws Exception{
+        var path = "/db";
+        this.makeRequest("DELETE", path, null, ClearDataResult.class, null);
     }
 
     private<T> T makeRequest(String method, String path,

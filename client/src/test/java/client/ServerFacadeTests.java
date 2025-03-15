@@ -6,13 +6,10 @@ import dataaccess.SQLAuthDataDAO;
 import dataaccess.SQLGameDataDAO;
 import dataaccess.SQLUserDataDAO;
 import model.AuthData;
-import model.GameData;
 import org.junit.jupiter.api.*;
 import requestresultrecords.*;
 import server.Server;
 import server.ServerFacade;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -156,6 +153,28 @@ public class ServerFacadeTests {
     public void createGameNoName(){}
 
     @Test
+    public void joinGameSuccess() throws Exception {
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+
+        RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
+                loginResult.authToken(), "myGameName");
+        RequestResult.CreateGameResult createGameResult = facade.createGame(
+                createGameRequest.authToken(), createGameRequest.gameName());
+
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(loginResult.authToken(),
+                "WHITE",
+                createGameResult.gameID()));
+    }
+
+    @Test
+    public void joinGameNoneExist(){}
+
+    @Test
     public void listGamesSuccess() throws Exception{
         RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
                 "nicholasUsername", "password123", "email@email.com");
@@ -169,10 +188,38 @@ public class ServerFacadeTests {
 
         RequestResult.ListGamesRequest listGamesRequest = new RequestResult.ListGamesRequest(
                 loginResult.authToken());
-        RequestResult.ListGamesResult games = facade.listGames(listGamesRequest.authToken());
+        RequestResult.ListGamesResult allGames = facade.listGames(listGamesRequest.authToken());
 
-        Assertions.assertNotNull(games);
-        Assertions.assertEquals(1, games.size());
+        Assertions.assertNotNull(allGames);
+        Assertions.assertEquals(1, allGames.games().size());
     }
 
+    @Test
+    public void listGamesNoneExist(){}
+
+    @Test
+    public void clearDataSuccess() throws Exception {
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+        RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
+                loginResult.authToken(), "myGameName");
+        facade.createGame(createGameRequest.authToken(), createGameRequest.gameName());
+
+        facade.clearData();
+
+        RequestResult.ListGamesRequest listGamesRequest = new RequestResult.ListGamesRequest(
+                loginResult.authToken());
+
+        Exception listGamesException = assertThrows(ResponseException.class, () ->
+                facade.listGames(listGamesRequest.authToken()));
+        Exception exception = assertThrows(ResponseException.class,() ->
+                facade.login(loginRequest));
+
+        Assertions.assertEquals("some error message", listGamesException.getMessage());
+        Assertions.assertEquals("some error message", exception.getMessage());
+    }
 }

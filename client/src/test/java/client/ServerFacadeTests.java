@@ -130,7 +130,24 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void logoutUserTwice(){}
+    public void logoutUserTwice() throws Exception{
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        AuthData authData = facade.register(request);
+
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        facade.login(loginRequest);
+
+        RequestResult.LogoutRequest logoutRequest = new RequestResult.LogoutRequest(
+                authData.authToken());
+        facade.logout(logoutRequest.authToken());
+
+        Exception exception = assertThrows(ResponseException.class, () ->
+                facade.logout(logoutRequest.authToken()));
+
+        Assertions.assertEquals("some error message", exception.getMessage());
+    }
 
     @Test
     public void createGameSuccess() throws Exception {
@@ -150,7 +167,22 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void createGameNoName(){}
+    public void createGameNoName() throws Exception {
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+
+        RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
+                loginResult.authToken(), null);
+
+        Exception exception = assertThrows(ResponseException.class, () ->
+                facade.createGame(createGameRequest.authToken(), createGameRequest.gameName()));
+
+        Assertions.assertEquals("some error message", exception.getMessage());
+    }
 
     @Test
     public void joinGameSuccess() throws Exception {
@@ -172,7 +204,19 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void joinGameNoneExist(){}
+    public void joinGameNoneExist() throws Exception {
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+
+        Exception exception = assertThrows(ResponseException.class, () ->
+                facade.joinGame(loginResult.authToken(), "BLACK", 1));
+
+        Assertions.assertEquals("Some error message", exception.getMessage());
+    }
 
     @Test
     public void listGamesSuccess() throws Exception{
@@ -195,7 +239,22 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void listGamesNoneExist(){}
+    public void listGamesNoneExist() throws Exception {
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+
+        RequestResult.ListGamesRequest listGamesRequest = new RequestResult.ListGamesRequest(
+                loginResult.authToken());
+        String authToken = listGamesRequest.authToken();
+        Exception exception = assertThrows(ResponseException.class, () ->
+                facade.listGames(authToken+1));
+
+        Assertions.assertEquals("some error message", exception.getMessage());
+    }
 
     @Test
     public void clearDataSuccess() throws Exception {

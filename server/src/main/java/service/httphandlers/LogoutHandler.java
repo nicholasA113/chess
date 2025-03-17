@@ -22,9 +22,8 @@ public class LogoutHandler {
         }
         catch (DataAccessException e){
             response.status(401);
-            return serializer.toJson(Map.of("message", "Error: AuthToken should not be null"));
+            return serializer.toJson(Map.of("message", "Error: AuthToken is invalid"));
         }
-
         response.status(200);
         return serializer.toJson(logoutResult);
     }

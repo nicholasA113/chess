@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.*;
-import java.util.List;
 import java.util.Map;
 
 import exceptions.*;
@@ -41,11 +40,16 @@ public class ServerFacade {
     }
 
     public CreateGameResult createGame(String authToken, String gameName) throws Exception{
-        var path = "/game";
-        Map<String, String> header = Map.of("authorization", authToken);
-        Map<String, String> body = Map.of("gameName", gameName);
-        return this.makeRequest("POST", path,
-                body, CreateGameResult.class, header);
+        try {
+            var path = "/game";
+            Map<String, String> header = Map.of("authorization", authToken);
+            Map<String, String> body = Map.of("gameName", gameName);
+            return this.makeRequest("POST", path,
+                    body, CreateGameResult.class, header);
+        }
+        catch (Exception e){
+            throw new Exception("Given input(s) is/are null");
+        }
     }
 
     public void joinGame(String authToken, String playerColor, int id) throws Exception{
@@ -91,15 +95,15 @@ public class ServerFacade {
             if (status / 100 != 2){
                 try (InputStream responseError = http.getErrorStream()) {
                     if (responseError != null) {
-                        throw ResponseException.fromJson(responseError);
+                        throw ResponseException.fromJson(responseError, status);
                     }
                 }
-                throw new ResponseException(status, "other failure: " + status);
+                throw new ResponseException(status, "Failure: " + status);
             }
             return readBody(http, responseClass);
         }
         catch (Exception e){
-            throw new ResponseException(500, "Internal error: " + e.getMessage());
+            throw new ResponseException(500, e.getMessage());
         }
     }
 

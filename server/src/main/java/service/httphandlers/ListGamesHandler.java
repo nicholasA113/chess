@@ -21,7 +21,7 @@ public class ListGamesHandler {
         }
         catch (DataAccessException e){
             response.status(401);
-            return serializer.toJson(Map.of("message", "Error: Invalid username or authToken"));
+            return serializer.toJson(Map.of("message", "Error: No games exist with given authToken"));
         }
         response.status(200);
         return serializer.toJson(listGamesResult);

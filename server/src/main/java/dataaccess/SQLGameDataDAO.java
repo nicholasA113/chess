@@ -19,7 +19,6 @@ public class SQLGameDataDAO implements GameDataAccess {
                 throw new DataAccessException("gameName already exists in database");
             }
         }
-
         String insertStatement = "INSERT INTO gameData (whiteusername, " +
                 "blackusername, gameName, chessGame) VALUES (?, ?, ?, ?)";
         String chessGameJSON = serializer.toJson(new ChessGame());
@@ -57,7 +56,7 @@ public class SQLGameDataDAO implements GameDataAccess {
                                 gameName, chessGame);
                     }
                     else{
-                        throw new InvalidAccessException("Game is not found in the database");
+                        return null;
                     }
                 }
             }

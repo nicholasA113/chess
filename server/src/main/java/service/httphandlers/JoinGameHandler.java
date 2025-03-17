@@ -34,7 +34,7 @@ public class JoinGameHandler {
             }
             if (e instanceof InvalidAccessException){
                 response.status(400);
-                return serializer.toJson(Map.of("message", "Error: invalid playerColor requested"));
+                return serializer.toJson(Map.of("message", "Error: invalid data was passed in"));
             }
             response.status(401);
             return serializer.toJson(Map.of("message", "Error: Invalid username"));

@@ -363,14 +363,12 @@ public class SQLDAOClassTests {
 
     @Test
     @DisplayName("Get game fails")
-    public void getGameFails(){
+    public void getGameFails() throws DataAccessException {
         SQLGameDataDAO sqlGameDataDAO = new SQLGameDataDAO();
 
-        DataAccessException exception = assertThrows(DataAccessException.class, () ->
-                sqlGameDataDAO.getGame(34));
+        GameData gameData = sqlGameDataDAO.getGame(34);
 
-        Assertions.assertEquals("Game is not found in the database", exception.getMessage(),
-                "Assertion should throw a message");
+        Assertions.assertNull(gameData, "gameData should be null");
     }
 
     @Test

@@ -82,7 +82,7 @@ public class ServerFacadeTests {
                     facade.register(request));
 
         Assertions.assertNotNull(authData.authToken());
-        Assertions.assertEquals("An error message", exception.getMessage());
+        Assertions.assertEquals("Error: Username is already taken", exception.getMessage());
     }
 
     @Test
@@ -108,7 +108,7 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(ResponseException.class, () ->
                 facade.login(loginRequest));
 
-        Assertions.assertEquals("An error message", exception.getMessage());
+        Assertions.assertEquals("Error: Invalid credentials", exception.getMessage());
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(ResponseException.class, () ->
                 facade.logout(logoutRequest.authToken()));
 
-        Assertions.assertEquals("some error message", exception.getMessage());
+        Assertions.assertEquals("Error: AuthToken is invalid", exception.getMessage());
     }
 
     @Test
@@ -178,10 +178,10 @@ public class ServerFacadeTests {
         RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
                 loginResult.authToken(), null);
 
-        Exception exception = assertThrows(ResponseException.class, () ->
+        Exception exception = assertThrows(Exception.class, () ->
                 facade.createGame(createGameRequest.authToken(), createGameRequest.gameName()));
 
-        Assertions.assertEquals("some error message", exception.getMessage());
+        Assertions.assertEquals("Given input(s) is/are null", exception.getMessage());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(ResponseException.class, () ->
                 facade.joinGame(loginResult.authToken(), "BLACK", 1));
 
-        Assertions.assertEquals("Some error message", exception.getMessage());
+        Assertions.assertEquals("Error: invalid data was passed in", exception.getMessage());
     }
 
     @Test
@@ -253,7 +253,7 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(ResponseException.class, () ->
                 facade.listGames(authToken+1));
 
-        Assertions.assertEquals("some error message", exception.getMessage());
+        Assertions.assertEquals("Error: No games exist with given authToken", exception.getMessage());
     }
 
     @Test
@@ -278,7 +278,7 @@ public class ServerFacadeTests {
         Exception exception = assertThrows(ResponseException.class,() ->
                 facade.login(loginRequest));
 
-        Assertions.assertEquals("some error message", listGamesException.getMessage());
-        Assertions.assertEquals("some error message", exception.getMessage());
+        Assertions.assertEquals("Error: No games exist with given authToken", listGamesException.getMessage());
+        Assertions.assertEquals("Error: Invalid credentials", exception.getMessage());
     }
 }

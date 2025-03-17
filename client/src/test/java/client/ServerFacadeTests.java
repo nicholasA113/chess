@@ -15,12 +15,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServerFacadeTests {
 
-    private static Server server;
-    private static ServerFacade facade;
-
     private SQLAuthDataDAO authDataSQL;
     private SQLUserDataDAO userDataSQL;
     private SQLGameDataDAO gameDataSQL;
+
+    private static Server server;
+    private static ServerFacade facade;
 
     @BeforeAll
     public static void init() {

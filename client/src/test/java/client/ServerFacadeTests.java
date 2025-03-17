@@ -185,6 +185,23 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void createGameInvalidAuthToken() throws Exception{
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        facade.register(request);
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUsername", "password123");
+        RequestResult.LoginResult loginResult = facade.login(loginRequest);
+
+        RequestResult.CreateGameRequest createGameRequest = new RequestResult.CreateGameRequest(
+                loginResult.authToken()+1, "myGameName");
+
+        Exception exception = assertThrows(Exception.class, () ->
+                facade.createGame(createGameRequest.authToken(), createGameRequest.gameName()));
+        Assertions.assertEquals("Given input(s) is/are null", exception.getMessage());
+    }
+
+    @Test
     public void joinGameSuccess() throws Exception {
         RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
                 "nicholasUsername", "password123", "email@email.com");

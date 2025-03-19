@@ -6,6 +6,7 @@ import model.GameData;
 import requestresultrecords.RequestResult;
 import server.ServerFacade;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,16 +15,17 @@ public class ChessClient {
 
     private boolean loggedIn;
     private boolean registered;
-    ServerFacade server;
+    ServerFacade serverFacade;
     AuthData data;
     Integer mapIndex = 1;
-    Map<Integer, Integer> gameMapIndexToID;
+    Map<Integer, GameData> gameMapIndexToID;
 
 
     public ChessClient(int port){
-        this.server = new ServerFacade(port);
+        this.serverFacade = new ServerFacade(port);
         registered = false;
         loggedIn = false;
+        this.gameMapIndexToID = new HashMap<>();
     }
 
 
@@ -37,7 +39,7 @@ public class ChessClient {
             case "logout" -> logout();
             case "create" -> createGame(parameters);
             case "list" -> listGames();
-            case "join" -> joinGame();
+            case "join" -> joinGame(parameters);
             /**case "observe" -> observeGame();**/
 
             case "quit" -> "quit";
@@ -51,7 +53,7 @@ public class ChessClient {
             RequestResult.RegisterRequest registerRequest = new RequestResult.RegisterRequest(
                     parameters[0], parameters[1], parameters[2]);
             try{
-                data = server.register(registerRequest);
+                data = serverFacade.register(registerRequest);
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error registering user - " + e.getMessage());
@@ -68,7 +70,7 @@ public class ChessClient {
             RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
                     parameters[0], parameters[1]);
             try{
-                server.login(loginRequest);
+                serverFacade.login(loginRequest);
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error logging in user - " + e.getMessage());
@@ -83,7 +85,7 @@ public class ChessClient {
     public String logout() throws ResponseException{
         if (loggedIn){
             try{
-                server.logout(data.authToken());
+                serverFacade.logout(data.authToken());
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error logging out - " + e.getMessage());
@@ -98,8 +100,7 @@ public class ChessClient {
     public String createGame(String ... parameters) throws ResponseException{
         if (loggedIn && parameters.length == 1){
             try{
-                RequestResult.CreateGameResult createGameResult = server.createGame(data.authToken(), parameters[0]);
-                gameMapIndexToID.put(mapIndex++, createGameResult.gameID());
+                serverFacade.createGame(data.authToken(), parameters[0]);
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error creating game - " + e.getMessage());
@@ -111,10 +112,22 @@ public class ChessClient {
 
 
     public String listGames() throws ResponseException{
+        String gameListString = "";
         if (loggedIn){
             try{
-                RequestResult.ListGamesResult listGamesResult = server.listGames(data.authToken());
+                RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
+                        data.authToken());
                 List<GameData> games = listGamesResult.games();
+                for (GameData game : games){
+                    gameMapIndexToID.put(mapIndex++, game);
+                }
+                for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
+                    GameData gameData = game.getValue();
+                    gameListString += String.format("%d) %s [White: %s|Black: %s]\n",
+                            game.getKey(), gameData.gameName(),
+                            gameData.whiteUsername(), gameData.blackUsername());
+                }
+                return gameListString;
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error listing games - " + e.getMessage());
@@ -125,9 +138,17 @@ public class ChessClient {
 
 
     public String joinGame(String ... parameters) throws ResponseException {
-        if (loggedIn && parameters.length == 3){
+        if (loggedIn && parameters.length == 2){
             try{
-                server.joinGame(data.authToken(), parameters[1], gameMapIndexToID.get(parameters[2]));
+                int gameID = 0;
+                for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
+                    GameData gameData = game.getValue();
+                    if (Integer.parseInt(parameters[0]) == game.getKey()){
+                        gameID = gameData.gameID();
+                    }
+                }
+                serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
+                return "Successfully joined game";
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error joining game - " + e.getMessage());

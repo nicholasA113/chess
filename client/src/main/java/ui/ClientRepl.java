@@ -11,8 +11,7 @@ public class ClientRepl {
     }
 
     public void run() throws Exception {
-        System.out.println("Welcome to the chess server! Sign in to start.");
-        System.out.println("\nHere are options to get started\n");
+        System.out.println("\nWelcome to the chess server! Register or sign in to start.\n");
         System.out.print(chessClient.help());
 
         Scanner scanner = new Scanner(System.in);

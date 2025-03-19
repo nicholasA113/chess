@@ -2,17 +2,22 @@ package ui;
 
 import exceptions.ResponseException;
 import model.AuthData;
+import model.GameData;
 import requestresultrecords.RequestResult;
 import server.ServerFacade;
-
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class ChessClient {
+
 
     private boolean loggedIn;
     private boolean registered;
     ServerFacade server;
     AuthData data;
+    Integer mapIndex = 1;
+    Map<Integer, Integer> gameMapIndexToID;
 
 
     public ChessClient(int port){
@@ -31,9 +36,9 @@ public class ChessClient {
             case "login" -> login(parameters);
             case "logout" -> logout();
             case "create" -> createGame(parameters);
-            case "list" -> list();
-            case "join" -> join();
-            case "observe" -> observe();
+            case "list" -> listGames();
+            case "join" -> joinGame();
+            /**case "observe" -> observeGame();**/
 
             case "quit" -> "quit";
             default -> help();
@@ -93,7 +98,8 @@ public class ChessClient {
     public String createGame(String ... parameters) throws ResponseException{
         if (loggedIn && parameters.length == 1){
             try{
-                server.createGame(data.authToken(), parameters[0]);
+                RequestResult.CreateGameResult createGameResult = server.createGame(data.authToken(), parameters[0]);
+                gameMapIndexToID.put(mapIndex++, createGameResult.gameID());
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error creating game - " + e.getMessage());
@@ -102,6 +108,38 @@ public class ChessClient {
         }
         throw new ResponseException(400, "Error: Not logged in or too many/not enough parameters given");
     }
+
+
+    public String listGames() throws ResponseException{
+        if (loggedIn){
+            try{
+                RequestResult.ListGamesResult listGamesResult = server.listGames(data.authToken());
+                List<GameData> games = listGamesResult.games();
+            }
+            catch (Exception e){
+                throw new ResponseException(400, "Error listing games - " + e.getMessage());
+            }
+        }
+        throw new ResponseException(400, "Error: Not logged in");
+    }
+
+
+    public String joinGame(String ... parameters) throws ResponseException {
+        if (loggedIn && parameters.length == 3){
+            try{
+                server.joinGame(data.authToken(), parameters[1], gameMapIndexToID.get(parameters[2]));
+            }
+            catch (Exception e){
+                throw new ResponseException(400, "Error joining game - " + e.getMessage());
+            }
+        }
+        throw new ResponseException(400, "Error: Not logged in");
+    }
+
+
+    /**public String observeGame(String ... parameters) throws ResponseException{
+
+    }**/
 
 
     public String help(){

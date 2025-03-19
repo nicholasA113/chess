@@ -52,7 +52,7 @@ public class ServerFacade {
         }
     }
 
-    public void joinGame(String authToken, String playerColor, int id) throws Exception{
+    public void joinGame(String authToken, String playerColor, Integer id) throws Exception{
         var path = "/game";
         Map<String, String> header = Map.of("authorization", authToken);
         Map<String, String> body = Map.ofEntries(

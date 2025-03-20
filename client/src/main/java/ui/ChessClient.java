@@ -59,7 +59,7 @@ public class ChessClient {
                 data = serverFacade.register(registerRequest);
             }
             catch (Exception e){
-                throw new ResponseException(400, "Error registering user - " + e.getMessage());
+                return "Username is already taken";
             }
             registered = true;
             return String.format("Successfully registered as %s.", parameters[0]);

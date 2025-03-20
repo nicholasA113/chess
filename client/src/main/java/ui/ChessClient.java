@@ -9,16 +9,19 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import ui.DrawChessBoard.*;
 
 public class ChessClient {
 
 
     private boolean loggedIn;
+    private boolean loggedOut;
     private boolean registered;
     ServerFacade serverFacade;
     AuthData data;
     Integer mapIndex = 1;
     Map<Integer, GameData> gameMapIndexToID;
+    DrawChessBoard drawChessBoard = new DrawChessBoard();
 
 
     public ChessClient(int port){
@@ -61,7 +64,7 @@ public class ChessClient {
             registered = true;
             return String.format("Successfully registered as %s.", parameters[0]);
         }
-        throw new ResponseException(400, "Error: Not enough parameters to register user");
+        return "Not enough information given to register user";
     }
 
 
@@ -78,7 +81,7 @@ public class ChessClient {
             loggedIn = true;
             return String.format("Successfully logged in as %s.", parameters[0]);
         }
-        throw new ResponseException(400, "Error: Not enough/Too many parameters to login");
+        return "You are not registered or did not give enough information to login";
     }
 
 
@@ -91,9 +94,10 @@ public class ChessClient {
                 throw new ResponseException(400, "Error logging out - " + e.getMessage());
             }
             loggedIn = false;
+            loggedOut = true;
             return String.format("Logged out as %s", data.username());
         }
-        throw new ResponseException(400, "Error: You need to login before logging out");
+        return "You need to login before being able to logout";
     }
 
 
@@ -107,7 +111,7 @@ public class ChessClient {
             }
             return "Successfully created game";
         }
-        throw new ResponseException(400, "Error: Not logged in or too many/not enough parameters given");
+        return "You are not logged in or did not give the correct amount of information";
     }
 
 
@@ -118,8 +122,11 @@ public class ChessClient {
                 RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
                         data.authToken());
                 List<GameData> games = listGamesResult.games();
-                for (GameData game : games){
-                    gameMapIndexToID.put(mapIndex++, game);
+                for (int i=1; i<games.size()+1; i++){
+                    for (GameData game : games)
+                        if (!gameMapIndexToID.containsKey(i) &&
+                                !gameMapIndexToID.containsValue(game))
+                            gameMapIndexToID.put(mapIndex++, game);
                 }
                 for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
                     GameData gameData = game.getValue();
@@ -133,7 +140,7 @@ public class ChessClient {
                 throw new ResponseException(400, "Error listing games - " + e.getMessage());
             }
         }
-        throw new ResponseException(400, "Error: Not logged in");
+        return "You are not logged in";
     }
 
 
@@ -148,13 +155,14 @@ public class ChessClient {
                     }
                 }
                 serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
-                return "Successfully joined game";
+                drawChessBoard.drawBoard();
+                return "Successfully joined the game";
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error joining game - " + e.getMessage());
             }
         }
-        throw new ResponseException(400, "Error: Not logged in");
+        return "You are not logged in or did not give enough information to join the game";
     }
 
 
@@ -163,24 +171,32 @@ public class ChessClient {
     }**/
 
 
-    public String help(){
-        if (registered){
+    public String help() {
+        if (loggedOut) {
             return """
-               help: lists available commands
-               quit: exits the program
-               login <USERNAME> <PASSWORD>: login to play chess
-               logout: logs you out of the Chess Server
-               create <GAME NAME>: creates a game
-               list: lists all available games
-               join <GAME ID> <[WHITE|BLACK]>: join a game as a requested color
-               observe <GAME ID>: watch given game
-               """;
+                    help: lists available commands
+                    quit: exits the program
+                    register <USERNAME> <PASSWORD> <EMAIL>: create an account
+                    login <USERNAME> <PASSWORD>: login to play chess
+                    """;
+        }if (registered || loggedIn)
+            return """
+                    help: lists available commands
+                    quit: exits the program
+                    login <USERNAME> <PASSWORD>: login to play chess
+                    logout: logs you out of the Chess Server
+                    create <GAME NAME>: creates a game
+                    list: lists all available games
+                    join <GAME ID> <[WHITE|BLACK]>: join a game as a requested color
+                    observe <GAME ID>: watch given game
+                    """;
+        else {
+            return """
+                    help: lists available commands
+                    quit: exits the program
+                    register <USERNAME> <PASSWORD> <EMAIL>: create an account
+                    login <USERNAME> <PASSWORD>: login to play chess
+                    """;
         }
-        return """
-               help: lists available commands
-               quit: exits the program
-               register <USERNAME> <PASSWORD> <EMAIL>: create an account
-               login <USERNAME> <PASSWORD>: login to play chess
-               """;
     }
 }

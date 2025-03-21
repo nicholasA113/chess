@@ -58,6 +58,7 @@ public class ChessClient {
             catch (Exception e){
                 return "Username is already taken";
             }
+            loggedOut = false;
             registered = true;
             return String.format("Successfully registered as %s.", parameters[0]);
         }
@@ -146,22 +147,51 @@ public class ChessClient {
     }
 
 
-    public String joinGame(String ... parameters) throws ResponseException {
+    public String joinGame(String ... parameters){
         if (loggedIn && parameters.length == 2){
             try{
                 int gameID = 0;
+                String whiteUsername = "";
+                String blackUsername = "";
+                RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
+                        data.authToken());
+                List<GameData> games = listGamesResult.games();
+                if (games.isEmpty()){
+                    return "There are no games to join.";
+                }
+                for (int i=1; i<games.size()+1; i++){
+                    for (GameData game : games)
+                        if (!gameMapIndexToID.containsKey(i) &&
+                                !gameMapIndexToID.containsValue(game))
+                            gameMapIndexToID.put(mapIndex++, game);
+                }
                 for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
                     GameData gameData = game.getValue();
                     if (Integer.parseInt(parameters[0]) == game.getKey()){
                         gameID = gameData.gameID();
+                        whiteUsername = gameData.whiteUsername();
+                        blackUsername = gameData.blackUsername();
                     }
                 }
-                serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
-                DrawChessBoard.main(new String []{});
+                if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
+                    DrawChessBoard.main(new String []{});
+                }
+                else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
+                    DrawFlippedChessBoard.main(new String []{});
+                }
+                else{
+                    serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
+                    if (parameters[1].equalsIgnoreCase("WHITE")){
+                        DrawChessBoard.main(new String []{});
+                    }
+                    else if (parameters[1].equalsIgnoreCase("BLACK")){
+                        DrawFlippedChessBoard.main(new String []{});
+                    }
+                }
                 return "Successfully joined the game";
             }
             catch (Exception e){
-                throw new ResponseException(400, "Error joining game - " + e.getMessage());
+                return "Player color is already taken";
             }
         }
         return "You are not logged in or did not give enough information to join the game";
@@ -184,7 +214,7 @@ public class ChessClient {
                     register <USERNAME> <PASSWORD> <EMAIL>: create an account
                     login <USERNAME> <PASSWORD>: login to play chess
                     """;
-        }if (registered || loggedIn)
+        }else if (registered || loggedIn)
             return """
                     help: lists available commands
                     quit: exits the program

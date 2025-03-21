@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import ui.DrawChessBoard.*;
 
 public class ChessClient {
 
@@ -21,7 +20,6 @@ public class ChessClient {
     AuthData data;
     Integer mapIndex = 1;
     Map<Integer, GameData> gameMapIndexToID;
-    DrawChessBoard drawChessBoard = new DrawChessBoard();
 
 
     public ChessClient(int port){
@@ -43,8 +41,7 @@ public class ChessClient {
             case "create" -> createGame(parameters);
             case "list" -> listGames();
             case "join" -> joinGame(parameters);
-            /**case "observe" -> observeGame();**/
-
+            case "observe" -> observeGame(parameters);
             case "quit" -> "quit";
             default -> help();
         };
@@ -69,15 +66,17 @@ public class ChessClient {
 
 
     public String login(String ... parameters) throws ResponseException {
-        if (registered && parameters.length == 2){
+        if (parameters.length == 2){
             RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
                     parameters[0], parameters[1]);
             try{
-                serverFacade.login(loginRequest);
+                RequestResult.LoginResult loginResult = serverFacade.login(loginRequest);
+                data = new AuthData(loginResult.authToken(), loginResult.username());
             }
             catch (Exception e){
-                throw new ResponseException(400, "Error logging in user - " + e.getMessage());
+                return "Invalid username or password";
             }
+            loggedOut = false;
             loggedIn = true;
             return String.format("Successfully logged in as %s.", parameters[0]);
         }
@@ -122,6 +121,9 @@ public class ChessClient {
                 RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
                         data.authToken());
                 List<GameData> games = listGamesResult.games();
+                if (games.isEmpty()){
+                    return "There are no games.";
+                }
                 for (int i=1; i<games.size()+1; i++){
                     for (GameData game : games)
                         if (!gameMapIndexToID.containsKey(i) &&
@@ -155,7 +157,7 @@ public class ChessClient {
                     }
                 }
                 serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
-                drawChessBoard.drawBoard();
+                DrawChessBoard.main(new String []{});
                 return "Successfully joined the game";
             }
             catch (Exception e){
@@ -166,9 +168,12 @@ public class ChessClient {
     }
 
 
-    /**public String observeGame(String ... parameters) throws ResponseException{
-
-    }**/
+    public String observeGame(String ... parameters){
+        if (loggedIn && parameters.length == 1){
+            DrawChessBoard.main(new String []{});
+        }
+        return "Observing chess game";
+    }
 
 
     public String help() {

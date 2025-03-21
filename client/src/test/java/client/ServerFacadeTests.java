@@ -112,6 +112,20 @@ public class ServerFacadeTests {
     }
 
     @Test
+    public void loginRegisteredUserTypo() throws Exception{
+        RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
+                "nicholasUsername", "password123", "email@email.com");
+        AuthData authData = facade.register(request);
+
+        RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
+                "nicholasUSername", "password123");
+        Exception exception = assertThrows(ResponseException.class, () ->
+                facade.login(loginRequest));
+
+        Assertions.assertEquals("Error: Invalid credentials", exception.getMessage());
+    }
+
+    @Test
     public void logoutSuccess() throws Exception {
         RequestResult.RegisterRequest request = new RequestResult.RegisterRequest(
                 "nicholasUsername", "password123", "email@email.com");

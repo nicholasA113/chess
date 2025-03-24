@@ -119,17 +119,9 @@ public class ChessClient {
         String gameListString = "";
         if (loggedIn){
             try{
-                RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
-                        data.authToken());
-                List<GameData> games = listGamesResult.games();
+                List<GameData> games = getUpdateGames();
                 if (games.isEmpty()){
                     return "There are no games.";
-                }
-                for (int i=1; i<games.size()+1; i++){
-                    for (GameData game : games)
-                        if (!gameMapIndexToID.containsKey(i) &&
-                                !gameMapIndexToID.containsValue(game))
-                            gameMapIndexToID.put(mapIndex++, game);
                 }
                 for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
                     GameData gameData = game.getValue();
@@ -153,18 +145,7 @@ public class ChessClient {
                 int gameID = 0;
                 String whiteUsername = "";
                 String blackUsername = "";
-                RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
-                        data.authToken());
-                List<GameData> games = listGamesResult.games();
-                if (games.isEmpty()){
-                    return "There are no games to join.";
-                }
-                for (int i=1; i<games.size()+1; i++){
-                    for (GameData game : games)
-                        if (!gameMapIndexToID.containsKey(i) &&
-                                !gameMapIndexToID.containsValue(game))
-                            gameMapIndexToID.put(mapIndex++, game);
-                }
+                getUpdateGames();
                 for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
                     GameData gameData = game.getValue();
                     if (Integer.parseInt(parameters[0]) == game.getKey()){
@@ -233,5 +214,18 @@ public class ChessClient {
                     login <USERNAME> <PASSWORD>: login to play chess
                     """;
         }
+    }
+
+    private List<GameData> getUpdateGames() throws Exception {
+        RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
+                data.authToken());
+        List<GameData> games = listGamesResult.games();
+        for (int i=1; i<games.size()+1; i++){
+            for (GameData game : games)
+                if (!gameMapIndexToID.containsKey(i) &&
+                        !gameMapIndexToID.containsValue(game))
+                    gameMapIndexToID.put(mapIndex++, game);
+        }
+        return games;
     }
 }

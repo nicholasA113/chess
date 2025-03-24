@@ -12,7 +12,7 @@ public class DrawFlippedChessBoard {
     private static StringBuilder board = new StringBuilder();
 
     public static void main(String[] args) {
-        DrawChessBoard flippedBoard = new DrawChessBoard();
+        DrawFlippedChessBoard flippedBoard = new DrawFlippedChessBoard();
         flippedBoard.drawBoard();
         System.out.print(flippedBoard.printBoard());
     }
@@ -98,10 +98,10 @@ public class DrawFlippedChessBoard {
                 board.append(WHITE_BISHOP);
             }
             else if (j==4){
-                board.append(WHITE_KING);
+                board.append(WHITE_QUEEN);
             }
             else if (j==5){
-                board.append(WHITE_QUEEN);
+                board.append(WHITE_KING);
             }
         }
         else if (i == 2){

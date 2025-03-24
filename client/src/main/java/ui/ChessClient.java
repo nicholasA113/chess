@@ -209,7 +209,7 @@ public class ChessClient {
                     register <USERNAME> <PASSWORD> <EMAIL>: create an account
                     login <USERNAME> <PASSWORD>: login to play chess
                     """;
-        }else if (registered || loggedIn) {
+        }else if (registered || loggedIn){
             return """
                     help: lists available commands
                     quit: exits the program
@@ -220,7 +220,7 @@ public class ChessClient {
                     join <GAME ID> <[WHITE|BLACK]>: join a game as a requested color
                     observe <GAME ID>: watch given game
                     """;
-        }
+
         else {
             return """
                     help: lists available commands

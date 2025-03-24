@@ -18,6 +18,7 @@ public abstract class DrawChessBoard {
 
     public abstract void addNumbersLetters(PrintStream out, int i, int j);
     public abstract void addPieces(PrintStream out, int i, int j);
+    public abstract void printPieces(PrintStream out, int j, String textColor);
 
     public void drawBoard(PrintStream out){
         for (int i = 0; i< BOARD_SIZE; i++){

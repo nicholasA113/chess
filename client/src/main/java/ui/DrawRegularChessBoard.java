@@ -42,15 +42,7 @@ public class DrawRegularChessBoard extends DrawChessBoard{
 
     public void addPieces(PrintStream out, int i, int j){
         if (i == 1){
-            out.print(SET_TEXT_BOLD);
-            out.print(SET_TEXT_COLOR_BLUE);
-            switch (j){
-                case (1), (8) -> out.print(" R ");
-                case (2), (7) -> out.print(" N ");
-                case (3), (6) -> out.print(" B ");
-                case (4) -> out.print(" Q ");
-                case (5) -> out.print(" K ");
-            }
+            printPieces(out, j, SET_TEXT_COLOR_BLUE);
             out.print(RESET_TEXT_BOLD_FAINT);
             out.print(RESET_TEXT_COLOR);
         }
@@ -71,17 +63,21 @@ public class DrawRegularChessBoard extends DrawChessBoard{
             out.print(RESET_TEXT_BOLD_FAINT);
         }
         else if (i == 8){
-            out.print(SET_TEXT_BOLD);
-            out.print(SET_TEXT_COLOR_RED);
-            switch (j){
-                case (1), (8) -> out.print(" R ");
-                case (2), (7) -> out.print(" N ");
-                case (3), (6) -> out.print(" B ");
-                case (4) -> out.print(" Q ");
-                case (5) -> out.print(" K ");
-            }
+            printPieces(out, j, SET_TEXT_COLOR_RED);
         }
         out.print(RESET_TEXT_BOLD_FAINT);
         out.print(RESET_TEXT_COLOR);
+    }
+
+    public void printPieces(PrintStream out, int j, String textColor) {
+        out.print(SET_TEXT_BOLD);
+        out.print(textColor);
+        switch (j){
+            case (1), (8) -> out.print(" R ");
+            case (2), (7) -> out.print(" N ");
+            case (3), (6) -> out.print(" B ");
+            case (4) -> out.print(" Q ");
+            case (5) -> out.print(" K ");
+        }
     }
 }

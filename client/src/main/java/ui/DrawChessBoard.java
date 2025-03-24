@@ -9,127 +9,120 @@ public class DrawChessBoard {
 
     //ChessBoard Dimensions
     private static final int BOARD_SIZE = 10;
-    private static StringBuilder board = new StringBuilder();
 
     public static void main(String[] args) {
         DrawChessBoard chessBoard = new DrawChessBoard();
-        chessBoard.drawBoard();
-        System.out.print(chessBoard.printBoard());
+        PrintStream out = new PrintStream(System.out, true, StandardCharsets.UTF_8);;
+        chessBoard.drawBoard(out);
     }
 
-    public String printBoard(){
-        return board.toString();
-    }
-
-    public void drawBoard(){
-        board.setLength(0);
+    public void drawBoard(PrintStream out){
         for (int i = 0; i< BOARD_SIZE; i++){
             for (int j = 0; j< BOARD_SIZE; j++){
                 if (i==0 || i== BOARD_SIZE -1 || j==0 || j== BOARD_SIZE -1) {
-                    addNumbersLetters(i, j);
-                }
-                else if (i==1 || i==2 || i==7 || i==8){
-                    addColoredGrid(i, j);
+                    addNumbersLetters(out, i, j);
                 }
                 else{
-                    addColoredGrid(i, j);
+                    addColoredGrid(out, i, j);
                 }
             }
-            board.append("\n");
+            out.print("\n");
         }
     }
 
 
-    public void addNumbersLetters(int i, int j){
+    public void addNumbersLetters(PrintStream out, int i, int j){
+        out.print(RESET_BG_COLOR);
+        out.print(SET_BG_COLOR_LIGHT_GREY);
         switch(j){
             case (0), (9) -> {
                 if (i >= 1 && i <= 8){
                     switch(i){
-                        case (1) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 8 ");
-                        case (2) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 7 ");
-                        case (3) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 6 ");
-                        case (4) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 5 ");
-                        case (5) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 4 ");
-                        case (6) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 3 ");
-                        case (7) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 2 ");
-                        case (8) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" 1 ");
+                        case (1) -> out.print(" 8 ");
+                        case (2) -> out.print(" 7 ");
+                        case (3) -> out.print(" 6 ");
+                        case (4) -> out.print(" 5 ");
+                        case (5) -> out.print(" 4 ");
+                        case (6) -> out.print(" 3 ");
+                        case (7) -> out.print(" 2 ");
+                        case (8) -> out.print(" 1 ");
                     }
                 }
                 else{
-                    board.append(SET_BG_COLOR_LIGHT_GREY).append("   ").append(RESET_BG_COLOR);
+                    out.print("   ");
                 }
             }
-            case (1) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" a ");
-            case (2) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" b ");
-            case (3) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" c ");
-            case (4) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" d ");
-            case (5) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" e ");
-            case (6) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" f ");
-            case (7) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" g ");
-            case (8) -> board.append(SET_BG_COLOR_LIGHT_GREY).append(" h ");
+            case (1) -> out.print(" a ");
+            case (2) -> out.print(" b ");
+            case (3) -> out.print(" c ");
+            case (4) -> out.print(" d ");
+            case (5) -> out.print(" e ");
+            case (6) -> out.print(" f ");
+            case (7) -> out.print(" g ");
+            case (8) -> out.print(" h ");
         }
-        board.append(RESET_BG_COLOR);
+        out.print(RESET_BG_COLOR);
     }
 
 
-    public void addColoredGrid(int i, int j){
+    public void addColoredGrid(PrintStream out, int i, int j){
         if ((i + j) % 2 == 0) {
-            board.append(SET_BG_COLOR_WHITE);
+            out.print(SET_BG_COLOR_WHITE);
         } else {
-            board.append(SET_BG_COLOR_BLACK);
+            out.print(SET_BG_COLOR_BLACK);
         }
-        if (i == 1 || i == 2 || i == 7 || i == 8) {
-            addPieces(i, j);
-        } else {
-            board.append(EMPTY);
+
+        if (i==1 || i==2 || i==7 || i==8){
+            addPieces(out, i, j);
         }
-        board.append(RESET_BG_COLOR);
+        else{
+            out.print("   ");
+        }
+        out.print(RESET_BG_COLOR);
     }
 
-    public void addPieces(int i, int j){
+    public void addPieces(PrintStream out, int i, int j){
         if (i == 1){
-            if (j == 1 || j==8){
-                board.append(BLACK_ROOK);
+            out.print(SET_TEXT_BOLD);
+            out.print(SET_TEXT_COLOR_BLUE);
+            switch (j){
+                case (1), (8) -> out.print(" R ");
+                case (2), (7) -> out.print(" N ");
+                case (3), (6) -> out.print(" B ");
+                case (4) -> out.print(" Q ");
+                case (5) -> out.print(" K ");
             }
-            else if (j==2 || j==7){
-                board.append(BLACK_KNIGHT);
-            }
-            else if (j==3 || j==6){
-                board.append(BLACK_BISHOP);
-            }
-            else if (j==4){
-                board.append(BLACK_QUEEN);
-            }
-            else if (j==5){
-                board.append(BLACK_KING);
-            }
+            out.print(RESET_TEXT_BOLD_FAINT);
+            out.print(RESET_TEXT_COLOR);
         }
         else if (i == 2){
             if (j >= 1 && j<=8){
-                board.append(BLACK_PAWN);
+                out.print(SET_TEXT_COLOR_BLUE);
+                out.print(SET_TEXT_BOLD);
+                out.print(" P ");
             }
+            out.print(RESET_TEXT_BOLD_FAINT);
         }
         else if (i==7){
             if (j >= 1 && j<=8){
-                board.append(WHITE_PAWN);
+                out.print(SET_TEXT_COLOR_RED);
+                out.print(SET_TEXT_BOLD);
+                out.print(" P ");
             }
+            out.print(RESET_TEXT_BOLD_FAINT);
         }
         else if (i == 8){
-            if (j == 1 || j==8){
-                board.append(WHITE_ROOK);
-            }
-            else if (j==2 || j==7){
-                board.append(WHITE_KNIGHT);
-            }
-            else if (j==3 || j==6){
-                board.append(WHITE_BISHOP);
-            }
-            else if (j==4){
-                board.append(WHITE_QUEEN);
-            }
-            else if (j==5){
-                board.append(WHITE_KING);
+            out.print(SET_TEXT_BOLD);
+            out.print(SET_TEXT_COLOR_RED);
+            switch (j){
+                case (1), (8) -> out.print(" R ");
+                case (2), (7) -> out.print(" N ");
+                case (3), (6) -> out.print(" B ");
+                case (4) -> out.print(" Q ");
+                case (5) -> out.print(" K ");
             }
         }
+        out.print(RESET_TEXT_BOLD_FAINT);
+        out.print(RESET_TEXT_COLOR);
     }
 }

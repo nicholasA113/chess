@@ -68,9 +68,6 @@ public class ChessClient {
 
 
     public String login(String ... parameters) throws ResponseException {
-        if (!registered){
-            return "User is not registered. Please register before logging in.";
-        }
         if (parameters.length == 2){
             RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
                     parameters[0], parameters[1]);

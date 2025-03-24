@@ -62,11 +62,15 @@ public class ChessClient {
             registered = true;
             return String.format("Successfully registered as %s.", parameters[0]);
         }
-        return "Not enough information given to register user";
+        return "Not enough information given to register user. Required is a username, " +
+                "password, and email.";
     }
 
 
     public String login(String ... parameters) throws ResponseException {
+        if (!registered){
+            return "User is not registered. Please register before logging in.";
+        }
         if (parameters.length == 2){
             RequestResult.LoginRequest loginRequest = new RequestResult.LoginRequest(
                     parameters[0], parameters[1]);
@@ -75,13 +79,15 @@ public class ChessClient {
                 data = new AuthData(loginResult.authToken(), loginResult.username());
             }
             catch (Exception e){
-                return "Invalid username or password";
+                return "Invalid login credentials";
             }
             loggedOut = false;
             loggedIn = true;
             return String.format("Successfully logged in as %s.", parameters[0]);
         }
-        return "You are not registered or did not give enough information to login";
+        else{
+            return "Too many/few inputs given. Need request, username, and password";
+        }
     }
 
 
@@ -97,7 +103,7 @@ public class ChessClient {
             loggedOut = true;
             return String.format("Logged out as %s", data.username());
         }
-        return "You need to login before being able to logout";
+        return "You must be logged in before being able to logout.";
     }
 
 
@@ -111,7 +117,12 @@ public class ChessClient {
             }
             return "Successfully created game";
         }
-        return "You are not logged in or did not give the correct amount of information";
+        if (!loggedIn){
+            return "You are not logged in. Please login before creating a game.";
+        }
+        else{
+            return "Too few/many arguments passed in. Need request and a game name";
+        }
     }
 
 
@@ -135,7 +146,7 @@ public class ChessClient {
                 throw new ResponseException(400, "Error listing games - " + e.getMessage());
             }
         }
-        return "You are not logged in";
+        return "You are not logged in. Please login before listing the games.";
     }
 
 
@@ -175,7 +186,13 @@ public class ChessClient {
                 return "Player color is already taken";
             }
         }
-        return "You are not logged in or did not give enough information to join the game";
+        if (!loggedIn){
+            return "You are not logged in. Please login before attempting to join game";
+        }
+        else {
+            return "Too few/many arguments passed in. Need request, game to join, " +
+                    "and desired player color";
+        }
     }
 
 

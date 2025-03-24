@@ -1,7 +1,6 @@
 package ui;
 
 import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 
 import static ui.EscapeSequences.*;
 
@@ -23,6 +22,7 @@ public class DrawRegularChessBoard extends DrawChessBoard{
                         case (7) -> out.print(" 2 ");
                         case (8) -> out.print(" 1 ");
                     }
+                    out.print(RESET_BG_COLOR);
                 }
                 else{
                     out.print("   ");
@@ -38,35 +38,6 @@ public class DrawRegularChessBoard extends DrawChessBoard{
             case (8) -> out.print(" h ");
         }
         out.print(RESET_BG_COLOR);
-    }
-
-    public void addPieces(PrintStream out, int i, int j){
-        if (i == 1){
-            printPieces(out, j, SET_TEXT_COLOR_BLUE);
-            out.print(RESET_TEXT_BOLD_FAINT);
-            out.print(RESET_TEXT_COLOR);
-        }
-        else if (i == 2){
-            if (j >= 1 && j<=8){
-                out.print(SET_TEXT_COLOR_BLUE);
-                out.print(SET_TEXT_BOLD);
-                out.print(" P ");
-            }
-            out.print(RESET_TEXT_BOLD_FAINT);
-        }
-        else if (i==7){
-            if (j >= 1 && j<=8){
-                out.print(SET_TEXT_COLOR_RED);
-                out.print(SET_TEXT_BOLD);
-                out.print(" P ");
-            }
-            out.print(RESET_TEXT_BOLD_FAINT);
-        }
-        else if (i == 8){
-            printPieces(out, j, SET_TEXT_COLOR_RED);
-        }
-        out.print(RESET_TEXT_BOLD_FAINT);
-        out.print(RESET_TEXT_COLOR);
     }
 
     public void printPieces(PrintStream out, int j, String textColor) {

@@ -163,18 +163,18 @@ public class ChessClient {
                     }
                 }
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
-                    DrawChessBoard.main(new String []{});
+                    DrawChessBoard.drawChessBoard(parameters[1]);
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
-                    DrawFlippedChessBoard.main(new String []{});
+                    DrawChessBoard.drawChessBoard(parameters[1]);
                 }
                 else{
                     serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
                     if (parameters[1].equalsIgnoreCase("WHITE")){
-                        DrawChessBoard.main(new String []{});
+                        DrawChessBoard.drawChessBoard(parameters[1]);
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
-                        DrawFlippedChessBoard.main(new String []{});
+                        DrawChessBoard.drawChessBoard(parameters[1]);
                     }
                 }
                 return "Successfully joined the game";
@@ -194,8 +194,9 @@ public class ChessClient {
 
 
     public String observeGame(String ... parameters){
+        String playerColor = "WHITE";
         if (loggedIn && parameters.length == 1){
-            DrawChessBoard.main(new String []{});
+            DrawChessBoard.drawChessBoard(playerColor);
         }
         return "Observing chess game";
     }
@@ -209,7 +210,8 @@ public class ChessClient {
                     register <USERNAME> <PASSWORD> <EMAIL>: create an account
                     login <USERNAME> <PASSWORD>: login to play chess
                     """;
-        }else if (registered || loggedIn)
+        }
+        else if (registered || loggedIn) {
             return """
                     help: lists available commands
                     quit: exits the program
@@ -220,6 +222,7 @@ public class ChessClient {
                     join <GAME ID> <[WHITE|BLACK]>: join a game as a requested color
                     observe <GAME ID>: watch given game
                     """;
+        }
         else {
             return """
                     help: lists available commands

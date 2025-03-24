@@ -209,7 +209,7 @@ public class ChessClient {
                     register <USERNAME> <PASSWORD> <EMAIL>: create an account
                     login <USERNAME> <PASSWORD>: login to play chess
                     """;
-        }else if (registered || loggedIn)
+        }else if (registered || loggedIn) {
             return """
                     help: lists available commands
                     quit: exits the program
@@ -220,6 +220,7 @@ public class ChessClient {
                     join <GAME ID> <[WHITE|BLACK]>: join a game as a requested color
                     observe <GAME ID>: watch given game
                     """;
+        }
         else {
             return """
                     help: lists available commands
@@ -234,11 +235,12 @@ public class ChessClient {
         RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
                 data.authToken());
         List<GameData> games = listGamesResult.games();
-        for (int i=1; i<games.size()+1; i++){
-            for (GameData game : games)
-                if (!gameMapIndexToID.containsKey(i) &&
-                        !gameMapIndexToID.containsValue(game))
+        for (int i=1; i<games.size()+1; i++) {
+            for (GameData game : games) {
+                if (!gameMapIndexToID.containsKey(i) && !gameMapIndexToID.containsValue(game)) {
                     gameMapIndexToID.put(mapIndex++, game);
+                }
+            }
         }
         return games;
     }

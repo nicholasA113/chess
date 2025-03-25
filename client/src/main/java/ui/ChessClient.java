@@ -182,17 +182,20 @@ public class ChessClient {
                 return "Successfully joined the game";
             }
             catch (Exception e){
-                if (Integer.parseInt(parameters[0]) >= mapIndex ||
-                        Integer.parseInt(parameters[0]) < 0){
-                    return "Game number does not exist. " +
-                            "Please enter a valid game number.";
+                try {
+                    if (Integer.parseInt(parameters[0]) >= mapIndex ||
+                            Integer.parseInt(parameters[0]) < 0) {
+                        return "Game number does not exist. " +
+                                "Please enter a valid game number.";
+                    } else if (!parameters[1].equalsIgnoreCase("WHITE") &&
+                            !parameters[1].equalsIgnoreCase("BLACK")) {
+                        return "Color is not valid. Please enter WHITE or BLACK.";
+                    } else {
+                        return "Player color is already taken";
+                    }
                 }
-                else if (!parameters[1].equalsIgnoreCase("WHITE") &&
-                            !parameters[1].equalsIgnoreCase("BLACK")){
-                    return "Color is not valid. Please enter WHITE or BLACK.";
-                }
-                else{
-                    return "Player color is already taken";
+                catch (Exception ex){
+                    return "Invalid input. Please enter a valid number.";
                 }
             }
         }
@@ -250,12 +253,10 @@ public class ChessClient {
         RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
                 data.authToken());
         List<GameData> games = listGamesResult.games();
-        for (int i=1; i<games.size()+1; i++) {
-            for (GameData game : games) {
-                if (!gameMapIndexToID.containsKey(i) && !gameMapIndexToID.containsValue(game)) {
-                    gameMapIndexToID.put(mapIndex++, game);
-                }
-            }
+        gameMapIndexToID.clear();
+        mapIndex = 1;
+        for (GameData game : games){
+            gameMapIndexToID.put(mapIndex++, game);
         }
         return games;
     }

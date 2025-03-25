@@ -58,6 +58,7 @@ public class ChessClient {
             catch (Exception e){
                 return "Username is already taken";
             }
+            login(parameters[0], parameters[1]);
             loggedOut = false;
             registered = true;
             return String.format("Successfully registered as %s.", parameters[0]);
@@ -181,7 +182,18 @@ public class ChessClient {
                 return "Successfully joined the game";
             }
             catch (Exception e){
-                return "Player color is already taken";
+                if (Integer.parseInt(parameters[0]) >= mapIndex ||
+                        Integer.parseInt(parameters[0]) < 0){
+                    return "Game number does not exist. " +
+                            "Please enter a valid game number.";
+                }
+                else if (!parameters[1].equalsIgnoreCase("WHITE") &&
+                            !parameters[1].equalsIgnoreCase("BLACK")){
+                    return "Color is not valid. Please enter WHITE or BLACK.";
+                }
+                else{
+                    return "Player color is already taken";
+                }
             }
         }
         if (!loggedIn){

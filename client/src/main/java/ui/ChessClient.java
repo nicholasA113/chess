@@ -108,6 +108,7 @@ public class ChessClient {
         if (loggedIn && parameters.length == 1){
             try{
                 serverFacade.createGame(data.authToken(), parameters[0]);
+                getUpdateGames();
             }
             catch (Exception e){
                 throw new ResponseException(400, "Error creating game - " + e.getMessage());

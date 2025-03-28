@@ -165,18 +165,22 @@ public class ChessClient {
                     }
                 }
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
-                    DrawChessBoard.drawChessBoard(parameters[1]);
+                    StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                    chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
-                    DrawChessBoard.drawChessBoard(parameters[1]);
+                    StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                    chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                 }
                 else{
                     serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
                     if (parameters[1].equalsIgnoreCase("WHITE")){
-                        DrawChessBoard.drawChessBoard(parameters[1]);
+                        StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                        chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
-                        DrawChessBoard.drawChessBoard(parameters[1]);
+                        StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                        chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                     }
                 }
                 return "Successfully joined the game";
@@ -212,7 +216,8 @@ public class ChessClient {
     public String observeGame(String ... parameters){
         String playerColor = "WHITE";
         if (loggedIn && parameters.length == 1){
-            DrawChessBoard.drawChessBoard(playerColor);
+            StringBuilder[][] chessBoard = new StringBuilder[10][10];
+            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
         }
         return "Observing chess game";
     }

@@ -42,6 +42,7 @@ public class DrawFlippedChessBoard extends DrawChessBoard{
     }
 
     public void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor) {
+        chessBoard[i][j] = new StringBuilder();
         chessBoard[i][j].append(SET_TEXT_BOLD);
         chessBoard[i][j].append(textColor);
         switch (j){

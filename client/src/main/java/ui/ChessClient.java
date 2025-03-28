@@ -20,6 +20,7 @@ public class ChessClient {
     AuthData data;
     Integer mapIndex = 1;
     Map<Integer, GameData> gameMapIndexToID;
+    Map<Integer, StringBuilder[][]> gameToChessBoard;
 
 
     public ChessClient(int port){
@@ -167,6 +168,9 @@ public class ChessClient {
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
+                    gameToChessBoard.put(Integer.parseInt(parameters[0]), chessBoard);
+                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, gameToChessBoard);
+                    gameplayREPL.runGameplayRepl();
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];

@@ -37,7 +37,6 @@ public abstract class DrawChessBoard {
     public abstract void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor);
 
     public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor){
-        chessBoard[i][j] = new StringBuilder();
         if (i == 1){
             if (playerColor.equalsIgnoreCase("WHITE")){
                 printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE);
@@ -97,6 +96,7 @@ public abstract class DrawChessBoard {
 
     public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j, String playerColor){
         chessBoard[i][j] = new StringBuilder();
+
         if ((i + j) % 2 == 0) {
             chessBoard[i][j].append(SET_BG_COLOR_WHITE);
         } else {

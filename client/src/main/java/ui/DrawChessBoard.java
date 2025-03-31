@@ -34,39 +34,42 @@ public abstract class DrawChessBoard {
     }
 
     public abstract void addNumbersLetters(StringBuilder[][] chessBoard, int i, int j);
-    public abstract void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor);
+    public abstract void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor, String bgColor);
 
-    public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor){
+    public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor, String bgColor){
         if (i == 1){
             if (playerColor.equalsIgnoreCase("WHITE")){
-                printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE);
+                printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE, bgColor);
             }
             else{
-                printPieces(chessBoard, i, j, SET_TEXT_COLOR_RED);
+                printPieces(chessBoard, i, j, SET_TEXT_COLOR_RED, bgColor);
             }
             chessBoard[i][j].append(RESET_TEXT_BOLD_FAINT);
             chessBoard[i][j].append(RESET_TEXT_COLOR);
         }
         else if (i == 2){
-            printPawns(chessBoard, i, j, playerColor, SET_TEXT_COLOR_BLUE, SET_TEXT_COLOR_RED);
+            printPawns(chessBoard, i, j, playerColor, SET_TEXT_COLOR_BLUE, SET_TEXT_COLOR_RED, bgColor);
         }
         else if (i==7){
-            printPawns(chessBoard, i, j, playerColor, SET_TEXT_COLOR_RED, SET_TEXT_COLOR_BLUE);
+            printPawns(chessBoard, i, j, playerColor, SET_TEXT_COLOR_RED, SET_TEXT_COLOR_BLUE, bgColor);
         }
         else if (i == 8){
             if (playerColor.equalsIgnoreCase("WHITE")){
-                printPieces(chessBoard, i, j, SET_TEXT_COLOR_RED);
+                printPieces(chessBoard, i, j, SET_TEXT_COLOR_RED, bgColor);
             }
             else{
-                printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE);
+                printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE, bgColor);
             }
         }
         chessBoard[i][j].append(RESET_TEXT_BOLD_FAINT);
         chessBoard[i][j].append(RESET_TEXT_COLOR);
     }
 
-    private void printPawns(StringBuilder[][] chessBoard, int i, int j, String playerColor, String setTextColorBlue, String setTextColorRed) {
+    private void printPawns(StringBuilder[][] chessBoard, int i, int j,
+                            String playerColor, String setTextColorBlue,
+                            String setTextColorRed, String bgColor) {
         chessBoard[i][j] = new StringBuilder();
+        chessBoard[i][j].append(bgColor);
         if (j >= 1 && j<=8){
             if (playerColor.equalsIgnoreCase("WHITE")){
                 chessBoard[i][j].append(setTextColorBlue);
@@ -96,18 +99,19 @@ public abstract class DrawChessBoard {
 
     public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j, String playerColor){
         chessBoard[i][j] = new StringBuilder();
+        String bgColor;
 
         if ((i + j) % 2 == 0) {
-            chessBoard[i][j].append(SET_BG_COLOR_WHITE);
+            bgColor = SET_BG_COLOR_WHITE;
         } else {
-            chessBoard[i][j].append(SET_BG_COLOR_BLACK);
+            bgColor = SET_BG_COLOR_BLACK;
         }
 
         if (i==1 || i==2 || i==7 || i==8){
-            addPieces(chessBoard, i, j, playerColor);
+            addPieces(chessBoard, i, j, playerColor, bgColor);
         }
         else{
-            chessBoard[i][j].append("   ");
+            chessBoard[i][j].append(bgColor).append("   ");
         }
         chessBoard[i][j].append(RESET_BG_COLOR);
     }

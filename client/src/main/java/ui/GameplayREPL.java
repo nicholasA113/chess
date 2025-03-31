@@ -50,11 +50,11 @@ public class GameplayREPL {
         var request = (tokens.length > 0) ? tokens[0] : "help";
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
-            case "redraw" -> redraw(parameters);
-            case "move" -> makeMove();
-            case "resign" -> resign(parameters);
-            case "highlight" -> highlight(parameters);
-            case "leave" -> "leave";
+            //case "redraw" -> redraw(parameters);
+            //case "move" -> makeMove();
+            //case "resign" -> resign(parameters);
+            //case "highlight" -> highlight(parameters);
+            //case "leave" -> "leave";
             default -> help();
         };
     }

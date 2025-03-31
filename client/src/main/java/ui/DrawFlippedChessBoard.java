@@ -41,10 +41,10 @@ public class DrawFlippedChessBoard extends DrawChessBoard{
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
 
-    public void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor) {
+    public void printPieces(StringBuilder[][] chessBoard, int i, int j,
+                            String textColor, String bgColor) {
         chessBoard[i][j] = new StringBuilder();
-        chessBoard[i][j].append(SET_TEXT_BOLD);
-        chessBoard[i][j].append(textColor);
+        chessBoard[i][j].append(bgColor).append(SET_TEXT_BOLD).append(textColor);
         switch (j){
             case (1), (8) -> chessBoard[i][j].append(" R ");
             case (2), (7) -> chessBoard[i][j].append(" N ");

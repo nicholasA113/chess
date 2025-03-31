@@ -1,9 +1,11 @@
 package ui;
 
+import com.google.gson.Gson;
 import exceptions.ResponseException;
 import model.GameData;
 import websocket.commands.UserGameCommand;
 
+import javax.management.Notification;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +17,7 @@ public class GameplayREPL {
     Map<Integer, GameData> gameMapIndexToID;
     String authToken;
     int gameID;
+    Gson gson = new Gson();
 
     public GameplayREPL(String authToken, int gameID, Map<Integer, StringBuilder[][]> gameToChessBoard){
         this.gameToChessBoard = new HashMap<>();
@@ -23,10 +26,16 @@ public class GameplayREPL {
     }
 
     public void runGameplayRepl() throws ResponseException {
-        //WebSocketFacade connection = new WebSocketFacade();
+        NotificationHandler handler = new NotificationHandler() {
+            @Override
+            public void notify(Notification notification) {
+                System.out.println("Notification received: " + notification);
+            }
+        };
+        WebSocketFacade connection = new WebSocketFacade(handler, authToken, gameID);
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while(!result.equalsIgnoreCase("leave")){
+        while (!result.equalsIgnoreCase("leave")) {
             printPrompt();
             String line = scanner.nextLine();
             result = makeRequest(line);
@@ -41,19 +50,13 @@ public class GameplayREPL {
         var request = (tokens.length > 0) ? tokens[0] : "help";
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
-            //case "redraw" -> redraw(parameters);
-            //case "move" -> makeMove();
-            //case "resign" -> resign(parameters);
-            //case "highlight" -> highlight(parameters);
+            case "redraw" -> redraw(parameters);
+            case "move" -> makeMove();
+            case "resign" -> resign(parameters);
+            case "highlight" -> highlight(parameters);
             case "leave" -> "leave";
             default -> help();
         };
-    }
-
-    public void makeMove(){
-        //UserGameCommand.CommandType commandType = new UserGameCommand.CommandType(MAKE_MOVE);
-        UserGameCommand makeMoveCommand = new UserGameCommand(commandType, authToken, gameID);
-
     }
 
     public String help(){

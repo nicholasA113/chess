@@ -32,7 +32,7 @@ public class ChessClient {
     }
 
 
-    public String request(String input) throws ResponseException {
+    public String request(String input) throws Exception {
         var tokens = input.split(" ");
         var request = (tokens.length > 0) ? tokens[0] : "help";
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
@@ -175,19 +175,25 @@ public class ChessClient {
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
+                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                    gameplayREPL.runGameplayRepl();
                 }
                 else{
                     serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
                     if (parameters[1].equalsIgnoreCase("WHITE")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
+                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                        gameplayREPL.runGameplayRepl();
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
+                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                        gameplayREPL.runGameplayRepl();
                     }
                 }
-                return "Successfully joined the game";
+                return "";
             }
             catch (Exception e){
                 try {
@@ -217,13 +223,22 @@ public class ChessClient {
     }
 
 
-    public String observeGame(String ... parameters){
+    public String observeGame(String ... parameters) throws Exception {
         String playerColor = "WHITE";
+        int gameID = 0;
+        for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
+            GameData gameData = game.getValue();
+            if (Integer.parseInt(parameters[0]) == game.getKey()){
+                gameID = gameData.gameID();
+            }
+        }
         if (loggedIn && parameters.length == 1){
             StringBuilder[][] chessBoard = new StringBuilder[10][10];
             chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+            GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+            gameplayREPL.runGameplayRepl();
         }
-        return "Observing chess game";
+        return "";
     }
 
 

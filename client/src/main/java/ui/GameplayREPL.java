@@ -2,13 +2,10 @@ package ui;
 
 import com.google.gson.Gson;
 import exceptions.ResponseException;
-import model.GameData;
-import websocket.commands.UserGameCommand;
+import websocket.commands.*;
 
 import javax.management.Notification;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 public class GameplayREPL {
@@ -16,6 +13,8 @@ public class GameplayREPL {
     StringBuilder[][] chessBoard;
     String authToken;
     int gameID;
+    WebSocketFacade connection;
+    Gson gson = new Gson();
 
     public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard){
         this.chessBoard = chessBoard;
@@ -30,7 +29,7 @@ public class GameplayREPL {
                 System.out.println("Notification received: " + notification);
             }
         };
-        WebSocketFacade connection = new WebSocketFacade(handler, authToken, gameID);
+        connection = new WebSocketFacade(handler, authToken, gameID);
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equalsIgnoreCase("leave")) {
@@ -52,9 +51,24 @@ public class GameplayREPL {
             //case "move" -> makeMove();
             //case "resign" -> resign(parameters);
             //case "highlight" -> highlight(parameters);
-            //case "leave" -> "leave";
+            case "leave" -> leave();
             default -> help();
         };
+    }
+
+    public String leave(){
+        UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
+                authToken, gameID);
+        String command = gson.toJson(leaveCommand);
+
+        try{
+            connection.sendCommand(command);
+        }
+        catch (Exception e){
+            System.out.print(e.getMessage());
+        }
+        System.out.print("User has left the game");
+        return "leave";
     }
 
     public String help(){

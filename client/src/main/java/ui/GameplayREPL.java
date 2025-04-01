@@ -15,11 +15,24 @@ public class GameplayREPL {
     int gameID;
     WebSocketFacade connection;
     Gson gson = new Gson();
+    Boolean observer;
+    String playerColor;
+    String help = """
+                    help: lists available commands
+                    redraw: redraws the chessboard for a fresh start
+                    leave: leave game
+                    move: make chess move
+                    resign: admit defeat
+                    highlight: highlight valid movies for chess piece
+                    """;
 
-    public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard){
+    public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard,
+                        boolean observer, String playerColor){
         this.chessBoard = chessBoard;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.observer = observer;
+        this.playerColor = playerColor;
     }
 
     public void runGameplayRepl() throws ResponseException {
@@ -47,20 +60,42 @@ public class GameplayREPL {
         var request = (tokens.length > 0) ? tokens[0] : "help";
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
-            //case "redraw" -> redraw(parameters);
-            //case "move" -> makeMove();
+            case "redraw" -> redraw();
+            //case "move" -> makeMove(parameters);
             //case "resign" -> resign(parameters);
-            //case "highlight" -> highlight(parameters);
+            case "highlight" -> highlight();
             case "leave" -> leave();
-            default -> help();
+            default -> {
+                System.out.print(help);
+                System.out.print("\n");
+                StringBuilder[][] reprintedChessboard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+                DrawChessBoard.printBoard(reprintedChessboard);
+                yield "";
+            }
         };
+    }
+
+    public String highlight(){
+        if (!observer){
+            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+        }
+        return "Highlighted moves for piece at requested position";
+    }
+
+    public String redraw(){
+        if (!observer){
+            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+            return "Redrew the chessboard";
+        }
+        else{
+            return "You are only an observer. You cannot interfere with gameplay.";
+        }
     }
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
                 authToken, gameID);
         String command = gson.toJson(leaveCommand);
-
         try{
             connection.sendCommand(command);
         }
@@ -69,17 +104,6 @@ public class GameplayREPL {
         }
         System.out.print("User has left the game");
         return "leave";
-    }
-
-    public String help(){
-        return """
-                    help: lists available commands
-                    redraw: redraws the chessboard for a fresh start
-                    leave: leave game
-                    move: make chess move
-                    resign: admit defeat
-                    highlight: highlight valid movies for chess piece
-                    """;
     }
 
     private void printPrompt() {

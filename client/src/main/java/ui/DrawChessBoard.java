@@ -1,15 +1,11 @@
 package ui;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-
 import static ui.EscapeSequences.*;
 
 public abstract class DrawChessBoard {
 
     //ChessBoard Dimensions
     private static final int BOARD_SIZE = 10;
-    //private static StringBuilder[][] chessBoard = new StringBuilder[BOARD_SIZE][BOARD_SIZE];;
 
     public static StringBuilder[][] drawChessBoard(String playerColor, StringBuilder[][] chessBoard) {
         if (playerColor.equalsIgnoreCase("WHITE")){
@@ -20,7 +16,6 @@ public abstract class DrawChessBoard {
             DrawFlippedChessBoard flippedBoard = new DrawFlippedChessBoard();
             flippedBoard.drawBoard(chessBoard, playerColor);
         }
-        printBoard(chessBoard);
         return chessBoard;
     }
 

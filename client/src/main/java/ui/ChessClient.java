@@ -152,6 +152,7 @@ public class ChessClient {
 
 
     public String joinGame(String ... parameters){
+        Boolean observer = false;
         if (loggedIn && parameters.length == 2){
             try{
                 int gameID = 0;
@@ -169,13 +170,17 @@ public class ChessClient {
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                    DrawChessBoard.printBoard(chessBoard);
+                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
+                            chessBoard, observer, parameters[1]);
                     gameplayREPL.runGameplayRepl();
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                    DrawChessBoard.printBoard(chessBoard);
+                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
+                            chessBoard, observer, parameters[1]);
                     gameplayREPL.runGameplayRepl();
                 }
                 else{
@@ -183,13 +188,17 @@ public class ChessClient {
                     if (parameters[1].equalsIgnoreCase("WHITE")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                        DrawChessBoard.printBoard(chessBoard);
+                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
+                                gameID, chessBoard, observer, parameters[1]);
                         gameplayREPL.runGameplayRepl();
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
+                        DrawChessBoard.printBoard(chessBoard);
+                        GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
+                                gameID, chessBoard, observer, parameters[1]);
                         gameplayREPL.runGameplayRepl();
                     }
                 }
@@ -233,10 +242,18 @@ public class ChessClient {
             }
         }
         if (loggedIn && parameters.length == 1){
-            StringBuilder[][] chessBoard = new StringBuilder[10][10];
-            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
-            GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
-            gameplayREPL.runGameplayRepl();
+            try{
+                Boolean observer = true;
+                StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+                DrawChessBoard.printBoard(chessBoard);
+                GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
+                        gameID, chessBoard, observer, playerColor);
+                gameplayREPL.runGameplayRepl();
+            }
+            catch (Exception e){
+                System.out.print(e.getMessage());
+            }
         }
         return "";
     }

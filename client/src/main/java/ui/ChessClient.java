@@ -28,6 +28,7 @@ public class ChessClient {
         registered = false;
         loggedIn = false;
         this.gameMapIndexToID = new HashMap<>();
+        this.gameToChessBoard = new HashMap<>();
     }
 
 
@@ -168,8 +169,7 @@ public class ChessClient {
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    gameToChessBoard.put(Integer.parseInt(parameters[0]), chessBoard);
-                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, gameToChessBoard);
+                    GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID, chessBoard);
                     gameplayREPL.runGameplayRepl();
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){

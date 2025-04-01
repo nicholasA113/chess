@@ -9,6 +9,7 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 
+@ClientEndpoint
 public class WebSocketFacade{
 
     Session session;

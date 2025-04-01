@@ -13,14 +13,12 @@ import java.util.Scanner;
 
 public class GameplayREPL {
 
-    Map<Integer, StringBuilder[][]> gameToChessBoard;
-    Map<Integer, GameData> gameMapIndexToID;
+    StringBuilder[][] chessBoard;
     String authToken;
     int gameID;
-    Gson gson = new Gson();
 
-    public GameplayREPL(String authToken, int gameID, Map<Integer, StringBuilder[][]> gameToChessBoard){
-        this.gameToChessBoard = new HashMap<>();
+    public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard){
+        this.chessBoard = chessBoard;
         this.authToken = authToken;
         this.gameID = gameID;
     }

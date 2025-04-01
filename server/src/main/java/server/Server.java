@@ -6,7 +6,7 @@ import service.ClearService;
 import service.GameService;
 import service.UserService;
 import service.httphandlers.*;
-import spark.*;
+import spark.Spark;
 
 public class Server {
 
@@ -21,6 +21,8 @@ public class Server {
     UserService userService;
     GameService gameService;
     ClearService clearService;
+
+    WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     Gson serializer = new Gson();
 
@@ -65,6 +67,8 @@ public class Server {
 
         Spark.port(desiredPort);
         Spark.staticFiles.location("web");
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         Spark.post("/user", (request, response) ->
                 new RegisterHandler().registerHandler(request, response, serializer, userService)

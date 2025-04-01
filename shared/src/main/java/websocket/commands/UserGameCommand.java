@@ -43,11 +43,6 @@ public class UserGameCommand {
         return gameID;
     }
 
-    public String connect(){
-        UserGameCommand connectCommand = new UserGameCommand(CommandType.CONNECT, authToken, gameID);
-        return new Gson().toJson(connectCommand);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

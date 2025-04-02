@@ -13,8 +13,10 @@ public class ChessBoard {
 
     private final ChessPiece[][] board = new ChessPiece[8][8];
 
-    public ChessBoard() {
+    public ChessBoard() {}
 
+    public ChessPiece[][] getBoard(){
+        return board;
     }
 
     public ChessBoard copy(){

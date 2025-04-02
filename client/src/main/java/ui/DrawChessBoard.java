@@ -111,13 +111,12 @@ public abstract class DrawChessBoard {
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
 
-    public static void highlightSpace(StringBuilder positionToHighlight) {
+    public static void highlightSpace(StringBuilder positionToHighlight, String bgColor) {
         positionToHighlight.setLength(0);
         positionToHighlight
-                .append(SET_BG_COLOR_MAGENTA)
-                .append("\u001B[2m")
+                .append(bgColor)
                 .append("   ")
-                .append("\u001B[0m");
+                .append(RESET_BG_COLOR);
     }
 
 }

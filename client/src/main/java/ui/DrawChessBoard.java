@@ -7,7 +7,7 @@ public abstract class DrawChessBoard {
     //ChessBoard Dimensions
     private static final int BOARD_SIZE = 10;
 
-    public static StringBuilder[][] drawChessBoard(String playerColor, StringBuilder[][] chessBoard) {
+    public static StringBuilder[][] drawChessBoard(String playerColor, StringBuilder[][] chessBoard){
         if (playerColor.equalsIgnoreCase("WHITE")){
             DrawRegularChessBoard regularBoard = new DrawRegularChessBoard();
             regularBoard.drawBoard(chessBoard, playerColor);
@@ -112,7 +112,12 @@ public abstract class DrawChessBoard {
     }
 
     public static void highlightSpace(StringBuilder positionToHighlight) {
-        positionToHighlight.append(RESET_BG_COLOR).append(SET_BG_COLOR_MAGENTA);
+        positionToHighlight.setLength(0);
+        positionToHighlight
+                .append(SET_BG_COLOR_MAGENTA)
+                .append("\u001B[2m")
+                .append("   ")
+                .append("\u001B[0m");
     }
 
 }

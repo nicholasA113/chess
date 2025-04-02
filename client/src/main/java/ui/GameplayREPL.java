@@ -81,21 +81,46 @@ public class GameplayREPL {
 
     public String highlight(String ... parameters){
         if (!observer && parameters.length == 1){
-            char rowChar = parameters[0].charAt(0);
-            char colChar = parameters[0].charAt(1);
-            int col = rowChar - 'a' + 1;
-            int row = colChar - '0';
+            int col = 0;
+            int row = 0;
+            if (playerColor.equalsIgnoreCase("white")){
+                char rowChar = parameters[0].charAt(0);
+                char colChar = parameters[0].charAt(1);
+                col = rowChar - 'a' + 1;
+                row = colChar - '0';
+            }
+            else if (playerColor.equalsIgnoreCase("black")){
+                char rowChar = parameters[0].charAt(0);
+                char colChar = parameters[0].charAt(1);
+                col = ('h' - rowChar) + 1;
+                row = 9 - (colChar - '0');
+            }
             Collection<ChessMove> validMoves = chessGame.validMoves(new ChessPosition(row, col));
+            if (validMoves.isEmpty()){
+                DrawChessBoard.printBoard(chessBoard);
+                return "There are no valid moves for piece at requested position.";
+                //System.out.print("There are no valid moves for piece at requested position");
+            }
             for (ChessMove move : validMoves){
                 ChessPosition endPosition = move.getEndPosition();
                 int endPositionRow = endPosition.getRow();
                 int endPositionCol = endPosition.getColumn();
-                StringBuilder positionToHighlight = chessBoard[endPositionRow][endPositionCol];
-                DrawChessBoard.highlightSpace(positionToHighlight);
+                if (playerColor.equalsIgnoreCase("white")){
+                    StringBuilder positionToHighlight = chessBoard[9-endPositionRow][endPositionCol];
+                    DrawChessBoard.highlightSpace(positionToHighlight);
+                }
+                else if (playerColor.equalsIgnoreCase("black")){
+                    StringBuilder positionToHighlight = chessBoard[9-endPositionRow][endPositionCol];
+                    DrawChessBoard.highlightSpace(positionToHighlight);
+                }
             }
             DrawChessBoard.printBoard(chessBoard);
+            return "Highlighted moves for piece at requested position";
         }
-        return "Highlighted moves for piece at requested position";
+        else{
+            DrawChessBoard.printBoard(chessBoard);
+            return "You are only an observer. You cannot interact with the game";
+        }
     }
 
     public String redraw(){

@@ -111,4 +111,8 @@ public abstract class DrawChessBoard {
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
 
+    public static void highlightSpace(StringBuilder positionToHighlight) {
+        positionToHighlight.append(RESET_BG_COLOR).append(SET_BG_COLOR_MAGENTA);
+    }
+
 }

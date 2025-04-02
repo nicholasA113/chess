@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import exceptions.ResponseException;
 import model.AuthData;
 import model.GameData;
@@ -158,6 +159,7 @@ public class ChessClient {
                 int gameID = 0;
                 String whiteUsername = "";
                 String blackUsername = "";
+                ChessGame chessGame = null;
                 getUpdateGames();
                 for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
                     GameData gameData = game.getValue();
@@ -165,6 +167,7 @@ public class ChessClient {
                         gameID = gameData.gameID();
                         whiteUsername = gameData.whiteUsername();
                         blackUsername = gameData.blackUsername();
+                        chessGame = gameData.game();
                     }
                 }
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
@@ -172,7 +175,7 @@ public class ChessClient {
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                     DrawChessBoard.printBoard(chessBoard);
                     GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
-                            chessBoard, observer, parameters[1]);
+                            chessBoard, observer, parameters[1], chessGame);
                     gameplayREPL.runGameplayRepl();
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
@@ -180,7 +183,7 @@ public class ChessClient {
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                     DrawChessBoard.printBoard(chessBoard);
                     GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
-                            chessBoard, observer, parameters[1]);
+                            chessBoard, observer, parameters[1], chessGame);
                     gameplayREPL.runGameplayRepl();
                 }
                 else{
@@ -190,7 +193,7 @@ public class ChessClient {
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                         DrawChessBoard.printBoard(chessBoard);
                         GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                                gameID, chessBoard, observer, parameters[1]);
+                                gameID, chessBoard, observer, parameters[1], chessGame);
                         gameplayREPL.runGameplayRepl();
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
@@ -198,7 +201,7 @@ public class ChessClient {
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
                         DrawChessBoard.printBoard(chessBoard);
                         GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                                gameID, chessBoard, observer, parameters[1]);
+                                gameID, chessBoard, observer, parameters[1], chessGame);
                         gameplayREPL.runGameplayRepl();
                     }
                 }
@@ -235,10 +238,12 @@ public class ChessClient {
     public String observeGame(String ... parameters) throws Exception {
         String playerColor = "WHITE";
         int gameID = 0;
+        ChessGame chessGame = null;
         for (Map.Entry<Integer, GameData> game : gameMapIndexToID.entrySet()){
             GameData gameData = game.getValue();
             if (Integer.parseInt(parameters[0]) == game.getKey()){
                 gameID = gameData.gameID();
+                chessGame = gameData.game();
             }
         }
         if (loggedIn && parameters.length == 1){
@@ -248,7 +253,7 @@ public class ChessClient {
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
                 DrawChessBoard.printBoard(chessBoard);
                 GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                        gameID, chessBoard, observer, playerColor);
+                        gameID, chessBoard, observer, playerColor, chessGame);
                 gameplayREPL.runGameplayRepl();
             }
             catch (Exception e){

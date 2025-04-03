@@ -1,11 +1,25 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessPiece;
+import chess.ChessPosition;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static ui.EscapeSequences.*;
 
 public abstract class DrawChessBoard {
 
-    //ChessBoard Dimensions
     private static final int BOARD_SIZE = 10;
+    private static Map<ChessPiece.PieceType, String> chessPieces = new HashMap<>() {{
+        put(ChessPiece.PieceType.KING, " K ");
+        put(ChessPiece.PieceType.QUEEN, " Q ");
+        put(ChessPiece.PieceType.ROOK, " R ");
+        put(ChessPiece.PieceType.BISHOP, " B ");
+        put(ChessPiece.PieceType.KNIGHT, " N ");
+        put(ChessPiece.PieceType.PAWN, " P ");
+    }};
 
     public static StringBuilder[][] drawChessBoard(String playerColor, StringBuilder[][] chessBoard){
         if (playerColor.equalsIgnoreCase("WHITE")){
@@ -111,12 +125,30 @@ public abstract class DrawChessBoard {
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
 
-    public static void highlightSpace(StringBuilder positionToHighlight, String bgColor) {
+    public static void highlightSpace(StringBuilder positionToHighlight,
+                                      String bgColor, int row, int col,
+                                      ChessBoard board) {
+        ChessPosition position = new ChessPosition(row, col);
+        ChessPiece chessPiece = board.getPiece(position);
+
         positionToHighlight.setLength(0);
-        positionToHighlight
-                .append(bgColor)
-                .append("   ")
-                .append(RESET_BG_COLOR);
+        if (chessPiece == null){
+            positionToHighlight
+                    .append(bgColor)
+                    .append("   ")
+                    .append(RESET_BG_COLOR);
+        }
+        else{
+            String text = chessPieces.get(chessPiece.getPieceType());
+            positionToHighlight.append(RESET_TEXT_COLOR)
+                    .append(bgColor)
+                    .append(SET_TEXT_COLOR_BLACK)
+                    .append(SET_TEXT_BOLD)
+                    .append(text)
+                    .append(RESET_TEXT_BOLD_FAINT)
+                    .append(RESET_BG_COLOR)
+                    .append(RESET_TEXT_COLOR);
+        }
     }
 
 }

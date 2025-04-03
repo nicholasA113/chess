@@ -30,7 +30,7 @@ public class GameplayREPL {
                     help: lists available commands
                     redraw: redraws the chessboard for a fresh start
                     leave: leave game
-                    move: make chess move
+                    move <position to move from> <position to move to>: make chess move
                     resign: admit defeat
                     highlight <[Row(a-h)][Column(1-8)]>: highlight valid movies for chess piece
                     """;
@@ -71,7 +71,7 @@ public class GameplayREPL {
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
             case "redraw" -> redraw();
-            //case "move" -> makeMove(parameters);
+            case "move" -> makeMove(parameters);
             case "resign" -> resign();
             case "highlight" -> highlight(parameters);
             case "leave" -> leave();
@@ -84,27 +84,51 @@ public class GameplayREPL {
         };
     }
 
+    public String makeMove(String ... parameters){
+        if (!observer && parameters.length == 2){
+            int colStart = 0;
+            int rowStart = 0;
+            int colEnd = 0;
+            int rowEnd = 0;
+            char rowCharStart = parameters[0].charAt(0);
+            char colCharStart = parameters[0].charAt(1);
+            char rowCharEnd = parameters[1].charAt(0);
+            char colCharEnd = parameters[1].charAt(1);
+            colStart = rowCharStart - 'a' + 1;
+            rowStart = colCharStart - '0';
+            colEnd = rowCharEnd - 'a' + 1;
+            rowEnd = colCharEnd - '0';
+            if (rowStart > 8 || colStart > 8 || rowStart <= 0 || colStart <= 0 ||
+                rowEnd > 8 || colEnd > 8 || rowEnd <= 0 || colEnd <= 0){
+                DrawChessBoard.printBoard(chessBoard);
+                return "Invalid space position. Please enter a valid space.";
+            }
+            ChessPosition position = new ChessPosition(rowStart, colStart);
+            ChessBoard board = chessGame.getBoard();
+            ChessPiece chessPiece = board.getPiece(position);
+            if (chessPiece == null){
+                DrawChessBoard.printBoard(chessBoard);
+                return "No piece at selected position. Please enter a valid position.";
+            }
+
+            Collection<ChessMove> validMoves = chessGame.validMoves(position);
+        }
+        return "You are an observer. You cannot make a move.";
+    }
+
     public String highlight(String ... parameters){
         if (!observer && parameters.length == 1){
+            /**if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
+             DrawChessBoard.printBoard(chessBoard);
+             return "It is not your turn. Please wait until it is your turn to highlight.";
+             }**/
             int col = 0;
             int row = 0;
-            if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
-                DrawChessBoard.printBoard(chessBoard);
-                return "It is not your turn. Please wait until it is your turn to highlight.";
-            }
-            if (playerColor.equalsIgnoreCase("white")){
-                char rowChar = parameters[0].charAt(0);
-                char colChar = parameters[0].charAt(1);
-                col = rowChar - 'a' + 1;
-                row = colChar - '0';
-            }
-            else if (playerColor.equalsIgnoreCase("black")){
-                char rowChar = parameters[0].charAt(0);
-                char colChar = parameters[0].charAt(1);
-                col = ('h' - rowChar) + 1;
-                row = 9 - (colChar - '0');
-            }
-            if (row > 8 || col > 8){
+            char rowChar = parameters[0].charAt(0);
+            char colChar = parameters[0].charAt(1);
+            col = rowChar - 'a' + 1;
+            row = colChar - '0';
+            if (row > 8 || col > 8 || row <= 0 || col <= 0){
                 DrawChessBoard.printBoard(chessBoard);
                 return "Invalid space position. Please enter a valid space.";
             }
@@ -117,7 +141,7 @@ public class GameplayREPL {
             }
             if (!playerColor.equalsIgnoreCase(chessPiece.getTeamColor().toString())){
                 DrawChessBoard.printBoard(chessBoard);
-                return "You have selected a piece for the other team.Please select " +
+                return "You have selected a piece for the other team. Please select " +
                         "one of your own pieces to highlight.";
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
@@ -126,24 +150,39 @@ public class GameplayREPL {
                 return "There are no valid moves for piece at requested position.";
             }
             for (ChessMove move : validMoves){
-                ChessPosition startPosition = move.getStartPosition();
-                int startPositionRow = startPosition.getRow();
-                int startPositionCol = startPosition.getColumn();
-                StringBuilder startPositionToHighlight =
-                        chessBoard[9-startPositionRow][startPositionCol];
-                DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart);
-
-                ChessPosition endPosition = move.getEndPosition();
-                int endPositionRow = endPosition.getRow();
-                int endPositionCol = endPosition.getColumn();
-
                 if (playerColor.equalsIgnoreCase("white")){
+                    ChessPosition startPosition = move.getStartPosition();
+                    int startPositionRow = startPosition.getRow();
+                    int startPositionCol = startPosition.getColumn();
+                    StringBuilder startPositionToHighlight =
+                            chessBoard[9-startPositionRow][startPositionCol];
+                    DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart,
+                            9-startPositionRow, startPositionCol, board);
+
+                    ChessPosition endPosition = move.getEndPosition();
+                    int endPositionRow = endPosition.getRow();
+                    int endPositionCol = endPosition.getColumn();
+
                     StringBuilder positionToHighlight = chessBoard[9-endPositionRow][endPositionCol];
-                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd);
+                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd,
+                            endPositionRow, 9-endPositionCol, board);
                 }
                 else if (playerColor.equalsIgnoreCase("black")){
-                    StringBuilder positionToHighlight = chessBoard[9-endPositionRow][endPositionCol];
-                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd);
+                    ChessPosition startPosition = move.getStartPosition();
+                    int startPositionRow = startPosition.getRow();
+                    int startPositionCol = startPosition.getColumn();
+                    StringBuilder startPositionToHighlight =
+                            chessBoard[startPositionRow][9-startPositionCol];
+                    DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart,
+                            9-startPositionRow, startPositionCol, board);
+
+                    ChessPosition endPosition = move.getEndPosition();
+                    int endPositionRow = endPosition.getRow();
+                    int endPositionCol = endPosition.getColumn();
+
+                    StringBuilder positionToHighlight = chessBoard[endPositionRow][9-endPositionCol];
+                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd,
+                            endPositionRow, 9-endPositionCol, board);
                 }
             }
             DrawChessBoard.printBoard(chessBoard);
@@ -152,7 +191,7 @@ public class GameplayREPL {
         }
         else{
             DrawChessBoard.printBoard(chessBoard);
-            return "You are only an observer. You cannot interact with the game";
+            return "You are only an observer. You cannot interact with the game.";
         }
     }
 

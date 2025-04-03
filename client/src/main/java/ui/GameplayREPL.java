@@ -26,6 +26,11 @@ public class GameplayREPL {
     String bgColorStart = SET_BG_COLOR_YELLOW;
     String bgColorEnd = SET_BG_COLOR_GREEN;
 
+    String observerHelp = """
+                    help: lists available commands
+                    leave: leave game
+                    highlight <[Row(a-h)][Column(1-8)]>: highlight valid movies for chess piece
+                    """;
     String help = """
                     help: lists available commands
                     redraw: redraws the chessboard for a fresh start
@@ -76,7 +81,12 @@ public class GameplayREPL {
             case "highlight" -> highlight(parameters);
             case "leave" -> leave();
             default -> {
-                System.out.print(help);
+                if (!observer){
+                    System.out.print(help);
+                }
+                else{
+                    System.out.print(observerHelp);
+                }
                 System.out.print("\n");
                 DrawChessBoard.printBoard(chessBoard);
                 yield "";
@@ -182,11 +192,7 @@ public class GameplayREPL {
     }
 
     public String highlight(String ... parameters){
-        if (!observer && parameters.length == 1){
-            if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
-                DrawChessBoard.printBoard(chessBoard);
-                return "It is not your turn. Please wait until it is your turn to highlight.";
-             }
+        if (parameters.length == 1){
             int col = 0;
             int row = 0;
             char rowChar = parameters[0].charAt(0);
@@ -203,11 +209,6 @@ public class GameplayREPL {
             if (chessPiece == null){
                 DrawChessBoard.printBoard(chessBoard);
                 return "No piece at selected position. Please enter a valid position.";
-            }
-            if (!playerColor.equalsIgnoreCase(chessPiece.getTeamColor().toString())){
-                DrawChessBoard.printBoard(chessBoard);
-                return "You have selected a piece for the other team. Please select " +
-                        "one of your own pieces to highlight.";
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             if (validMoves.isEmpty()){
@@ -254,10 +255,7 @@ public class GameplayREPL {
             DrawChessBoard.drawChessBoard(playerColor, chessBoard);
             return "Highlighted moves for piece at requested position";
         }
-        else{
-            DrawChessBoard.printBoard(chessBoard);
-            return "You are only an observer. You cannot interact with the game.";
-        }
+        return "Invalid input. Please try again.";
     }
 
     public String redraw(){

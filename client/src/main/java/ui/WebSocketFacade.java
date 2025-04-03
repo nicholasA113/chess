@@ -12,8 +12,9 @@ import java.net.URI;
 @ClientEndpoint
 public class WebSocketFacade{
 
-    Session session;
-    NotificationHandler notificationHandler;
+    private Session session;
+    private NotificationHandler notificationHandler;
+    private Gson gson = new Gson();
 
     public WebSocketFacade(NotificationHandler notificationHandler,
                            String authToken, int gameID) throws ResponseException {
@@ -22,38 +23,30 @@ public class WebSocketFacade{
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, url);
             this.notificationHandler = notificationHandler;
-            this.session.addMessageHandler(new MessageHandler.Whole<String>() {
-                @Override
-                public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
-                    notificationHandler.notify(notification);
-                }
-            });
+
             UserGameCommand connectCommand = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID);
-            sendCommand(new Gson().toJson(connectCommand));
+            sendCommand(gson.toJson(connectCommand));
+            System.out.print("Connected to WebSocket\n");
         }
         catch(Exception e){
-            throw new ResponseException(500, e.getMessage());
+            throw new ResponseException(500, "Connection failed - " + e.getMessage());
+        }
+    }
+
+    @OnMessage
+    public void onMessage(String message) {
+        Notification notification = gson.fromJson(message, Notification.class);
+        if (notificationHandler != null) {
+            notificationHandler.notify(notification);
         }
     }
 
     public void sendCommand(String command) throws IOException {
-        session.getBasicRemote().sendText(command);
-    }
-
-    @OnOpen
-    public void onOpen(Session session) {
-        System.out.println("Connected to WebSocket server.");
-    }
-
-    @OnError
-    public void onError(Session session, Throwable throwable) {
-        System.err.println("WebSocket error: " + throwable.getMessage());
-    }
-
-    @OnClose
-    public void onClose(Session session, CloseReason reason) {
-        System.out.println("WebSocket closed: " + reason);
+        if (session != null && session.isOpen()) {
+            session.getBasicRemote().sendText(command);
+        } else {
+            throw new IOException("WebSocket connection is closed.");
+        }
     }
 
 }

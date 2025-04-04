@@ -174,7 +174,6 @@ public class GameplayREPL {
                     chessGame.makeMove(chessMove);
                     return "Moved chess piece successfully";
                 }
-
                 else if (playerColor.equalsIgnoreCase("black")){
                     ChessPosition startPosition = chessMove.getStartPosition();
                     int startPositionRow = startPosition.getRow();
@@ -290,7 +289,6 @@ public class GameplayREPL {
         catch (Exception e){
             System.out.print(e.getMessage());
         }
-        System.out.print("User has left the game");
         return "leave";
     }
 

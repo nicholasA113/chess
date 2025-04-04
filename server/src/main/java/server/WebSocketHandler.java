@@ -24,6 +24,8 @@ public class WebSocketHandler {
     private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
     private static Map<Session, Integer> sessionGameID = new HashMap<>();
 
+    private static String notificationText;
+
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
@@ -31,7 +33,7 @@ public class WebSocketHandler {
         switch(command.getCommandType()){
             case CONNECT -> connect(session, command);
             //case MAKE_MOVE -> makeMove(session, command);
-            //case LEAVE -> leave(session, command);
+            case LEAVE -> leave(session, command);
             //case RESIGN -> resign(session, command);
         }
     }
@@ -40,17 +42,14 @@ public class WebSocketHandler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
         ChessGame game = null;
-
         connections.put(authToken, session);
         sessionGameID.put(session, gameID);
-
         List<GameData> games = command.getGames();
         for (GameData chessGame : games){
             if (chessGame.gameID() == gameID){
                 game = chessGame.game();
             }
         }
-
         String playerColor = command.getPlayerColor();
         if (!command.observer()){
             System.out.println("User " + command.getUsername() + " connected to game " + gameID +
@@ -60,7 +59,6 @@ public class WebSocketHandler {
             System.out.println("User " + command.getUsername() + " connected to game " + gameID
             + " as an observer");
         }
-
         LoadGameMessage loadGameMessage = new LoadGameMessage(game);
         try {
             session.getRemote().sendString(gson.toJson(loadGameMessage));
@@ -72,13 +70,22 @@ public class WebSocketHandler {
                 System.err.println("Failed to send error message: " + ex.getMessage());
             }
         }
-        String notificationText = "";
         if (!command.observer()){
             notificationText = command.getUsername() + " has joined the game as player color " + playerColor;
         }
         else if (command.observer()){
             notificationText = command.getUsername() + " has joined as an observer";
         }
+        Notification notification = new Notification(notificationText);
+        sendNotification(authToken, notification, gameID);
+    }
+
+    public static void leave(Session session, UserGameCommand command){
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+        connections.remove(authToken, session);
+        sessionGameID.remove(session, gameID);
+        notificationText = command.getUsername() + " has left the game.";
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }

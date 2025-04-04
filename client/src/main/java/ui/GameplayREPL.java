@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import model.GameData;
 import websocket.commands.*;
 
-import javax.management.Notification;
 import java.util.*;
 
 import static ui.EscapeSequences.*;
@@ -52,13 +51,8 @@ public class GameplayREPL {
     }
 
     public void runGameplayRepl() throws Exception {
-        NotificationHandler handler = new NotificationHandler() {
-            @Override
-            public void notify(Notification notification) {
-                System.out.println(notification);
-            }
-        };
-        connection = new WebSocketFacade(handler, authToken, gameID, games);
+        NotificationHandler handler = notification -> System.out.println(notification);
+        connection = new WebSocketFacade(handler, authToken, gameID, games, playerColor);
         DrawChessBoard.printBoard(chessBoard);
         Scanner scanner = new Scanner(System.in);
         var result = "";
@@ -274,7 +268,7 @@ public class GameplayREPL {
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
-                authToken, gameID, games);
+                authToken, gameID, games, playerColor);
         String command = gson.toJson(leaveCommand);
         try{
             connection.sendCommand(command);
@@ -290,7 +284,7 @@ public class GameplayREPL {
         Scanner scanner = new Scanner(System.in);
         if (!observer){
             UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
-                    authToken, gameID, games);
+                    authToken, gameID, games, playerColor);
             String command = gson.toJson(resignCommand);
             try{
                 connection.sendCommand(command);

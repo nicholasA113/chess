@@ -38,15 +38,26 @@ public class WebSocketHandler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
         ChessGame game = null;
+        String whiteUsername = "";
+        String blackUsername = "";
 
         connections.put(authToken, session);
-        System.out.println("User " + authToken + " connected to game " + gameID);
 
         List<GameData> games = command.getGames();
         for (GameData chessGame : games){
             if (chessGame.gameID() == gameID){
                 game = chessGame.game();
+                whiteUsername = chessGame.whiteUsername();
+                blackUsername = chessGame.blackUsername();
             }
+        }
+
+        String playerColor = command.getPlayerColor();
+        if (playerColor.equalsIgnoreCase("white")){
+            System.out.println("User " + whiteUsername + " connected to game " + gameID);
+        }
+        else if (playerColor.equalsIgnoreCase("black")){
+            System.out.println("User " + blackUsername + " connected to game " + gameID);
         }
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(game);
@@ -60,22 +71,30 @@ public class WebSocketHandler {
                 System.err.println("Failed to send error message: " + ex.getMessage());
             }
         }
-        String message = gson.toJson(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION));
-        Notification notification = new Notification(message);
-        sendNotification(notification);
+
+        String notificationText = "";
+        if (playerColor.equalsIgnoreCase("white")){
+            notificationText = whiteUsername + " joined game " + gameID;
+        }
+        else if (playerColor.equalsIgnoreCase("black")){
+            notificationText = blackUsername + " joined game " + gameID;
+        }
+        Notification notification = new Notification(notificationText);
+        sendNotification(authToken, notification);
     }
 
-    public static void sendNotification(Notification notification){
-        connections.forEach((_, session) -> {
-            try {
-                System.out.print("Sending notification...");
-                session.getRemote().sendString(gson.toJson(notification));
-            } catch (IOException e) {
-                ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
+    public static void sendNotification(String authToken, Notification notification){
+        connections.forEach((token, session) -> {
+            if (!token.equals(authToken)) {
                 try {
-                    session.getRemote().sendString(new Gson().toJson(errorMessage));
-                } catch (IOException ex) {
-                    System.err.println("Failed to send error message: " + ex.getMessage());
+                    session.getRemote().sendString(gson.toJson(notification));
+                } catch (IOException e) {
+                    ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
+                    try {
+                        session.getRemote().sendString(new Gson().toJson(errorMessage));
+                    } catch (IOException ex) {
+                        System.err.println("Failed to send error message: " + ex.getMessage());
+                    }
                 }
             }
         });

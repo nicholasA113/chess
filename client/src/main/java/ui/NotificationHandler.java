@@ -1,7 +1,7 @@
 package ui;
 
-import javax.management.Notification;
+import websocket.messages.*;
 
 public interface NotificationHandler {
-    public void notify(Notification notification);
+    public void handleNotification(Notification notification);
 }

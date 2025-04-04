@@ -22,12 +22,15 @@ public class UserGameCommand {
 
     private final List<GameData> games;
 
+    private final String playerColor;
+
     public UserGameCommand(CommandType commandType, String authToken, Integer gameID,
-                           List<GameData> games) {
+                           List<GameData> games, String playerColor) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
         this.games = games;
+        this.playerColor = playerColor;
     }
 
     public enum CommandType {
@@ -50,6 +53,8 @@ public class UserGameCommand {
     }
 
     public List<GameData> getGames(){ return games; }
+
+    public String getPlayerColor(){ return playerColor; }
 
     @Override
     public boolean equals(Object o) {

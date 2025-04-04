@@ -2,13 +2,11 @@ package ui;
 
 import chess.*;
 import com.google.gson.Gson;
-import exceptions.ResponseException;
+import model.GameData;
 import websocket.commands.*;
 
 import javax.management.Notification;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
@@ -22,6 +20,7 @@ public class GameplayREPL {
     Boolean observer;
     String playerColor;
     ChessGame chessGame;
+    List<GameData> games;
 
     String bgColorStart = SET_BG_COLOR_YELLOW;
     String bgColorEnd = SET_BG_COLOR_GREEN;
@@ -41,23 +40,26 @@ public class GameplayREPL {
                     """;
 
     public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard,
-                        boolean observer, String playerColor, ChessGame chessGame){
+                        boolean observer, String playerColor, ChessGame chessGame,
+                        List<GameData> games){
         this.chessBoard = chessBoard;
         this.authToken = authToken;
         this.gameID = gameID;
         this.observer = observer;
         this.playerColor = playerColor;
         this.chessGame = chessGame;
+        this.games = games;
     }
 
     public void runGameplayRepl() throws Exception {
         NotificationHandler handler = new NotificationHandler() {
             @Override
             public void notify(Notification notification) {
-                System.out.println("Notification received: " + notification);
+                System.out.println(notification);
             }
         };
-        connection = new WebSocketFacade(handler, authToken, gameID);
+        connection = new WebSocketFacade(handler, authToken, gameID, games);
+        DrawChessBoard.printBoard(chessBoard);
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equalsIgnoreCase("leave")) {
@@ -272,7 +274,7 @@ public class GameplayREPL {
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
-                authToken, gameID);
+                authToken, gameID, games);
         String command = gson.toJson(leaveCommand);
         try{
             connection.sendCommand(command);
@@ -288,7 +290,7 @@ public class GameplayREPL {
         Scanner scanner = new Scanner(System.in);
         if (!observer){
             UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
-                    authToken, gameID);
+                    authToken, gameID, games);
             String command = gson.toJson(resignCommand);
             try{
                 connection.sendCommand(command);

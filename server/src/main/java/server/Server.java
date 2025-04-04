@@ -5,10 +5,13 @@ import dataaccess.*;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
+import server.WebSocketHandler;
 import service.httphandlers.*;
 import spark.Spark;
 
 public class Server {
+
+    WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     SQLUserDataDAO sqlUserDataDAO;
     SQLAuthDataDAO sqlAuthDataDAO;
@@ -21,8 +24,6 @@ public class Server {
     UserService userService;
     GameService gameService;
     ClearService clearService;
-
-    WebSocketHandler webSocketHandler = new WebSocketHandler();
 
     Gson serializer = new Gson();
 

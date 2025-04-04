@@ -1,7 +1,9 @@
 package websocket.commands;
 
 import com.google.gson.Gson;
+import model.GameData;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -18,10 +20,14 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
+    private final List<GameData> games;
+
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID,
+                           List<GameData> games) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
+        this.games = games;
     }
 
     public enum CommandType {
@@ -42,6 +48,8 @@ public class UserGameCommand {
     public Integer getGameID() {
         return gameID;
     }
+
+    public List<GameData> getGames(){ return games; }
 
     @Override
     public boolean equals(Object o) {

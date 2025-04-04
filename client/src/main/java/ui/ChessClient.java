@@ -22,6 +22,7 @@ public class ChessClient {
     Integer mapIndex = 1;
     Map<Integer, GameData> gameMapIndexToID;
     Map<Integer, StringBuilder[][]> gameToChessBoard;
+    List<GameData> games;
 
 
     public ChessClient(int port){
@@ -173,17 +174,15 @@ public class ChessClient {
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    DrawChessBoard.printBoard(chessBoard);
                     GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
-                            chessBoard, observer, parameters[1], chessGame);
+                            chessBoard, observer, parameters[1], chessGame, games);
                     gameplayREPL.runGameplayRepl();
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
                     StringBuilder[][] chessBoard = new StringBuilder[10][10];
                     chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    DrawChessBoard.printBoard(chessBoard);
                     GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(), gameID,
-                            chessBoard, observer, parameters[1], chessGame);
+                            chessBoard, observer, parameters[1], chessGame, games);
                     gameplayREPL.runGameplayRepl();
                 }
                 else{
@@ -191,17 +190,15 @@ public class ChessClient {
                     if (parameters[1].equalsIgnoreCase("WHITE")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        DrawChessBoard.printBoard(chessBoard);
                         GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                                gameID, chessBoard, observer, parameters[1], chessGame);
+                                gameID, chessBoard, observer, parameters[1], chessGame, games);
                         gameplayREPL.runGameplayRepl();
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
                         StringBuilder[][] chessBoard = new StringBuilder[10][10];
                         chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        DrawChessBoard.printBoard(chessBoard);
                         GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                                gameID, chessBoard, observer, parameters[1], chessGame);
+                                gameID, chessBoard, observer, parameters[1], chessGame, games);
                         gameplayREPL.runGameplayRepl();
                     }
                 }
@@ -251,9 +248,8 @@ public class ChessClient {
                 Boolean observer = true;
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
-                DrawChessBoard.printBoard(chessBoard);
                 GameplayREPL gameplayREPL = new GameplayREPL(data.authToken(),
-                        gameID, chessBoard, observer, playerColor, chessGame);
+                        gameID, chessBoard, observer, playerColor, chessGame, games);
                 gameplayREPL.runGameplayRepl();
             }
             catch (Exception e){
@@ -298,7 +294,7 @@ public class ChessClient {
     private List<GameData> getUpdateGames() throws Exception {
         RequestResult.ListGamesResult listGamesResult = serverFacade.listGames(
                 data.authToken());
-        List<GameData> games = listGamesResult.games();
+        games = listGamesResult.games();
         gameMapIndexToID.clear();
         mapIndex = 1;
         for (GameData game : games){

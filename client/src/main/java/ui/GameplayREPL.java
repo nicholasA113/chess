@@ -69,7 +69,7 @@ public class GameplayREPL {
             String line = scanner.nextLine();
             result = makeRequest(line);
             if (!result.isEmpty() && !result.equalsIgnoreCase("leave")) {
-                System.out.println(result);
+                System.out.print(result);
             }
         }
     }

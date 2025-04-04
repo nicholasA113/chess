@@ -241,7 +241,6 @@ public class ChessClient {
         return "";
     }
 
-
     public String help() {
         if (loggedOut) {
             return """

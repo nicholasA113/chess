@@ -51,16 +51,21 @@ public class GameplayREPL {
     }
 
     public void runGameplayRepl() throws Exception {
-        NotificationHandler handler = notification -> System.out.println(notification);
+        NotificationHandler handler = notification -> {
+            System.out.println(notification);
+            System.out.print("\n>>> ");
+        };
         connection = new WebSocketFacade(handler, authToken, gameID, games, playerColor);
-        DrawChessBoard.printBoard(chessBoard);
+        userInput();
+    }
+
+    public void userInput() throws Exception {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equalsIgnoreCase("leave")) {
-            printPrompt();
             String line = scanner.nextLine();
             result = makeRequest(line);
-            if (!result.equalsIgnoreCase("leave")) {
+            if (!result.isEmpty() && !result.equalsIgnoreCase("leave")) {
                 System.out.println(result);
             }
         }
@@ -74,7 +79,11 @@ public class GameplayREPL {
             case "redraw" -> redraw();
             case "move" -> makeMove(parameters);
             case "resign" -> resign();
-            case "highlight" -> highlight(parameters);
+            case "highlight" -> {
+                highlight(parameters);
+                printPrompt();
+                yield "";
+            }
             case "leave" -> leave();
             default -> {
                 if (!observer){
@@ -187,7 +196,7 @@ public class GameplayREPL {
         return "You are an observer. You cannot make a move.";
     }
 
-    public String highlight(String ... parameters){
+    public void highlight(String ... parameters){
         if (parameters.length == 1){
             int col = 0;
             int row = 0;
@@ -197,19 +206,19 @@ public class GameplayREPL {
             row = colChar - '0';
             if (row > 8 || col > 8 || row <= 0 || col <= 0){
                 DrawChessBoard.printBoard(chessBoard);
-                return "Invalid space position. Please enter a valid space.";
+                System.out.print("Invalid space position. Please enter a valid space.");
             }
             ChessPosition position = new ChessPosition(row, col);
             ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = board.getPiece(position);
             if (chessPiece == null){
                 DrawChessBoard.printBoard(chessBoard);
-                return "No piece at selected position. Please enter a valid position.";
+                System.out.print("No piece at selected position. Please enter a valid position.");
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             if (validMoves.isEmpty()){
                 DrawChessBoard.printBoard(chessBoard);
-                return "There are no valid moves for piece at requested position.";
+                System.out.print("\nThere are no valid moves for piece at requested position.\n");
             }
             for (ChessMove move : validMoves){
                 if (playerColor.equalsIgnoreCase("white")){
@@ -248,10 +257,12 @@ public class GameplayREPL {
                 }
             }
             DrawChessBoard.printBoard(chessBoard);
+            System.out.print("Highlighted moves for piece at requested position\n");
             DrawChessBoard.drawChessBoard(playerColor, chessBoard);
-            return "Highlighted moves for piece at requested position";
         }
-        return "Invalid input. Please try again.";
+        else{
+            System.out.print("Invalid input. Please try again.");
+        }
     }
 
     public String redraw(){
@@ -296,7 +307,7 @@ public class GameplayREPL {
                     " forfeit and the other player will win the game.\n");
             var result = "";
             while (!result.equalsIgnoreCase("yes")){
-                printPrompt();
+                //printPrompt();
                 result = scanner.nextLine();
                 if (result.equalsIgnoreCase("yes")){
                     DrawChessBoard.printBoard(chessBoard);
@@ -314,8 +325,8 @@ public class GameplayREPL {
         return "";
     }
 
-    private void printPrompt() {
+    public void printPrompt(){
         System.out.print("\n>>> ");
+        System.out.flush();
     }
-
 }

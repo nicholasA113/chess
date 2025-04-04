@@ -14,7 +14,9 @@ import websocket.messages.Notification;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -22,6 +24,8 @@ public class WebSocketHandler {
 
     private static Gson gson = new Gson();
     private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
+    private static Map<Session, Integer> sessionGameID = new HashMap<>();
+
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
@@ -42,6 +46,7 @@ public class WebSocketHandler {
         String blackUsername = "";
 
         connections.put(authToken, session);
+        sessionGameID.put(session, gameID);
 
         List<GameData> games = command.getGames();
         for (GameData chessGame : games){
@@ -80,12 +85,13 @@ public class WebSocketHandler {
             notificationText = blackUsername + " joined game " + gameID;
         }
         Notification notification = new Notification(notificationText);
-        sendNotification(authToken, notification);
+        sendNotification(authToken, notification, gameID);
     }
 
-    public static void sendNotification(String authToken, Notification notification){
+    public static void sendNotification(String authToken, Notification notification, Integer gameID){
         connections.forEach((token, session) -> {
-            if (!token.equals(authToken)) {
+            Integer sessionID = sessionGameID.get(session);
+            if (!token.equals(authToken) && sessionID.equals(gameID)) {
                 try {
                     session.getRemote().sendString(gson.toJson(notification));
                 } catch (IOException e) {

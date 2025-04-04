@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import exceptions.ResponseException;
 import model.GameData;
@@ -45,9 +47,18 @@ public class WebSocketFacade{
 
     @OnMessage
     public void onMessage(String message) {
-        Notification notification = gson.fromJson(message, Notification.class);
-        if (notificationHandler != null) {
-            notificationHandler.handleNotification(notification);
+        ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
+        switch (serverMessage.getServerMessageType()){
+            case LOAD_GAME -> {
+                LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
+                ChessGame game = loadGameMessage.getChessGame();
+                ChessBoard board = game.getBoard();
+                StringBuilder[][] chessBoard = new StringBuilder[10][10];
+                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+                DrawChessBoard.printBoard(chessBoard);
+                System.out.print("Drew chessBoard from server\n");
+                printPrompt();
+            }
         }
     }
 
@@ -57,6 +68,11 @@ public class WebSocketFacade{
         } else {
             throw new IOException("WebSocket connection is closed.\n");
         }
+    }
+
+    private void printPrompt() {
+        System.out.print("\n>>> ");
+        System.out.flush();
     }
 
 }

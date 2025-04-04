@@ -81,13 +81,15 @@ public class WebSocketHandler {
     }
 
     public static void leave(Session session, UserGameCommand command){
-        String authToken = command.getAuthToken();
-        int gameID = command.getGameID();
-        connections.remove(authToken, session);
-        sessionGameID.remove(session, gameID);
-        notificationText = command.getUsername() + " has left the game.";
-        Notification notification = new Notification(notificationText);
-        sendNotification(authToken, notification, gameID);
+        if (!command.observer()){
+            String authToken = command.getAuthToken();
+            int gameID = command.getGameID();
+            connections.remove(authToken, session);
+            sessionGameID.remove(session, gameID);
+            notificationText = command.getUsername() + " has left the game.";
+            Notification notification = new Notification(notificationText);
+            sendNotification(authToken, notification, gameID);
+        }
     }
 
     public static void sendNotification(String authToken, Notification notification, Integer gameID){
@@ -97,12 +99,7 @@ public class WebSocketHandler {
                 try {
                     session.getRemote().sendString(gson.toJson(notification));
                 } catch (IOException e) {
-                    ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
-                    try {
-                        session.getRemote().sendString(new Gson().toJson(errorMessage));
-                    } catch (IOException ex) {
-                        System.err.println("Failed to send error message: " + ex.getMessage());
-                    }
+                    System.err.println("Failed to send error message: " + e.getMessage());
                 }
             }
         });

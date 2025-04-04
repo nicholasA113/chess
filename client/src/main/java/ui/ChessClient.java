@@ -155,6 +155,7 @@ public class ChessClient {
 
     public String joinGame(String ... parameters){
         Boolean observer = false;
+        String playerColor = parameters[1];
         if (loggedIn && parameters.length == 2){
             try{
                 int gameID = 0;
@@ -172,34 +173,18 @@ public class ChessClient {
                     }
                 }
                 if (parameters[1].equalsIgnoreCase("WHITE") && data.username().equals(whiteUsername)){
-                    StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                    chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    GameplayREPL gameplayREPL = new GameplayREPL(data, gameID,
-                            chessBoard, observer, parameters[1], chessGame, games);
-                    gameplayREPL.runGameplayRepl();
+                    toGameplayREPL(observer, playerColor, gameID, chessGame);
                 }
                 else if (parameters[1].equalsIgnoreCase("BLACK") && data.username().equals(blackUsername)){
-                    StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                    chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                    GameplayREPL gameplayREPL = new GameplayREPL(data, gameID,
-                            chessBoard, observer, parameters[1], chessGame, games);
-                    gameplayREPL.runGameplayRepl();
+                    toGameplayREPL(observer, playerColor, gameID, chessGame);
                 }
                 else{
                     serverFacade.joinGame(data.authToken(), parameters[1].toUpperCase(), gameID);
                     if (parameters[1].equalsIgnoreCase("WHITE")){
-                        StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                        chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        GameplayREPL gameplayREPL = new GameplayREPL(data,
-                                gameID, chessBoard, observer, parameters[1], chessGame, games);
-                        gameplayREPL.runGameplayRepl();
+                        toGameplayREPL(observer, playerColor, gameID, chessGame);
                     }
                     else if (parameters[1].equalsIgnoreCase("BLACK")){
-                        StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                        chessBoard = DrawChessBoard.drawChessBoard(parameters[1], chessBoard);
-                        GameplayREPL gameplayREPL = new GameplayREPL(data,
-                                gameID, chessBoard, observer, parameters[1], chessGame, games);
-                        gameplayREPL.runGameplayRepl();
+                        toGameplayREPL(observer, playerColor, gameID, chessGame);
                     }
                 }
                 return "";
@@ -247,11 +232,7 @@ public class ChessClient {
         if (loggedIn && parameters.length == 1){
             try{
                 Boolean observer = true;
-                StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
-                GameplayREPL gameplayREPL = new GameplayREPL(data,
-                        gameID, chessBoard, observer, playerColor, chessGame, games);
-                gameplayREPL.runGameplayRepl();
+                toGameplayREPL(observer, playerColor, gameID, chessGame);
             }
             catch (Exception e){
                 System.out.print(e.getMessage());
@@ -302,5 +283,14 @@ public class ChessClient {
             gameMapIndexToID.put(mapIndex++, game);
         }
         return games;
+    }
+
+    public void toGameplayREPL(boolean observer, String playerColor,
+                               int gameID, ChessGame chessGame) throws Exception {
+        StringBuilder[][] chessBoard = new StringBuilder[10][10];
+        chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+        GameplayREPL gameplayREPL = new GameplayREPL(data, gameID,
+                chessBoard, observer, playerColor, chessGame, games);
+        gameplayREPL.runGameplayRepl();
     }
 }

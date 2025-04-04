@@ -59,6 +59,12 @@ public class WebSocketFacade{
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();
             }
+            case NOTIFICATION -> {
+                Notification notification = gson.fromJson(message, Notification.class);
+                if (notificationHandler != null) {
+                    notificationHandler.handleNotification(notification);
+                }
+            }
         }
     }
 

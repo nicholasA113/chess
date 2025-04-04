@@ -80,7 +80,8 @@ public class GameplayREPL {
             case "move" -> makeMove(parameters);
             case "resign" -> resign();
             case "highlight" -> {
-                highlight(parameters);
+                String message = highlight(parameters);
+                System.out.print(message + '\n');
                 printPrompt();
                 yield "";
             }
@@ -196,7 +197,7 @@ public class GameplayREPL {
         return "You are an observer. You cannot make a move.";
     }
 
-    public void highlight(String ... parameters){
+    public String highlight(String ... parameters){
         if (parameters.length == 1){
             int col = 0;
             int row = 0;
@@ -206,19 +207,19 @@ public class GameplayREPL {
             row = colChar - '0';
             if (row > 8 || col > 8 || row <= 0 || col <= 0){
                 DrawChessBoard.printBoard(chessBoard);
-                System.out.print("Invalid space position. Please enter a valid space.");
+                return "Invalid space position. Please enter a valid space.";
             }
             ChessPosition position = new ChessPosition(row, col);
             ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = board.getPiece(position);
             if (chessPiece == null){
                 DrawChessBoard.printBoard(chessBoard);
-                System.out.print("No piece at selected position. Please enter a valid position.");
+                return "No piece at selected position. Please enter a valid position.";
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             if (validMoves.isEmpty()){
                 DrawChessBoard.printBoard(chessBoard);
-                System.out.print("\nThere are no valid moves for piece at requested position.\n");
+                return "There are no valid moves for piece at requested position.";
             }
             for (ChessMove move : validMoves){
                 if (playerColor.equalsIgnoreCase("white")){
@@ -257,12 +258,10 @@ public class GameplayREPL {
                 }
             }
             DrawChessBoard.printBoard(chessBoard);
-            System.out.print("Highlighted moves for piece at requested position\n");
             DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+            return "Highlighted moves for piece at requested position";
         }
-        else{
-            System.out.print("Invalid input. Please try again.");
-        }
+        return "Invalid input. Please try again.";
     }
 
     public String redraw(){

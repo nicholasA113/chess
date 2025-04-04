@@ -21,9 +21,11 @@ public class WebSocketFacade{
     private Gson gson = new Gson();
     private List<GameData> games;
     private String playerColor;
+    private boolean observer;
+    private String username;
 
     public WebSocketFacade(NotificationHandler notificationHandler,
-                           String authToken, int gameID, List<GameData> games,
+                           String authToken, boolean observer, String username, int gameID, List<GameData> games,
                            String playerColor) throws ResponseException {
         try{
             URI url = new URI("ws://localhost:8080/ws");
@@ -31,13 +33,14 @@ public class WebSocketFacade{
             this.session = container.connectToServer(this, url);
             System.out.print("Connected to WebSocket\n");
 
+            this.observer = observer;
             this.playerColor = playerColor;
             this.games = games;
             this.notificationHandler = notificationHandler;
 
             UserGameCommand connectCommand =
                     new UserGameCommand(UserGameCommand.CommandType.CONNECT,
-                            authToken, gameID, games, playerColor);
+                            authToken, observer, username, gameID, games, playerColor);
             sendCommand(gson.toJson(connectCommand));
         }
         catch(Exception e){
@@ -64,6 +67,11 @@ public class WebSocketFacade{
                 if (notificationHandler != null) {
                     notificationHandler.handleNotification(notification);
                 }
+            }
+            case ERROR -> {
+                ErrorMessage errorMessage = gson.fromJson(message, ErrorMessage.class);
+                System.err.println("Error: " + errorMessage);
+                printPrompt();
             }
         }
     }

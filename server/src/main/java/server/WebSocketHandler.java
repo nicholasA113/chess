@@ -6,12 +6,10 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import requestresultrecords.RequestResult;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.Notification;
-import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,12 +36,10 @@ public class WebSocketHandler {
         }
     }
 
-    public static void connect(Session session, UserGameCommand command) throws Exception {
+    public static void connect(Session session, UserGameCommand command) {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
         ChessGame game = null;
-        String whiteUsername = "";
-        String blackUsername = "";
 
         connections.put(authToken, session);
         sessionGameID.put(session, gameID);
@@ -52,17 +48,17 @@ public class WebSocketHandler {
         for (GameData chessGame : games){
             if (chessGame.gameID() == gameID){
                 game = chessGame.game();
-                whiteUsername = chessGame.whiteUsername();
-                blackUsername = chessGame.blackUsername();
             }
         }
 
         String playerColor = command.getPlayerColor();
-        if (playerColor.equalsIgnoreCase("white")){
-            System.out.println("User " + whiteUsername + " connected to game " + gameID);
+        if (!command.observer()){
+            System.out.println("User " + command.getUsername() + " connected to game " + gameID +
+                    " as " + playerColor);
         }
-        else if (playerColor.equalsIgnoreCase("black")){
-            System.out.println("User " + blackUsername + " connected to game " + gameID);
+        else if (command.observer()){
+            System.out.println("User " + command.getUsername() + " connected to game " + gameID
+            + " as an observer");
         }
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(game);
@@ -76,13 +72,12 @@ public class WebSocketHandler {
                 System.err.println("Failed to send error message: " + ex.getMessage());
             }
         }
-
         String notificationText = "";
-        if (playerColor.equalsIgnoreCase("white")){
-            notificationText = whiteUsername + " joined game " + gameID;
+        if (!command.observer()){
+            notificationText = command.getUsername() + " has joined the game as player color " + playerColor;
         }
-        else if (playerColor.equalsIgnoreCase("black")){
-            notificationText = blackUsername + " joined game " + gameID;
+        else if (command.observer()){
+            notificationText = command.getUsername() + " has joined as an observer";
         }
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);

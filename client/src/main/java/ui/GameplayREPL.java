@@ -2,6 +2,7 @@ package ui;
 
 import chess.*;
 import com.google.gson.Gson;
+import model.AuthData;
 import model.GameData;
 import websocket.commands.*;
 
@@ -20,6 +21,7 @@ public class GameplayREPL {
     String playerColor;
     ChessGame chessGame;
     List<GameData> games;
+    String username;
 
     String bgColorStart = SET_BG_COLOR_YELLOW;
     String bgColorEnd = SET_BG_COLOR_GREEN;
@@ -38,11 +40,12 @@ public class GameplayREPL {
                     highlight <[Row(a-h)][Column(1-8)]>: highlight valid movies for chess piece
                     """;
 
-    public GameplayREPL(String authToken, int gameID, StringBuilder[][] chessBoard,
+    public GameplayREPL(AuthData data, int gameID, StringBuilder[][] chessBoard,
                         boolean observer, String playerColor, ChessGame chessGame,
                         List<GameData> games){
         this.chessBoard = chessBoard;
-        this.authToken = authToken;
+        this.authToken = data.authToken();
+        this.username = data.username();
         this.gameID = gameID;
         this.observer = observer;
         this.playerColor = playerColor;
@@ -55,7 +58,7 @@ public class GameplayREPL {
             System.out.println(notification);
             System.out.print("\n>>> ");
         };
-        connection = new WebSocketFacade(handler, authToken, gameID, games, playerColor);
+        connection = new WebSocketFacade(handler, authToken, observer, username, gameID, games, playerColor);
         userInput();
     }
 
@@ -95,6 +98,7 @@ public class GameplayREPL {
                 }
                 System.out.print("\n");
                 DrawChessBoard.printBoard(chessBoard);
+                printPrompt();
                 yield "";
             }
         };
@@ -278,7 +282,7 @@ public class GameplayREPL {
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
-                authToken, gameID, games, playerColor);
+                authToken, observer, username, gameID, games, playerColor);
         String command = gson.toJson(leaveCommand);
         try{
             connection.sendCommand(command);
@@ -294,7 +298,7 @@ public class GameplayREPL {
         Scanner scanner = new Scanner(System.in);
         if (!observer){
             UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
-                    authToken, gameID, games, playerColor);
+                    authToken, observer, username, gameID, games, playerColor);
             String command = gson.toJson(resignCommand);
             try{
                 connection.sendCommand(command);

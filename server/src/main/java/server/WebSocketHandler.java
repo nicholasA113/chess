@@ -26,7 +26,6 @@ public class WebSocketHandler {
 
     private static String notificationText;
 
-
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
@@ -34,7 +33,7 @@ public class WebSocketHandler {
             case CONNECT -> connect(session, command);
             //case MAKE_MOVE -> makeMove(session, command);
             case LEAVE -> leave(session, command);
-            //case RESIGN -> resign(session, command);
+            case RESIGN -> resign(session, command);
         }
     }
 
@@ -81,15 +80,28 @@ public class WebSocketHandler {
     }
 
     public static void leave(Session session, UserGameCommand command){
-        if (!command.observer()){
-            String authToken = command.getAuthToken();
-            int gameID = command.getGameID();
-            connections.remove(authToken, session);
-            sessionGameID.remove(session, gameID);
-            notificationText = command.getUsername() + " has left the game.";
-            Notification notification = new Notification(notificationText);
-            sendNotification(authToken, notification, gameID);
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+        connections.remove(authToken, session);
+        sessionGameID.remove(session, gameID);
+        if (command.observer()){
+            notificationText = "Observer " + command.getUsername() + " has left the game.";
         }
+        else{
+            notificationText = command.getUsername() + " has left the game.";
+        }
+        Notification notification = new Notification(notificationText);
+        sendNotification(authToken, notification, gameID);
+    }
+
+    public static void resign(Session session, UserGameCommand command){
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+        connections.remove(authToken, session);
+        sessionGameID.remove(session, gameID);
+        notificationText = command.getUsername() + " has resigned.";
+        Notification notification = new Notification(notificationText);
+        sendNotification(authToken, notification, gameID);
     }
 
     public static void sendNotification(String authToken, Notification notification, Integer gameID){

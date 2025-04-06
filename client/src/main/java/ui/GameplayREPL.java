@@ -69,7 +69,7 @@ public class GameplayREPL {
             String line = scanner.nextLine();
             result = makeRequest(line);
             if (!result.isEmpty() && !result.equalsIgnoreCase("leave")) {
-                System.out.print(result);
+                System.out.println(result);
             }
         }
     }
@@ -81,7 +81,12 @@ public class GameplayREPL {
         return switch (request){
             case "redraw" -> redraw();
             case "move" -> makeMove(parameters);
-            case "resign" -> resign();
+            case "resign" -> {
+                String message = resign();
+                System.out.print(message + '\n');
+                printPrompt();
+                yield "";
+            }
             case "highlight" -> {
                 String message = highlight(parameters);
                 System.out.print(message + '\n');
@@ -295,28 +300,28 @@ public class GameplayREPL {
     public String resign(){
         Scanner scanner = new Scanner(System.in);
         if (!observer){
-            UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
-                    authToken, observer, username, gameID, games, playerColor);
-            String command = gson.toJson(resignCommand);
-            try{
-                connection.sendCommand(command);
-            }
-            catch (Exception e){
-                System.out.print(e.getMessage());
-            }
             System.out.print("Are you sure to want to resign? Doing so will result in an\nautomatic" +
                     " forfeit and the other player will win the game.\n");
             var result = "";
             while (!result.equalsIgnoreCase("yes")){
-                //printPrompt();
+                printPrompt();
                 result = scanner.nextLine();
                 if (result.equalsIgnoreCase("yes")){
+                    UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
+                            authToken, observer, username, gameID, games, playerColor);
+                    String command = gson.toJson(resignCommand);
+                    try{
+                        connection.sendCommand(command);
+                    }
+                    catch (Exception e){
+                        System.out.print(e.getMessage());
+                    }
                     DrawChessBoard.printBoard(chessBoard);
-                    return "User has admitted defeat. Other player wins!";
+                    return "You have admitted defeat. Other player wins.";
                 }
                 else if (result.equalsIgnoreCase("no")){
                     DrawChessBoard.printBoard(chessBoard);
-                    return "You have chosen to not forefeit. The game will continue.";
+                    return "You have chosen to not forfeit. The game will continue.";
                 }
                 else{
                     System.out.print("Please enter YES or NO\n");

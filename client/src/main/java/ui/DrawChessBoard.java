@@ -128,13 +128,11 @@ public abstract class DrawChessBoard {
     public static void highlightSpace(StringBuilder positionToHighlight,
                                       String bgColor, int row, int col,
                                       ChessBoard board) {
-
         ChessPosition position = new ChessPosition(row, col);
         ChessPiece chessPiece = board.getPiece(position);
-
         positionToHighlight.setLength(0);
         if (chessPiece == null){
-            positionToHighlight.append(RESET_BG_COLOR)
+            positionToHighlight
                     .append(bgColor)
                     .append("   ")
                     .append(RESET_BG_COLOR);

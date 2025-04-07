@@ -113,7 +113,7 @@ public class GameplayREPL {
         if (!observer && parameters.length == 2){
             if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
                 DrawChessBoard.printBoard(chessBoard);
-                return "It is not your turn. Please wait until it is your turn to highlight.";
+                return "It is not your turn. Please wait until it is your turn to make a move.";
             }
             int colStart = 0;
             int rowStart = 0;
@@ -162,7 +162,7 @@ public class GameplayREPL {
             }
             if (isValidMove) {
                 if (playerColor.equalsIgnoreCase("white")){
-                    ChessPosition startPosition = chessMove.getStartPosition();
+                    /**ChessPosition startPosition = chessMove.getStartPosition();
                     int startPositionRow = startPosition.getRow();
                     int startPositionCol = startPosition.getColumn();
                     int endPositionRow = endPosition.getRow();
@@ -175,8 +175,21 @@ public class GameplayREPL {
                     DrawChessBoard.moveChessPiece(startPositionToUpdate,
                             endPositionToUpdate, bgColorStart, bgColorEnd, chessPiece,
                             SET_TEXT_COLOR_RED);
-                    DrawChessBoard.printBoard(chessBoard);
+                    DrawChessBoard.printBoard(chessBoard);**/
                     chessGame.makeMove(chessMove);
+
+                    connection.setLastMove(chessMove, chessPiece);
+
+                    MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
+                            authToken, gameID, username, observer, chessMove, chessPiece,
+                            games, playerColor);
+                    String command = gson.toJson(makeMoveCommand);
+                    try{
+                        connection.sendCommand(command);
+                    }
+                    catch (Exception e){
+                        System.out.print(e.getMessage());
+                    }
                     return "Moved chess piece successfully";
                 }
                 else if (playerColor.equalsIgnoreCase("black")){
@@ -194,6 +207,17 @@ public class GameplayREPL {
                             endPositionToUpdate, bgColorStart, bgColorEnd,
                             chessPiece, SET_TEXT_COLOR_BLUE);
                     chessGame.makeMove(chessMove);
+
+                    MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
+                            authToken, gameID, username, observer, chessMove, chessPiece,
+                            games, playerColor);
+                    String command = gson.toJson(makeMoveCommand);
+                    try{
+                        connection.sendCommand(command);
+                    }
+                    catch (Exception e){
+                        System.out.print(e.getMessage());
+                    }
                     return "Moved chess piece successfully";
                 }
             } else {
@@ -235,9 +259,9 @@ public class GameplayREPL {
                     int startPositionRow = startPosition.getRow();
                     int startPositionCol = startPosition.getColumn();
                     StringBuilder startPositionToHighlight =
-                            chessBoard[9-startPositionRow][startPositionCol];
+                            chessBoard[startPositionRow][startPositionCol];
                     DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart,
-                            9-startPositionRow, startPositionCol, board);
+                            startPositionRow, startPositionCol, board);
 
                     ChessPosition endPosition = move.getEndPosition();
                     int endPositionRow = endPosition.getRow();

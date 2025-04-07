@@ -6,6 +6,7 @@ import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
@@ -29,12 +30,42 @@ public class WebSocketHandler {
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
+        MakeMoveCommand makeMoveCommand = gson.fromJson(message, MakeMoveCommand.class);
         switch(command.getCommandType()){
             case CONNECT -> connect(session, command);
-            //case MAKE_MOVE -> makeMove(session, command);
+            case MAKE_MOVE -> makeMove(session, makeMoveCommand);
             case LEAVE -> leave(session, command);
             case RESIGN -> resign(session, command);
         }
+    }
+
+    public static void makeMove(Session session, MakeMoveCommand command){
+        String authToken = command.getAuthToken();
+        int gameID = command.getGameID();
+        ChessGame game = null;
+        List<GameData> games = command.getGames();
+        for (GameData chessGame : games){
+            if (chessGame.gameID() == gameID){
+                game = chessGame.game();
+            }
+        }
+        LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+        try {
+            session.getRemote().sendString(gson.toJson(loadGameMessage));
+        } catch (IOException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
+            try {
+                session.getRemote().sendString(new Gson().toJson(errorMessage));
+            } catch (IOException ex) {
+                System.err.println("Failed to send error message: " + ex.getMessage());
+            }
+        }
+        notificationText = command.getUsername() + " has moved " +
+                command.ChessPiece().getPieceType() + " from "
+                + command.ChessMove().getStartPosition() + " to "
+                + command.ChessMove().getEndPosition() + ".";
+        Notification notification = new Notification(notificationText);
+        sendNotification(authToken, notification, gameID);
     }
 
     public static void connect(Session session, UserGameCommand command) {

@@ -1,7 +1,6 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import com.google.gson.Gson;
 import exceptions.ResponseException;
 import model.GameData;
@@ -13,6 +12,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+import static ui.EscapeSequences.*;
+
+
 @ClientEndpoint
 public class WebSocketFacade{
 
@@ -23,6 +25,9 @@ public class WebSocketFacade{
     private String playerColor;
     private boolean observer;
     private String username;
+
+    private ChessMove lastMove;
+    private ChessPiece lastPieceMoved;
 
     public WebSocketFacade(NotificationHandler notificationHandler,
                            String authToken, boolean observer, String username, int gameID, List<GameData> games,
@@ -48,6 +53,11 @@ public class WebSocketFacade{
         }
     }
 
+    public void setLastMove(ChessMove move, ChessPiece piece) {
+        this.lastMove = move;
+        this.lastPieceMoved = piece;
+    }
+
     @OnMessage
     public void onMessage(String message) {
         ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
@@ -58,6 +68,33 @@ public class WebSocketFacade{
                 ChessBoard board = game.getBoard();
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+                if (lastMove != null && lastPieceMoved != null){
+                    ChessPosition start = lastMove.getStartPosition();
+                    ChessPosition end = lastMove.getEndPosition();
+                    int rowStart = start.getRow();
+                    int colStart = start.getColumn();
+                    int rowEnd = end.getRow();
+                    int colEnd = end.getColumn();
+
+                    String bgColorStart = ((colStart + rowStart) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+                    String bgColorEnd = ((colEnd + rowEnd) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
+                    StringBuilder startPositionToUpdate;
+                    StringBuilder endPositionToUpdate;
+
+                    if (playerColor.equalsIgnoreCase("white")) {
+                        startPositionToUpdate = chessBoard[9 - rowStart][colStart];
+                        endPositionToUpdate = chessBoard[9 - rowEnd][colEnd];
+                        DrawChessBoard.moveChessPiece(startPositionToUpdate, endPositionToUpdate,
+                                bgColorStart, bgColorEnd, lastPieceMoved, SET_TEXT_COLOR_RED);
+                    } else {
+                        startPositionToUpdate = chessBoard[rowStart][9 - colStart];
+                        endPositionToUpdate = chessBoard[rowEnd][9 - colEnd];
+                        DrawChessBoard.moveChessPiece(startPositionToUpdate, endPositionToUpdate,
+                                bgColorStart, bgColorEnd, lastPieceMoved, SET_TEXT_COLOR_BLUE);
+                    }
+                    lastMove = null;
+                    lastPieceMoved = null;
+                }
                 DrawChessBoard.printBoard(chessBoard);
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();

@@ -53,11 +53,6 @@ public class WebSocketFacade{
         }
     }
 
-    public void setLastMove(ChessMove move, ChessPiece piece) {
-        this.lastMove = move;
-        this.lastPieceMoved = piece;
-    }
-
     @OnMessage
     public void onMessage(String message) {
         ServerMessage serverMessage = gson.fromJson(message, ServerMessage.class);
@@ -67,12 +62,7 @@ public class WebSocketFacade{
                 ChessGame chessGame = loadGameMessage.getChessGame();
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-                if (lastMove != null && lastPieceMoved != null){
-                    DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-                    lastMove = null;
-                    lastPieceMoved = null;
-                }
-                DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
+
                 DrawChessBoard.printBoard(chessBoard);
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();

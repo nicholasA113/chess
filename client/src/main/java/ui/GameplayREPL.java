@@ -157,7 +157,6 @@ public class GameplayREPL {
                 }
             }
             if (isValidMove) {
-                connection.setLastMove(chessMove, chessPiece);
                 chessGame.makeMove(chessMove);
                 MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
                         authToken, gameID, username, observer, chessMove, chessPiece,

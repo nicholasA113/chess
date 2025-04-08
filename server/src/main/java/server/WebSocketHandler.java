@@ -27,7 +27,6 @@ public class WebSocketHandler {
     private static Gson gson = new Gson();
     private static ConcurrentHashMap<String, Session> connections = new ConcurrentHashMap<>();
     private static Map<Session, Integer> sessionGameID = new HashMap<>();
-    private static Map<Integer, ChessGame> activeGames = new HashMap<>();
 
     private static String notificationText;
 
@@ -54,6 +53,7 @@ public class WebSocketHandler {
             }
         }
         LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+        sendLoadGameMessage(authToken, loadGameMessage, gameID);
         try {
             session.getRemote().sendString(gson.toJson(loadGameMessage));
         } catch (IOException e) {
@@ -75,11 +75,9 @@ public class WebSocketHandler {
     public static void connect(Session session, UserGameCommand command) throws DataAccessException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
-        ChessGame game = null
-                ;
+        ChessGame game = null;
         connections.put(authToken, session);
         sessionGameID.put(session, gameID);
-
         List<GameData> games = command.getGames();
         if (games == null) {
             System.err.println("Error: No games available.");
@@ -90,7 +88,6 @@ public class WebSocketHandler {
                 game = chessGame.game();
             }
         }
-
         String playerColor = command.getPlayerColor();
         if (!command.observer()){
             System.out.println("User " + command.getUsername() + " connected to game " + gameID +
@@ -101,7 +98,6 @@ public class WebSocketHandler {
                     + " as an observer");
         }
         LoadGameMessage loadGameMessage = new LoadGameMessage(game);
-        sendLoadGameMessage(authToken, loadGameMessage, gameID);
         try {
             session.getRemote().sendString(gson.toJson(loadGameMessage));
         } catch (IOException e) {

@@ -66,7 +66,6 @@ public abstract class DrawChessBoard {
         }
     }
 
-
     public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j,
                                ChessBoard game, ChessPosition gamePosition,
                                Map<ChessPiece.PieceType, String> chessPieces,
@@ -93,6 +92,34 @@ public abstract class DrawChessBoard {
             chessBoard[i][j].append(bgColor).append(SET_TEXT_BOLD).append(textColor).append(pieceText);
         }
         chessBoard[i][j].append(RESET_BG_COLOR).append(RESET_TEXT_BOLD_FAINT).append(RESET_TEXT_COLOR);
+    }
+
+    public static void highlightSpace(StringBuilder positionToHighlight,
+                                      String bgColor, int row, int col,
+                                      ChessBoard board, String playerColor) {
+
+        int gameRow = playerColor.equalsIgnoreCase("white") ? 9 - row : row;
+        int gameCol = playerColor.equalsIgnoreCase("white") ? col : 9 - col;
+        ChessPiece chessPiece = board.getPiece(new ChessPosition(gameRow, gameCol));
+
+        positionToHighlight.setLength(0);
+        if (chessPiece == null){
+            positionToHighlight.append(RESET_BG_COLOR)
+                    .append(bgColor)
+                    .append("   ")
+                    .append(RESET_BG_COLOR);
+        }
+        else{
+            String text = chessPieces.get(chessPiece.getPieceType());
+            positionToHighlight.append(RESET_TEXT_COLOR)
+                    .append(bgColor)
+                    .append(SET_TEXT_COLOR_BLACK)
+                    .append(SET_TEXT_BOLD)
+                    .append(text)
+                    .append(RESET_TEXT_BOLD_FAINT)
+                    .append(RESET_BG_COLOR)
+                    .append(RESET_TEXT_COLOR);
+        }
     }
 
     /**public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor, String bgColor){
@@ -141,32 +168,6 @@ public abstract class DrawChessBoard {
         }
         chessBoard[i][j].append(RESET_TEXT_BOLD_FAINT);
     }**/
-
-    public static void highlightSpace(StringBuilder positionToHighlight,
-                                      String bgColor, int row, int col,
-                                      ChessBoard board) {
-
-        ChessPiece chessPiece = board.getPiece(new ChessPosition(row, col));
-
-        positionToHighlight.setLength(0);
-        if (chessPiece == null){
-            positionToHighlight.append(RESET_BG_COLOR)
-                    .append(bgColor)
-                    .append("   ")
-                    .append(RESET_BG_COLOR);
-        }
-        else{
-            String text = chessPieces.get(chessPiece.getPieceType());
-            positionToHighlight.append(RESET_TEXT_COLOR)
-                    .append(bgColor)
-                    .append(SET_TEXT_COLOR_BLACK)
-                    .append(SET_TEXT_BOLD)
-                    .append(text)
-                    .append(RESET_TEXT_BOLD_FAINT)
-                    .append(RESET_BG_COLOR)
-                    .append(RESET_TEXT_COLOR);
-        }
-    }
 
     /**public static void moveChessPiece(StringBuilder startPosition,
                                       StringBuilder endPosition, String startBgColor,

@@ -68,30 +68,11 @@ public class WebSocketFacade{
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                 if (lastMove != null && lastPieceMoved != null){
-                    ChessPosition start = lastMove.getStartPosition();
-                    ChessPosition end = lastMove.getEndPosition();
-                    int rowStart = start.getRow();
-                    int colStart = start.getColumn();
-                    int rowEnd = end.getRow();
-                    int colEnd = end.getColumn();
-
-                    String bgColorStart = ((colStart + rowStart) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
-                    String bgColorEnd = ((colEnd + rowEnd) % 2 == 0) ? SET_BG_COLOR_BLACK : SET_BG_COLOR_WHITE;
-                    StringBuilder startPositionToUpdate;
-                    StringBuilder endPositionToUpdate;
-
-                    if (playerColor.equalsIgnoreCase("white")) {
-                        startPositionToUpdate = chessBoard[9 - rowStart][colStart];
-                        endPositionToUpdate = chessBoard[9 - rowEnd][colEnd];
-                        DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-                    } else {
-                        startPositionToUpdate = chessBoard[rowStart][colStart];
-                        endPositionToUpdate = chessBoard[rowEnd][colEnd];
-                        DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-                    }
+                    DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                     lastMove = null;
                     lastPieceMoved = null;
                 }
+                DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                 DrawChessBoard.printBoard(chessBoard);
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();

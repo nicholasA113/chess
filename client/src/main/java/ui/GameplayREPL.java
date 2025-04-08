@@ -134,7 +134,7 @@ public class GameplayREPL {
             colEnd = rowCharEnd - 'a' + 1;
             rowEnd = colCharEnd - '0';
             if (rowStart > 8 || colStart > 8 || rowStart <= 0 || colStart <= 0 ||
-                rowEnd > 8 || colEnd > 8 || rowEnd <= 0 || colEnd <= 0){
+                    rowEnd > 8 || colEnd > 8 || rowEnd <= 0 || colEnd <= 0){
                 DrawChessBoard.printBoard(chessBoard);
                 return "Invalid space position. Please enter a valid space.";
             }
@@ -191,7 +191,6 @@ public class GameplayREPL {
                 return "Invalid space position. Please enter a valid space.";
             }
             ChessPosition position = new ChessPosition(row, col);
-            //ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = chessGame.getBoard().getPiece(position);
             if (chessPiece == null){
                 DrawChessBoard.printBoard(chessBoard);
@@ -206,12 +205,11 @@ public class GameplayREPL {
                 ChessPosition start = move.getStartPosition();
                 ChessPosition end = move.getEndPosition();
                 if (playerColor.equalsIgnoreCase("white")){
-                    int gameRow = 9 - row;
-                    int gameCol = col;
+                    int gameRow = 9 - start.getRow();
+                    int gameCol = start.getColumn();
                     StringBuilder startSpace = chessBoard[gameRow][gameCol];
                     DrawChessBoard.highlightSpace(startSpace, bgColorStart,
                             gameRow, gameCol, chessGame.getBoard(), playerColor);
-
                     int rowEnd = 9 - end.getRow();
                     int colEnd = end.getColumn();
                     StringBuilder endSpace = chessBoard[rowEnd][colEnd];

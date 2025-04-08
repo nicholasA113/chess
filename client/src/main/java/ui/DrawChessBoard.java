@@ -54,16 +54,18 @@ public abstract class DrawChessBoard {
                 if (i == 0 || i == BOARD_SIZE - 1 || j == 0 || j == BOARD_SIZE - 1) {
                     addNumbersLetters(chessBoard, i, j);
                 } else {
-                    for (int row = 7; row > 0; row--){
-                        for (int col = 7; col > 0; col--){
-                            ChessPosition gamePosition = new ChessPosition(row, col);
-                            addColoredGrid(chessBoard, i, j, game, gamePosition, chessPieces, playerColor);
-                        }
+                    int gameRow = playerColor.equalsIgnoreCase("white") ? 9 - i : i;
+                    int gameCol = playerColor.equalsIgnoreCase("white") ? j : 9 - j;
+                    if (gameRow >= 1 && gameRow <= 8 && gameCol >= 1 && gameCol <= 8) {
+                        ChessPosition gamePosition = new ChessPosition(gameRow, gameCol);
+                        addColoredGrid(chessBoard, i, j, game,
+                                gamePosition, chessPieces, playerColor);
                     }
                 }
             }
         }
     }
+
 
     public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j,
                                ChessBoard game, ChessPosition gamePosition,
@@ -72,36 +74,20 @@ public abstract class DrawChessBoard {
         chessBoard[i][j] = new StringBuilder();
         String bgColor;
         String textColor = "";
-        if (playerColor.equalsIgnoreCase("white")) {
-            if ((i + j) % 2 == 0) {
-                bgColor = SET_BG_COLOR_WHITE;
-            } else {
-                bgColor = SET_BG_COLOR_BLACK;
-            }
+        if ((i + j) % 2 == 0) {
+            bgColor = SET_BG_COLOR_WHITE;
         } else {
-            if ((i + j) % 2 == 0) {
-                bgColor = SET_BG_COLOR_BLACK;
-            } else {
-                bgColor = SET_BG_COLOR_WHITE;
-            }
+            bgColor = SET_BG_COLOR_BLACK;
         }
         ChessPiece piece = game.getPiece(gamePosition);
         if (piece == null) {
             chessBoard[i][j].append(bgColor).append("   ");
         } else {
             ChessPiece.PieceType pieceType = piece.getPieceType();
-            if (playerColor.equalsIgnoreCase("white")) {
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    textColor = SET_TEXT_COLOR_BLUE;
-                } else {
-                    textColor = SET_TEXT_COLOR_RED;
-                }
+            if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
+                textColor = SET_TEXT_COLOR_RED;
             } else {
-                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                    textColor = SET_TEXT_COLOR_RED;
-                } else {
-                    textColor = SET_TEXT_COLOR_BLUE;
-                }
+                textColor = SET_TEXT_COLOR_BLUE;
             }
             String pieceText = chessPieces.get(pieceType);
             chessBoard[i][j].append(bgColor).append(SET_TEXT_BOLD).append(textColor).append(pieceText);

@@ -12,9 +12,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import static ui.EscapeSequences.*;
-
-
 @ClientEndpoint
 public class WebSocketFacade{
 
@@ -24,13 +21,12 @@ public class WebSocketFacade{
     private List<GameData> games;
     private String playerColor;
     private boolean observer;
-    private String username;
 
-    private ChessMove lastMove;
-    private ChessPiece lastPieceMoved;
+    private ChessGame chessGame;
 
     public WebSocketFacade(NotificationHandler notificationHandler,
-                           String authToken, boolean observer, String username, int gameID, List<GameData> games,
+                           String authToken, boolean observer, String username,
+                           ChessGame chessGame, int gameID, List<GameData> games,
                            String playerColor) throws ResponseException {
         try{
             URI url = new URI("ws://localhost:8080/ws");
@@ -38,6 +34,7 @@ public class WebSocketFacade{
             this.session = container.connectToServer(this, url);
             System.out.print("Connected to WebSocket\n");
 
+            this.chessGame = chessGame;
             this.observer = observer;
             this.playerColor = playerColor;
             this.games = games;
@@ -59,10 +56,11 @@ public class WebSocketFacade{
         switch (serverMessage.getServerMessageType()){
             case LOAD_GAME -> {
                 LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
-                ChessGame chessGame = loadGameMessage.getChessGame();
+                ChessGame updatedGame =  loadGameMessage.getChessGame();
+                this.chessGame = updatedGame;
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
                 chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-
+                System.out.print('\n');
                 DrawChessBoard.printBoard(chessBoard);
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();
@@ -92,6 +90,10 @@ public class WebSocketFacade{
     private void printPrompt() {
         System.out.print("\n>>> ");
         System.out.flush();
+    }
+
+    public ChessGame getChessGame() {
+        return this.chessGame;
     }
 
 }

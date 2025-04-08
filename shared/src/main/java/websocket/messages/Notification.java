@@ -11,6 +11,6 @@ public class Notification extends ServerMessage{
 
     @Override
     public String toString() {
-        return "\n\nNOTIFICATION: " + notification;
+        return "\nNOTIFICATION: " + notification;
     }
 }

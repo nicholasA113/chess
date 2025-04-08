@@ -19,9 +19,10 @@ public class GameplayREPL {
     Gson gson = new Gson();
     Boolean observer;
     String playerColor;
-    ChessGame chessGame;
     List<GameData> games;
     String username;
+
+    ChessGame chessGame;
 
     String bgColorStart = SET_BG_COLOR_YELLOW;
     String bgColorEnd = SET_BG_COLOR_GREEN;
@@ -49,8 +50,9 @@ public class GameplayREPL {
         this.gameID = gameID;
         this.observer = observer;
         this.playerColor = playerColor;
-        this.chessGame = chessGame;
         this.games = games;
+
+        this.chessGame = chessGame;
     }
 
     public void runGameplayRepl() throws Exception {
@@ -58,7 +60,7 @@ public class GameplayREPL {
             System.out.println(notification);
             System.out.print("\n>>> ");
         };
-        connection = new WebSocketFacade(handler, authToken, observer, username, gameID, games, playerColor);
+        connection = new WebSocketFacade(handler, authToken, observer, username, chessGame, gameID, games, playerColor);
         userInput();
     }
 
@@ -84,7 +86,6 @@ public class GameplayREPL {
                 String message = makeMove(parameters);
                 System.out.print(message + '\n');
                 printPrompt();
-                System.out.print('\n');
                 yield "";
             }
             case "resign" -> {

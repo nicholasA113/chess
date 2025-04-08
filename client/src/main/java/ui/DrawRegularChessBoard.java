@@ -46,4 +46,5 @@ public class DrawRegularChessBoard extends DrawChessBoard{
         }
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
+
 }

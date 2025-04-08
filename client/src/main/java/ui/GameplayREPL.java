@@ -158,6 +158,7 @@ public class GameplayREPL {
             }
             if (isValidMove) {
                 connection.setLastMove(chessMove, chessPiece);
+                chessGame.makeMove(chessMove);
                 MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
                         authToken, gameID, username, observer, chessMove, chessPiece,
                         games, playerColor);
@@ -167,7 +168,6 @@ public class GameplayREPL {
                 } catch (Exception e) {
                     System.out.print(e.getMessage());
                 }
-                chessGame.makeMove(chessMove);
                 return "Moved chess piece successfully";
             }
             else {
@@ -233,6 +233,7 @@ public class GameplayREPL {
                 }
             }
             DrawChessBoard.printBoard(chessBoard);
+            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
             return "Highlighted moves for piece at requested position";
         }
         return "Invalid input. Please try again.";

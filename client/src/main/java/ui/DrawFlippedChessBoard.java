@@ -46,4 +46,5 @@ public class DrawFlippedChessBoard extends DrawChessBoard{
         }
         chessBoard[i][j].append(RESET_BG_COLOR);
     }
+
 }

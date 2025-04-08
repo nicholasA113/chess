@@ -198,8 +198,10 @@ public class ChessClient {
                     } else if (!parameters[1].equalsIgnoreCase("WHITE") &&
                             !parameters[1].equalsIgnoreCase("BLACK")) {
                         return "Color is not valid. Please enter WHITE or BLACK.";
-                    } else {
-                        return "Player color is already taken";
+                    }
+                    else{
+                        //return "Player color is already taken";
+                        return e.getMessage();
                     }
                 }
                 catch (Exception ex){

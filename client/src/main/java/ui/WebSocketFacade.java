@@ -83,13 +83,11 @@ public class WebSocketFacade{
                     if (playerColor.equalsIgnoreCase("white")) {
                         startPositionToUpdate = chessBoard[9 - rowStart][colStart];
                         endPositionToUpdate = chessBoard[9 - rowEnd][colEnd];
-                        DrawChessBoard.moveChessPiece(startPositionToUpdate, endPositionToUpdate,
-                                bgColorStart, bgColorEnd, lastPieceMoved, SET_TEXT_COLOR_RED);
+                        DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                     } else {
-                        startPositionToUpdate = chessBoard[rowStart][9 - colStart];
-                        endPositionToUpdate = chessBoard[rowEnd][9 - colEnd];
-                        DrawChessBoard.moveChessPiece(startPositionToUpdate, endPositionToUpdate,
-                                bgColorStart, bgColorEnd, lastPieceMoved, SET_TEXT_COLOR_BLUE);
+                        startPositionToUpdate = chessBoard[rowStart][colStart];
+                        endPositionToUpdate = chessBoard[rowEnd][colEnd];
+                        DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                     }
                     lastMove = null;
                     lastPieceMoved = null;

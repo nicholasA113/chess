@@ -287,7 +287,7 @@ public class ChessClient {
     public void toGameplayREPL(boolean observer, String playerColor,
                                int gameID, ChessGame chessGame) throws Exception {
         StringBuilder[][] chessBoard = new StringBuilder[10][10];
-        chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+        chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
         GameplayREPL gameplayREPL = new GameplayREPL(data, gameID,
                 chessBoard, observer, playerColor, chessGame, games);
         gameplayREPL.runGameplayRepl();

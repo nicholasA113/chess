@@ -64,10 +64,9 @@ public class WebSocketFacade{
         switch (serverMessage.getServerMessageType()){
             case LOAD_GAME -> {
                 LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
-                ChessGame game = loadGameMessage.getChessGame();
-                ChessBoard board = game.getBoard();
+                ChessGame chessGame = loadGameMessage.getChessGame();
                 StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
                 if (lastMove != null && lastPieceMoved != null){
                     ChessPosition start = lastMove.getStartPosition();
                     ChessPosition end = lastMove.getEndPosition();

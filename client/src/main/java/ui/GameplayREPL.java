@@ -80,7 +80,13 @@ public class GameplayREPL {
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
             case "redraw" -> redraw();
-            case "move" -> makeMove(parameters);
+            case "move" -> {
+                String message = makeMove(parameters);
+                System.out.print(message + '\n');
+                printPrompt();
+                System.out.print('\n');
+                yield "";
+            }
             case "resign" -> {
                 String message = resign();
                 System.out.print(message + '\n');
@@ -132,16 +138,6 @@ public class GameplayREPL {
                 DrawChessBoard.printBoard(chessBoard);
                 return "Invalid space position. Please enter a valid space.";
             }
-            if ((colStart + rowStart) % 2 == 0) {
-                bgColorStart = SET_BG_COLOR_BLACK;
-            } else {
-                bgColorStart = SET_BG_COLOR_WHITE;
-            }
-            if ((colEnd + rowEnd) % 2 == 0) {
-                bgColorEnd = SET_BG_COLOR_BLACK;
-            } else {
-                bgColorEnd = SET_BG_COLOR_WHITE;
-            }
             ChessPosition position = new ChessPosition(rowStart, colStart);
             ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = board.getPiece(position);
@@ -161,66 +157,20 @@ public class GameplayREPL {
                 }
             }
             if (isValidMove) {
-                if (playerColor.equalsIgnoreCase("white")){
-                    /**ChessPosition startPosition = chessMove.getStartPosition();
-                    int startPositionRow = startPosition.getRow();
-                    int startPositionCol = startPosition.getColumn();
-                    int endPositionRow = endPosition.getRow();
-                    int endPositionCol = endPosition.getColumn();
-                    StringBuilder startPositionToUpdate =
-                            chessBoard[9-startPositionRow][startPositionCol];
-                    StringBuilder endPositionToUpdate =
-                            chessBoard[9-endPositionRow][endPositionCol];
-
-                    DrawChessBoard.moveChessPiece(startPositionToUpdate,
-                            endPositionToUpdate, bgColorStart, bgColorEnd, chessPiece,
-                            SET_TEXT_COLOR_RED);
-                    DrawChessBoard.printBoard(chessBoard);**/
-                    chessGame.makeMove(chessMove);
-
-                    connection.setLastMove(chessMove, chessPiece);
-
-                    MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
-                            authToken, gameID, username, observer, chessMove, chessPiece,
-                            games, playerColor);
-                    String command = gson.toJson(makeMoveCommand);
-                    try{
-                        connection.sendCommand(command);
-                    }
-                    catch (Exception e){
-                        System.out.print(e.getMessage());
-                    }
-                    return "Moved chess piece successfully";
+                connection.setLastMove(chessMove, chessPiece);
+                MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
+                        authToken, gameID, username, observer, chessMove, chessPiece,
+                        games, playerColor);
+                String command = gson.toJson(makeMoveCommand);
+                try {
+                    connection.sendCommand(command);
+                } catch (Exception e) {
+                    System.out.print(e.getMessage());
                 }
-                else if (playerColor.equalsIgnoreCase("black")){
-                    ChessPosition startPosition = chessMove.getStartPosition();
-                    int startPositionRow = startPosition.getRow();
-                    int startPositionCol = startPosition.getColumn();
-                    int endPositionRow = endPosition.getRow();
-                    int endPositionCol = endPosition.getColumn();
-                    StringBuilder startPositionToUpdate =
-                            chessBoard[startPositionRow][9-startPositionCol];
-                    StringBuilder endPositionToUpdate =
-                            chessBoard[endPositionRow][9-endPositionCol];
-
-                    DrawChessBoard.moveChessPiece(startPositionToUpdate,
-                            endPositionToUpdate, bgColorStart, bgColorEnd,
-                            chessPiece, SET_TEXT_COLOR_BLUE);
-                    chessGame.makeMove(chessMove);
-
-                    MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
-                            authToken, gameID, username, observer, chessMove, chessPiece,
-                            games, playerColor);
-                    String command = gson.toJson(makeMoveCommand);
-                    try{
-                        connection.sendCommand(command);
-                    }
-                    catch (Exception e){
-                        System.out.print(e.getMessage());
-                    }
-                    return "Moved chess piece successfully";
-                }
-            } else {
+                chessGame.makeMove(chessMove);
+                return "Moved chess piece successfully";
+            }
+            else {
                 DrawChessBoard.printBoard(chessBoard);
                 return "Move is not valid. Please enter a valid move.";
             }
@@ -230,13 +180,12 @@ public class GameplayREPL {
     }
 
     public String highlight(String ... parameters){
+        chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
         if (parameters.length == 1){
-            int col = 0;
-            int row = 0;
-            char rowChar = parameters[0].charAt(0);
-            char colChar = parameters[0].charAt(1);
-            col = rowChar - 'a' + 1;
-            row = colChar - '0';
+            char colChar = parameters[0].charAt(0);
+            char rowChar = parameters[0].charAt(1);
+            int col = colChar - 'a' + 1;
+            int row = rowChar - '0';
             if (row > 8 || col > 8 || row <= 0 || col <= 0){
                 DrawChessBoard.printBoard(chessBoard);
                 return "Invalid space position. Please enter a valid space.";
@@ -254,43 +203,36 @@ public class GameplayREPL {
                 return "There are no valid moves for piece at requested position.";
             }
             for (ChessMove move : validMoves){
+                ChessPosition start = move.getStartPosition();
+                ChessPosition end = move.getEndPosition();
                 if (playerColor.equalsIgnoreCase("white")){
-                    ChessPosition startPosition = move.getStartPosition();
-                    int startPositionRow = startPosition.getRow();
-                    int startPositionCol = startPosition.getColumn();
-                    StringBuilder startPositionToHighlight =
-                            chessBoard[startPositionRow][startPositionCol];
-                    DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart,
-                            startPositionRow, startPositionCol, board);
+                    int rowStart = 9 - start.getRow();
+                    int colStart = start.getColumn();
+                    StringBuilder startSpace = chessBoard[rowStart][colStart];
+                    DrawChessBoard.highlightSpace(startSpace, bgColorStart,
+                            rowStart, colStart, board);
 
-                    ChessPosition endPosition = move.getEndPosition();
-                    int endPositionRow = endPosition.getRow();
-                    int endPositionCol = endPosition.getColumn();
-
-                    StringBuilder positionToHighlight = chessBoard[9-endPositionRow][endPositionCol];
-                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd,
-                            endPositionRow, 9-endPositionCol, board);
+                    int rowEnd = 9 - end.getRow();
+                    int colEnd = end.getColumn();
+                    StringBuilder endSpace = chessBoard[rowEnd][colEnd];
+                    DrawChessBoard.highlightSpace(endSpace, bgColorEnd,
+                            rowEnd, colEnd, board);
                 }
-                else if (playerColor.equalsIgnoreCase("black")){
-                    ChessPosition startPosition = move.getStartPosition();
-                    int startPositionRow = startPosition.getRow();
-                    int startPositionCol = startPosition.getColumn();
-                    StringBuilder startPositionToHighlight =
-                            chessBoard[startPositionRow][9-startPositionCol];
-                    DrawChessBoard.highlightSpace(startPositionToHighlight, bgColorStart,
-                            9-startPositionRow, startPositionCol, board);
+                else {
+                    int rowStart = start.getRow();
+                    int colStart = 9 - start.getColumn();
+                    StringBuilder startSpace = chessBoard[rowStart][colStart];
+                    DrawChessBoard.highlightSpace(startSpace, bgColorStart,
+                            rowStart, colStart, board);
 
-                    ChessPosition endPosition = move.getEndPosition();
-                    int endPositionRow = endPosition.getRow();
-                    int endPositionCol = endPosition.getColumn();
-
-                    StringBuilder positionToHighlight = chessBoard[endPositionRow][9-endPositionCol];
-                    DrawChessBoard.highlightSpace(positionToHighlight, bgColorEnd,
-                            endPositionRow, 9-endPositionCol, board);
+                    int rowEnd = end.getRow();
+                    int colEnd = 9 - end.getColumn();
+                    StringBuilder endSpace = chessBoard[rowEnd][colEnd];
+                    DrawChessBoard.highlightSpace(endSpace, bgColorEnd,
+                            rowEnd, colEnd, board);
                 }
             }
             DrawChessBoard.printBoard(chessBoard);
-            DrawChessBoard.drawChessBoard(playerColor, chessBoard);
             return "Highlighted moves for piece at requested position";
         }
         return "Invalid input. Please try again.";
@@ -299,7 +241,7 @@ public class GameplayREPL {
     public String redraw(){
         if (!observer){
             chessGame.getBoard().resetBoard();
-            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard);
+            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
             DrawChessBoard.printBoard(chessBoard);
             return "Redrew the chessboard";
         }

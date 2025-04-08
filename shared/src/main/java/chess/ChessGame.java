@@ -85,23 +85,18 @@ public class ChessGame {
             return validMoves;
         }
         validMoves.addAll(chessPiece.pieceMoves(board, startPosition));
-        Collection<ChessMove> invalidMoves = new ArrayList<>();
-        TeamColor currentTeam = team;
-        for (ChessMove move : validMoves){
-            ChessBoard backupBoard = board.copy();
-
-            team = chessPiece.getTeamColor();
-            makeTempMove(move);
-
-            if (isInCheck(chessPiece.getTeamColor())){
-                invalidMoves.add(move);
+        Collection<ChessMove> finalMoves = new ArrayList<>();
+        for (ChessMove move : validMoves) {
+            ChessBoard tempBoard = board.copy();
+            tempBoard.addPiece(move.getEndPosition(), tempBoard.getPiece(move.getStartPosition()));
+            tempBoard.addPiece(move.getStartPosition(), null);
+            if (!isInCheck(chessPiece.getTeamColor())) {
+                finalMoves.add(move);
             }
-            board = backupBoard;
         }
-        team = currentTeam;
-        validMoves.removeAll(invalidMoves);
-        return validMoves;
+        return finalMoves;
     }
+
 
     /**
      * Makes a move in a chess game

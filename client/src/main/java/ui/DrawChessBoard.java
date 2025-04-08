@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -21,14 +22,16 @@ public abstract class DrawChessBoard {
         put(ChessPiece.PieceType.PAWN, " P ");
     }};
 
-    public static StringBuilder[][] drawChessBoard(String playerColor, StringBuilder[][] chessBoard){
+    public static StringBuilder[][] drawChessBoard(String playerColor,
+                                                   StringBuilder[][] chessBoard,
+                                                   ChessBoard game){
         if (playerColor.equalsIgnoreCase("WHITE")){
             DrawRegularChessBoard regularBoard = new DrawRegularChessBoard();
-            regularBoard.drawBoard(chessBoard, playerColor);
+            regularBoard.drawBoard(chessBoard, game, playerColor);
         }
         else{
             DrawFlippedChessBoard flippedBoard = new DrawFlippedChessBoard();
-            flippedBoard.drawBoard(chessBoard, playerColor);
+            flippedBoard.drawBoard(chessBoard, game, playerColor);
         }
         return chessBoard;
     }
@@ -43,9 +46,48 @@ public abstract class DrawChessBoard {
     }
 
     public abstract void addNumbersLetters(StringBuilder[][] chessBoard, int i, int j);
-    public abstract void printPieces(StringBuilder[][] chessBoard, int i, int j, String textColor, String bgColor);
 
-    public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor, String bgColor){
+    public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j,
+                               ChessBoard game, Map<ChessPiece.PieceType, String> chessPieces,
+                               String playerColor) {
+        if (playerColor.equalsIgnoreCase("white")) {
+            i = 7 - i;
+            j = 7 - j;
+        }
+
+        chessBoard[i][j] = new StringBuilder();
+        String bgColor;
+        String textColor = "";
+        bgColor = (i + j) % 2 == 0 ? SET_BG_COLOR_WHITE : SET_BG_COLOR_BLACK;
+        ChessPiece piece = game.getPiece(new ChessPosition(i, j));
+        if (piece == null) {
+            chessBoard[i][j].append(bgColor).append("   ");
+        } else {
+            ChessPiece.PieceType pieceType = piece.getPieceType();
+            textColor = (piece.getTeamColor() == ChessGame.TeamColor.BLACK) ? SET_TEXT_COLOR_RED : SET_TEXT_COLOR_BLUE;
+
+            String pieceText = chessPieces.get(pieceType);
+            chessBoard[i][j].append(bgColor).append(SET_TEXT_BOLD).append(textColor).append(pieceText);
+        }
+        chessBoard[i][j].append(RESET_BG_COLOR).append(RESET_TEXT_BOLD_FAINT).append(RESET_TEXT_COLOR);
+    }
+
+
+    public void drawBoard(StringBuilder[][] chessBoard, ChessBoard game, String playerColor){
+        for (int i = 0; i< BOARD_SIZE; i++){
+            for (int j = 0; j< BOARD_SIZE; j++){
+                chessBoard[i][j] = new StringBuilder();
+                if (i==0 || i== BOARD_SIZE -1 || j==0 || j== BOARD_SIZE -1) {
+                    addNumbersLetters(chessBoard, i, j);
+                }
+                else{
+                    addColoredGrid(chessBoard, i, j, game, chessPieces, playerColor);
+                }
+            }
+        }
+    }
+
+    /**public void addPieces(StringBuilder[][] chessBoard, int i, int j, String playerColor, String bgColor){
         if (i == 1){
             if (playerColor.equalsIgnoreCase("WHITE")){
                 printPieces(chessBoard, i, j, SET_TEXT_COLOR_BLUE, bgColor);
@@ -90,49 +132,17 @@ public abstract class DrawChessBoard {
             chessBoard[i][j].append(" P ");
         }
         chessBoard[i][j].append(RESET_TEXT_BOLD_FAINT);
-    }
-
-    public void drawBoard(StringBuilder[][] chessBoard, String playerColor){
-        for (int i = 0; i< BOARD_SIZE; i++){
-            for (int j = 0; j< BOARD_SIZE; j++){
-                chessBoard[i][j] = new StringBuilder();
-                if (i==0 || i== BOARD_SIZE -1 || j==0 || j== BOARD_SIZE -1) {
-                    addNumbersLetters(chessBoard, i, j);
-                }
-                else{
-                    addColoredGrid(chessBoard, i, j, playerColor);
-                }
-            }
-        }
-    }
-
-    public void addColoredGrid(StringBuilder[][] chessBoard, int i, int j, String playerColor){
-        chessBoard[i][j] = new StringBuilder();
-        String bgColor;
-
-        if ((i + j) % 2 == 0) {
-            bgColor = SET_BG_COLOR_WHITE;
-        } else {
-            bgColor = SET_BG_COLOR_BLACK;
-        }
-
-        if (i==1 || i==2 || i==7 || i==8){
-            addPieces(chessBoard, i, j, playerColor, bgColor);
-        }
-        else{
-            chessBoard[i][j].append(bgColor).append("   ");
-        }
-        chessBoard[i][j].append(RESET_BG_COLOR);
-    }
+    }**/
 
     public static void highlightSpace(StringBuilder positionToHighlight,
                                       String bgColor, int row, int col,
                                       ChessBoard board) {
-        ChessPosition position = new ChessPosition(row, col);
-        ChessPiece chessPiece = board.getPiece(position);
+
+        ChessPiece chessPiece = board.getPiece(new ChessPosition(row, col));
+
         positionToHighlight.setLength(0);
         if (chessPiece == null){
-            positionToHighlight
+            positionToHighlight.append(RESET_BG_COLOR)
                     .append(bgColor)
                     .append("   ")
                     .append(RESET_BG_COLOR);

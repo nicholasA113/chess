@@ -30,6 +30,9 @@ public class WebSocketHandler {
 
     private static String notificationText;
 
+    private static AuthData authData;
+    private static GameData gameData;
+
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
         UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
@@ -54,29 +57,8 @@ public class WebSocketHandler {
             return;
         }
 
-        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-        AuthData authData;
-        GameData gameData;
-
-        try {
-            authData = authDataDAO.getAuth(authToken);
-            gameData = gameDataDAO.getGame(gameID);
-        } catch (DataAccessException e) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (gameData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (authData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
+        getData(session, authToken, gameID);
 
         String username = authData.username();
         ChessGame game = gameData.game();
@@ -111,29 +93,7 @@ public class WebSocketHandler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
-        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
-        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-        AuthData authData;
-        GameData gameData;
-
-        try {
-            authData = authDataDAO.getAuth(authToken);
-            gameData = gameDataDAO.getGame(gameID);
-        } catch (DataAccessException e) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (gameData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (authData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
+        getData(session, authToken, gameID);
 
         String username = authData.username();
 
@@ -184,29 +144,7 @@ public class WebSocketHandler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
-        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
-        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-        AuthData authData;
-        GameData gameData;
-
-        try {
-            authData = authDataDAO.getAuth(authToken);
-            gameData = gameDataDAO.getGame(gameID);
-        } catch (DataAccessException e) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (gameData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
-        if (authData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-            return;
-        }
+        getData(session, authToken, gameID);
 
         String username = authData.username();
 
@@ -230,7 +168,6 @@ public class WebSocketHandler {
         int gameID = command.getGameID();
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
-        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
         AuthData authData;
 
         try {
@@ -280,5 +217,28 @@ public class WebSocketHandler {
                 }
             }
         });
+    }
+
+    public static void getData(Session session, String authToken, Integer gameID)
+            throws DataAccessException, IOException {
+        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+        try {
+            authData = authDataDAO.getAuth(authToken);
+            gameData = gameDataDAO.getGame(gameID);
+        } catch (DataAccessException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (gameData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+        }
     }
 }

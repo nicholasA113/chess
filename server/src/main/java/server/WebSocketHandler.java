@@ -18,10 +18,7 @@ import websocket.messages.LoadGameMessage;
 import websocket.messages.Notification;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -45,43 +42,98 @@ public class WebSocketHandler {
         }
     }
 
-    public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, InvalidMoveException {
+    public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
+
         int gameID = command.getGameID();
-        ChessMove chessMove = command.ChessMove();
+        ChessMove chessMove = command.getChessMove();
+
+        if (chessMove == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Chess move is missing or invalid.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
-        GameData gameData = gameDataDAO.getGame(gameID);
+        AuthData authData;
+        GameData gameData;
+
+        try {
+            authData = authDataDAO.getAuth(authToken);
+            gameData = gameDataDAO.getGame(gameID);
+        } catch (DataAccessException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (gameData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         String username = authData.username();
         ChessGame game = gameData.game();
 
-        game.makeMove(chessMove);
-        gameDataDAO.updateGame(gameData);
+        Collection<ChessMove> validMoves = game.validMoves(chessMove.getStartPosition());
+        if (validMoves.contains(chessMove)){
+            try {
+                game.makeMove(chessMove);
+                gameDataDAO.updateGame(gameData);
+            } catch (InvalidMoveException e) {
+                ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
+                session.getRemote().sendString(new Gson().toJson(errorMessage));
+                return;
+            }
+        }
+
         ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(loadGameMessage, gameID);
 
-        notificationText = username + " has moved " +
-                chessPiece.getPieceType() + " from "
-                + command.ChessMove().getStartPosition() + " to "
-                + command.ChessMove().getEndPosition() + ".";
+        String notificationText = username + " has moved " +
+                chessPiece.getPieceType() + " from " +
+                command.getChessMove().getStartPosition() + " to " +
+                command.getChessMove().getEndPosition() + ".";
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }
 
-    public static void connect(Session session, UserGameCommand command) throws DataAccessException {
+
+    public static void connect(Session session, UserGameCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+        AuthData authData;
+        GameData gameData;
 
-        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
-        GameData gameData = gameDataDAO.getGame(gameID);
+        try {
+            authData = authDataDAO.getAuth(authToken);
+            gameData = gameDataDAO.getGame(gameID);
+        } catch (DataAccessException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (gameData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         String username = authData.username();
 
@@ -128,15 +180,34 @@ public class WebSocketHandler {
         sendNotification(authToken, notification, gameID);
     }
 
-    public static void leave(Session session, UserGameCommand command) throws DataAccessException {
+    public static void leave(Session session, UserGameCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+        AuthData authData;
+        GameData gameData;
 
-        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
-        GameData gameData = gameDataDAO.getGame(gameID);
+        try {
+            authData = authDataDAO.getAuth(authToken);
+            gameData = gameDataDAO.getGame(gameID);
+        } catch (DataAccessException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (gameData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Game not found with ID: " + gameID);
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
         String username = authData.username();
 
         boolean observer = (username != gameData.whiteUsername() &&
@@ -154,12 +225,26 @@ public class WebSocketHandler {
         sendNotification(authToken, notification, gameID);
     }
 
-    public static void resign(Session session, UserGameCommand command) throws DataAccessException {
+    public static void resign(Session session, UserGameCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
-        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+        AuthData authData;
+
+        try {
+            authData = authDataDAO.getAuth(authToken);
+        } catch (DataAccessException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         String username = authData.username();
 

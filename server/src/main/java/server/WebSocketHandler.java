@@ -61,14 +61,13 @@ public class WebSocketHandler {
 
 
     public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
-        System.out.println("Received MakeMoveCommand: " + command);
+        //System.out.println("Received MakeMoveCommand: " + command);
         String authToken = command.getAuthToken();
-        System.out.println("AuthToken: " + command.getAuthToken());
+        //System.out.println("AuthToken: " + command.getAuthToken());
         int gameID = command.getGameID();
-        System.out.println("GameID: " + command.getGameID());
+        //System.out.println("GameID: " + command.getGameID());
         ChessMove chessMove = command.getChessMove();
-        System.out.println("ChessMove: " + command.getChessMove());
-
+        //System.out.println("ChessMove: " + command.getChessMove());
         if (chessMove == null) {
             ErrorMessage errorMessage = new ErrorMessage("Chess move is missing or invalid.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -76,10 +75,29 @@ public class WebSocketHandler {
         }
 
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-        getData(session, authToken, gameID);
+
+        try{
+            getData(session, authToken, gameID);
+        }
+        catch (Exception e){
+            ErrorMessage errorMessage = new ErrorMessage("Data is invalid.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         String username = authData.username();
         ChessGame game = gameData.game();
+
+        ChessGame.TeamColor currentTurn = game.getTeamTurn();
+        boolean isWhite = username.equals(gameData.whiteUsername());
+        boolean isBlack = username.equals(gameData.blackUsername());
+
+        if ((currentTurn == ChessGame.TeamColor.WHITE && !isWhite) ||
+                (currentTurn == ChessGame.TeamColor.BLACK && !isBlack)) {
+            ErrorMessage errorMessage = new ErrorMessage("It is not your turn.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
 
         Collection<ChessMove> validMoves = game.validMoves(chessMove.getStartPosition());
         if (!validMoves.contains(chessMove)) {
@@ -88,6 +106,7 @@ public class WebSocketHandler {
             return;
         }
 
+        ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
         try {
             game.makeMove(chessMove);
             gameDataDAO.updateGame(gameData);
@@ -97,7 +116,6 @@ public class WebSocketHandler {
             return;
         }
 
-        ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(loadGameMessage, gameID);
 
@@ -271,7 +289,12 @@ public class WebSocketHandler {
             authData = authDataDAO.getAuth(authToken);
             gameData = gameDataDAO.getGame(gameID);
         } catch (DataAccessException e) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error fetching data.");
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token or error getting data.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+        if (authData == null) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
@@ -280,9 +303,6 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-        if (authData == null) {
-            ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
-            session.getRemote().sendString(new Gson().toJson(errorMessage));
-        }
     }
+
 }

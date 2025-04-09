@@ -61,13 +61,9 @@ public class WebSocketHandler {
 
 
     public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
-        //System.out.println("Received MakeMoveCommand: " + command);
         String authToken = command.getAuthToken();
-        //System.out.println("AuthToken: " + command.getAuthToken());
         int gameID = command.getGameID();
-        //System.out.println("GameID: " + command.getGameID());
         ChessMove chessMove = command.getChessMove();
-        //System.out.println("ChessMove: " + command.getChessMove());
         if (chessMove == null) {
             ErrorMessage errorMessage = new ErrorMessage("Chess move is missing or invalid.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -114,6 +110,22 @@ public class WebSocketHandler {
             ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
+        }
+
+        ChessGame.TeamColor opponentColor = (currentTurn == ChessGame.TeamColor.WHITE)
+                ? ChessGame.TeamColor.BLACK
+                : ChessGame.TeamColor.WHITE;
+
+        if (game.isInCheck(opponentColor)) {
+            String notificationText = username + " is in check.";
+            Notification notification = new Notification(notificationText);
+            sendNotificationAll(notification, gameID);
+        }
+
+        if (game.isInCheckmate(opponentColor)) {
+            String notificationText = username + " is in checkmate";
+            Notification notification = new Notification(notificationText);
+            sendNotificationAll(notification, gameID);
         }
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
@@ -199,6 +211,7 @@ public class WebSocketHandler {
         }
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
+
         GameData updatedGameData;
         if (username.equals(gameData.whiteUsername())) {
             updatedGameData = new GameData(
@@ -225,13 +238,12 @@ public class WebSocketHandler {
         sendNotification(authToken, notification, gameID);
     }
 
-
-
     public static void resign(Session session, UserGameCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         AuthData authData;
+
         try {
             authData = authDataDAO.getAuth(authToken);
         } catch (DataAccessException e) {
@@ -239,6 +251,7 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
+
         if (authData == null) {
             ErrorMessage errorMessage = new ErrorMessage("Invalid auth token.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
@@ -247,13 +260,15 @@ public class WebSocketHandler {
 
         String username = authData.username();
 
+        String notificationText = username + " has resigned.";
+        Notification notification = new Notification(notificationText);
+
+        sendNotificationAll(notification, gameID);
+
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
-
-        notificationText = username + " has resigned.";
-        Notification notification = new Notification(notificationText);
-        sendNotification(authToken, notification, gameID);
     }
+
 
     public static void sendNotification(String authToken, Notification notification, Integer gameID){
         connections.forEach((token, session) -> {
@@ -262,7 +277,20 @@ public class WebSocketHandler {
                 try {
                     session.getRemote().sendString(gson.toJson(notification));
                 } catch (IOException e) {
-                    System.err.println("Failed to send error message: " + e.getMessage());
+                    System.err.println("Failed to send notification: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    public static void sendNotificationAll(Notification notification, Integer gameID){
+        connections.forEach((token, session) -> {
+            Integer sessionID = sessionGameID.get(session);
+            if (sessionID != null && sessionID.equals(gameID)) {
+                try {
+                    session.getRemote().sendString(gson.toJson(notification));
+                } catch (IOException e) {
+                    System.err.println("Failed to send notification: " + e.getMessage());
                 }
             }
         });

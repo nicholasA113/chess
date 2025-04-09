@@ -22,6 +22,8 @@ public class GameplayREPL {
     List<GameData> games;
     String username;
 
+    Boolean resignedGame = false;
+
     ChessGame chessGame;
 
     String bgColorStart = SET_BG_COLOR_YELLOW;
@@ -123,7 +125,7 @@ public class GameplayREPL {
     public String makeMove(String ... parameters) throws Exception{
         this.chessGame = connection.getChessGame();
         this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
-        if (!observer && parameters.length == 2){
+        if (!observer && parameters.length == 2 && !resignedGame){
             if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
                 DrawChessBoard.printBoard(chessBoard);
                 return "It is not your turn. Please wait until it is your turn to make a move.";
@@ -181,6 +183,10 @@ public class GameplayREPL {
         else if (parameters.length != 2){
             DrawChessBoard.printBoard(chessBoard);
             return "Too many/Too few inputs. Please enter in the correct number of inputs.";
+        }
+        else if (resignedGame){
+            DrawChessBoard.printBoard(chessBoard);
+            return "The game has ended due to a player resigned. You cannot make any moves.";
         }
         else{
             DrawChessBoard.printBoard(chessBoard);
@@ -269,7 +275,7 @@ public class GameplayREPL {
 
     public String resign(){
         Scanner scanner = new Scanner(System.in);
-        if (!observer){
+        if (!observer && !resignedGame){
             System.out.print("Are you sure to want to resign? Doing so will result in an\nautomatic" +
                     " forfeit and the other player will win the game.\n");
             var result = "";
@@ -287,6 +293,7 @@ public class GameplayREPL {
                         System.out.print(e.getMessage());
                     }
                     DrawChessBoard.printBoard(chessBoard);
+                    resignedGame = true;
                     return "You have admitted defeat. Other player wins.";
                 }
                 else if (result.equalsIgnoreCase("no")){
@@ -297,6 +304,14 @@ public class GameplayREPL {
                     System.out.print("Please enter YES or NO\n");
                 }
             }
+        }
+        else if (observer && !resignedGame){
+            DrawChessBoard.printBoard(chessBoard);
+            return "You are an observer. You cannot resign the game.";
+        }
+        else if (resignedGame){
+            DrawChessBoard.printBoard(chessBoard);
+            return "The game has already has resigned.";
         }
         return "";
     }

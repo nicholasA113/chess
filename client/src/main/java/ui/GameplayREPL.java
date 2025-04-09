@@ -82,8 +82,7 @@ public class GameplayREPL {
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
             case "redraw" -> {
-                String message = redraw();
-                System.out.print(message + '\n');
+                redraw();
                 printPrompt();
                 yield "";
             }
@@ -248,16 +247,10 @@ public class GameplayREPL {
         return "Invalid input. Please try again.";
     }
 
-    public String redraw() {
-        if (!observer) {
-            this.chessGame = new ChessGame();
-            this.chessGame.getBoard().resetBoard();
-            this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
-            DrawChessBoard.printBoard(chessBoard);
-            return "Reset and redrew the chessboard to a new game";
-        } else {
-            return "You are only an observer. You cannot interfere with gameplay.";
-        }
+    public void redraw() {
+        this.chessGame = connection.getChessGame();
+        this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
+        DrawChessBoard.printBoard(chessBoard);
     }
 
 

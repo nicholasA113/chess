@@ -117,6 +117,7 @@ public class GameplayREPL {
     }
 
     public String makeMove(String ... parameters) throws Exception{
+        this.chessGame = connection.getChessGame();
         if (!observer && parameters.length == 2){
             if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
                 DrawChessBoard.printBoard(chessBoard);
@@ -172,11 +173,18 @@ public class GameplayREPL {
                 return "Move is not valid. Please enter a valid move.";
             }
         }
-        DrawChessBoard.printBoard(chessBoard);
-        return "You are an observer. You cannot make a move.";
+        else if (parameters.length != 2){
+            DrawChessBoard.printBoard(chessBoard);
+            return "Too many/Too few inputs. Please enter in the correct number of inputs.";
+        }
+        else{
+            DrawChessBoard.printBoard(chessBoard);
+            return "You are an observer. You cannot make a move.";
+        }
     }
 
     public String highlight(String ... parameters){
+        this.chessGame = connection.getChessGame();
         chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
         if (parameters.length == 1){
             char colChar = parameters[0].charAt(0);

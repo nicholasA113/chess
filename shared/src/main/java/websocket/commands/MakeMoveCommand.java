@@ -6,17 +6,25 @@ import model.GameData;
 
 import java.util.List;
 
-public class MakeMoveCommand extends UserGameCommand{
+public class MakeMoveCommand extends UserGameCommand {
 
-    private final ChessMove chessMove;
+    private ChessMove move;
 
-    public MakeMoveCommand(String authToken, Integer gameID,
-                           ChessMove chessMove) {
+    public MakeMoveCommand() {
+        super(CommandType.MAKE_MOVE, null, null);
+    }
+
+    public MakeMoveCommand(String authToken, Integer gameID, ChessMove move) {
         super(CommandType.MAKE_MOVE, authToken, gameID);
-        this.chessMove = chessMove;
+        this.move = move;
     }
 
     public ChessMove getChessMove() {
-        return chessMove;
+        return move;
+    }
+
+    public void setChessMove(ChessMove move) {
+        this.move = move;
     }
 }
+

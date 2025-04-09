@@ -5,6 +5,8 @@ import chess.ChessMove;
 import chess.ChessPiece;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dataaccess.*;
 import model.AuthData;
 import model.GameData;
@@ -35,21 +37,37 @@ public class WebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(Session session, String message) throws Exception {
-        UserGameCommand command = gson.fromJson(message, UserGameCommand.class);
-        MakeMoveCommand makeMoveCommand = gson.fromJson(message, MakeMoveCommand.class);
-        switch(command.getCommandType()){
-            case CONNECT -> connect(session, command);
-            case MAKE_MOVE -> makeMove(session, makeMoveCommand);
-            case LEAVE -> leave(session, command);
-            case RESIGN -> resign(session, command);
+        JsonObject jsonObject = JsonParser.parseString(message).getAsJsonObject();
+        UserGameCommand.CommandType commandType = UserGameCommand.CommandType.valueOf(jsonObject.get("commandType").getAsString());
+        switch (commandType) {
+            case CONNECT -> {
+                UserGameCommand connectCommand = gson.fromJson(message, UserGameCommand.class);
+                connect(session, connectCommand);
+            }
+            case MAKE_MOVE -> {
+                MakeMoveCommand makeMoveCommand = gson.fromJson(message, MakeMoveCommand.class);
+                makeMove(session, makeMoveCommand);
+            }
+            case LEAVE -> {
+                UserGameCommand leaveCommand = gson.fromJson(message, UserGameCommand.class);
+                leave(session, leaveCommand);
+            }
+            case RESIGN -> {
+                UserGameCommand resignCommand = gson.fromJson(message, UserGameCommand.class);
+                resign(session, resignCommand);
+            }
         }
     }
 
-    public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
-        String authToken = command.getAuthToken();
 
+    public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
+        System.out.println("Received MakeMoveCommand: " + command);
+        String authToken = command.getAuthToken();
+        System.out.println("AuthToken: " + command.getAuthToken());
         int gameID = command.getGameID();
+        System.out.println("GameID: " + command.getGameID());
         ChessMove chessMove = command.getChessMove();
+        System.out.println("ChessMove: " + command.getChessMove());
 
         if (chessMove == null) {
             ErrorMessage errorMessage = new ErrorMessage("Chess move is missing or invalid.");
@@ -64,19 +82,22 @@ public class WebSocketHandler {
         ChessGame game = gameData.game();
 
         Collection<ChessMove> validMoves = game.validMoves(chessMove.getStartPosition());
-        if (validMoves.contains(chessMove)){
-            try {
-                game.makeMove(chessMove);
-                gameDataDAO.updateGame(gameData);
-            } catch (InvalidMoveException e) {
-                ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
-                session.getRemote().sendString(new Gson().toJson(errorMessage));
-                return;
-            }
+        if (!validMoves.contains(chessMove)) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+        try {
+            game.makeMove(chessMove);
+            gameDataDAO.updateGame(gameData);
+        } catch (InvalidMoveException e) {
+            ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
         }
 
         ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
-
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(loadGameMessage, gameID);
 
@@ -87,6 +108,7 @@ public class WebSocketHandler {
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }
+
 
 
     public static void connect(Session session, UserGameCommand command) throws DataAccessException, IOException {
@@ -149,21 +171,16 @@ public class WebSocketHandler {
         getData(session, authToken, gameID);
 
         String username = authData.username();
-
         boolean observer = !(username.equals(gameData.whiteUsername()) || username.equals(gameData.blackUsername()));
-
         String notificationText = "";
-
         if (observer){
             notificationText = "Observer " + username + " has left the game.";
         }
         else if (!observer){
             notificationText = username + " has left the game.";
         }
-
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
-
         GameData updatedGameData;
         if (username.equals(gameData.whiteUsername())) {
             updatedGameData = new GameData(

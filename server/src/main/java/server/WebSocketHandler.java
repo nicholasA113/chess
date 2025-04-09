@@ -1,8 +1,12 @@
 package server;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
+import dataaccess.*;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -17,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 @WebSocket
@@ -40,19 +45,28 @@ public class WebSocketHandler {
         }
     }
 
-    public static void makeMove(Session session, MakeMoveCommand command){
+    public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, InvalidMoveException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
-        ChessGame game = null;
-        List<GameData> games = command.getGames();
-        for (GameData chessGame : games){
-            if (chessGame.gameID() == gameID){
-                game = chessGame.game();
-            }
-        }
-        LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+        ChessMove chessMove = command.ChessMove();
+
+        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+
+        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
+        GameData gameData = gameDataDAO.getGame(gameID);
+
+        String username = authData.username();
+        ChessGame game = gameData.game();
+
+        game.makeMove(chessMove);
+
+        ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
+
+        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(authToken, loadGameMessage, gameID);
-        try {
+
+        try{
             session.getRemote().sendString(gson.toJson(loadGameMessage));
         } catch (IOException e) {
             ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
@@ -62,8 +76,8 @@ public class WebSocketHandler {
                 System.err.println("Failed to send error message: " + ex.getMessage());
             }
         }
-        notificationText = command.getUsername() + " has moved " +
-                command.ChessPiece().getPieceType() + " from "
+        notificationText = username + " has moved " +
+                chessPiece.getPieceType() + " from "
                 + command.ChessMove().getStartPosition() + " to "
                 + command.ChessMove().getEndPosition() + ".";
         Notification notification = new Notification(notificationText);
@@ -73,29 +87,38 @@ public class WebSocketHandler {
     public static void connect(Session session, UserGameCommand command) throws DataAccessException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
-        ChessGame game = null;
+
+        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+
+        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
+        GameData gameData = gameDataDAO.getGame(gameID);
+
+        String username = authData.username();
+
         connections.put(authToken, session);
         sessionGameID.put(session, gameID);
-        List<GameData> games = command.getGames();
-        if (games == null) {
-            System.err.println("Error: No games available.");
-            return;
+        String playerColor = "";
+        if (Objects.equals(gameData.whiteUsername(), username)){
+            playerColor = "white";
         }
-        for (GameData chessGame : games){
-            if (chessGame.gameID() == gameID){
-                game = chessGame.game();
-            }
+        else if (Objects.equals(gameData.blackUsername(), username)){
+            playerColor = "black";
         }
-        String playerColor = command.getPlayerColor();
-        if (!command.observer()){
-            System.out.println("User " + command.getUsername() + " connected to game " + gameID +
+
+        boolean observer = (!username.equals(gameData.whiteUsername()) &&
+                !username.equals(gameData.blackUsername()));
+
+        if (!observer){
+            System.out.println("User " + username + " connected to game " + gameID +
                     " as " + playerColor);
         }
-        else if (command.observer()){
-            System.out.println("User " + command.getUsername() + " connected to game " + gameID
+        else if (observer){
+            System.out.println("User " + username + " connected to game " + gameID
                     + " as an observer");
         }
-        LoadGameMessage loadGameMessage = new LoadGameMessage(game);
+
+        LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         try {
             session.getRemote().sendString(gson.toJson(loadGameMessage));
         } catch (IOException e) {
@@ -106,37 +129,55 @@ public class WebSocketHandler {
                 System.err.println("Failed to send error message: " + ex.getMessage());
             }
         }
-        if (!command.observer()){
-            notificationText = command.getUsername() + " has joined the game as player color " + playerColor;
+        if (!observer){
+            notificationText = username + " has joined the game as player color " + playerColor;
         }
-        else if (command.observer()){
-            notificationText = command.getUsername() + " has joined as an observer";
+        else if (observer){
+            notificationText = username + " has joined as an observer";
         }
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }
 
-    public static void leave(Session session, UserGameCommand command){
+    public static void leave(Session session, UserGameCommand command) throws DataAccessException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
+
+        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+
+        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
+        GameData gameData = gameDataDAO.getGame(gameID);
+        String username = authData.username();
+
+        boolean observer = (username != gameData.whiteUsername() &&
+                username != gameData.blackUsername());
+
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
-        if (command.observer()){
-            notificationText = "Observer " + command.getUsername() + " has left the game.";
+        if (observer){
+            notificationText = "Observer " + username + " has left the game.";
         }
         else{
-            notificationText = command.getUsername() + " has left the game.";
+            notificationText = username + " has left the game.";
         }
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }
 
-    public static void resign(Session session, UserGameCommand command){
+    public static void resign(Session session, UserGameCommand command) throws DataAccessException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
+
+        SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
+        AuthData authData = authDataDAO.getAuth(command.getAuthToken());
+
+        String username = authData.username();
+
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
-        notificationText = command.getUsername() + " has resigned.";
+
+        notificationText = username + " has resigned.";
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }

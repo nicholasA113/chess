@@ -158,10 +158,7 @@ public class GameplayREPL {
                 }
             }
             if (isValidMove) {
-                chessGame.makeMove(chessMove);
-                MakeMoveCommand makeMoveCommand = new MakeMoveCommand(
-                        authToken, gameID, username, observer, chessMove, chessPiece,
-                        games, playerColor);
+                MakeMoveCommand makeMoveCommand = new MakeMoveCommand(authToken, gameID, chessMove);
                 String command = gson.toJson(makeMoveCommand);
                 try {
                     connection.sendCommand(command);
@@ -251,7 +248,7 @@ public class GameplayREPL {
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
-                authToken, observer, username, gameID, games, playerColor);
+                authToken, gameID);
         String command = gson.toJson(leaveCommand);
         try{
             connection.sendCommand(command);
@@ -273,7 +270,7 @@ public class GameplayREPL {
                 result = scanner.nextLine();
                 if (result.equalsIgnoreCase("yes")){
                     UserGameCommand resignCommand = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
-                            authToken, observer, username, gameID, games, playerColor);
+                            authToken, gameID);
                     String command = gson.toJson(resignCommand);
                     try{
                         connection.sendCommand(command);

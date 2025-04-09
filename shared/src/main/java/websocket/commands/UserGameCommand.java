@@ -19,23 +19,10 @@ public class UserGameCommand {
 
     private final Integer gameID;
 
-    private final List<GameData> games;
-
-    private final String playerColor;
-
-    private final boolean observer;
-
-    private final String username;
-
-    public UserGameCommand(CommandType commandType, String authToken, boolean observer, String username,
-                           Integer gameID, List<GameData> games, String playerColor) {
+    public UserGameCommand(CommandType commandType, String authToken, Integer gameID) {
         this.commandType = commandType;
         this.authToken = authToken;
         this.gameID = gameID;
-        this.games = games;
-        this.playerColor = playerColor;
-        this.observer = observer;
-        this.username = username;
     }
 
     public enum CommandType {
@@ -56,14 +43,6 @@ public class UserGameCommand {
     public Integer getGameID() {
         return gameID;
     }
-
-    public List<GameData> getGames(){ return games; }
-
-    public String getPlayerColor(){ return playerColor; }
-
-    public boolean observer(){ return observer; }
-
-    public String getUsername(){ return username; }
 
     @Override
     public boolean equals(Object o) {

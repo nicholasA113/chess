@@ -10,22 +10,13 @@ public class MakeMoveCommand extends UserGameCommand{
 
     private final ChessMove chessMove;
 
-    private final ChessPiece chessPiece;
-
-    public MakeMoveCommand(String authToken, Integer gameID, String username, boolean observer,
-                           ChessMove chessMove, ChessPiece chessPiece, List<GameData> games,
-                           String playerColor) {
-        super(CommandType.MAKE_MOVE, authToken, observer, username, gameID, games, playerColor);
+    public MakeMoveCommand(String authToken, Integer gameID,
+                           ChessMove chessMove) {
+        super(CommandType.MAKE_MOVE, authToken, gameID);
         this.chessMove = chessMove;
-        this.chessPiece = chessPiece;
     }
 
     public ChessMove ChessMove() {
         return chessMove;
     }
-
-    public ChessPiece ChessPiece() {
-        return chessPiece;
-    }
-
 }

@@ -15,12 +15,12 @@ import java.util.List;
 @ClientEndpoint
 public class WebSocketFacade{
 
-    private Session session;
-    private NotificationHandler notificationHandler;
-    private Gson gson = new Gson();
-    private List<GameData> games;
-    private String playerColor;
-    private boolean observer;
+    public Session session;
+    public NotificationHandler notificationHandler;
+    public Gson gson = new Gson();
+    public List<GameData> games;
+    public String playerColor;
+    public boolean observer;
 
     private ChessGame chessGame;
 
@@ -38,11 +38,11 @@ public class WebSocketFacade{
             this.observer = observer;
             this.playerColor = playerColor;
             this.games = games;
-            this.notificationHandler = notificationHandler;
 
+            this.notificationHandler = notificationHandler;
             UserGameCommand connectCommand =
                     new UserGameCommand(UserGameCommand.CommandType.CONNECT,
-                            authToken, observer, username, gameID, games, playerColor);
+                            authToken, gameID);
             sendCommand(gson.toJson(connectCommand));
         }
         catch(Exception e){

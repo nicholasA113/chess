@@ -70,6 +70,8 @@ public class WebSocketFacade{
                 Notification notification = gson.fromJson(message, Notification.class);
                 if (notificationHandler != null) {
                     notificationHandler.handleNotification(notification);
+                } else {
+                    System.err.println("No notification handler found.");
                 }
             }
             case ERROR -> {

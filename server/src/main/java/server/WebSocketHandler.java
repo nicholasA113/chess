@@ -141,6 +141,8 @@ public class WebSocketHandler {
     }
 
     public static void leave(Session session, UserGameCommand command) throws DataAccessException, IOException {
+        SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
+
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
 
@@ -148,28 +150,53 @@ public class WebSocketHandler {
 
         String username = authData.username();
 
-        boolean observer = (username != gameData.whiteUsername() &&
-                username != gameData.blackUsername());
+        boolean observer = !(username.equals(gameData.whiteUsername()) || username.equals(gameData.blackUsername()));
 
-        connections.remove(authToken, session);
-        sessionGameID.remove(session, gameID);
+        String notificationText = "";
+
         if (observer){
             notificationText = "Observer " + username + " has left the game.";
         }
-        else{
+        else if (!observer){
             notificationText = username + " has left the game.";
         }
+
+        connections.remove(authToken, session);
+        sessionGameID.remove(session, gameID);
+
+        GameData updatedGameData;
+        if (username.equals(gameData.whiteUsername())) {
+            updatedGameData = new GameData(
+                    gameData.gameID(),
+                    null,
+                    gameData.blackUsername(),
+                    gameData.gameName(),
+                    gameData.game()
+            );
+        } else if (username.equals(gameData.blackUsername())) {
+            updatedGameData = new GameData(
+                    gameData.gameID(),
+                    gameData.whiteUsername(),
+                    null,
+                    gameData.gameName(),
+                    gameData.game()
+            );
+        } else {
+            updatedGameData = gameData;
+        }
+        gameDataDAO.updateGame(updatedGameData);
+
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
     }
 
+
+
     public static void resign(Session session, UserGameCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
-
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         AuthData authData;
-
         try {
             authData = authDataDAO.getAuth(authToken);
         } catch (DataAccessException e) {

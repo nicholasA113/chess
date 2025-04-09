@@ -52,7 +52,6 @@ public class WebSocketHandler {
 
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-
         AuthData authData = authDataDAO.getAuth(command.getAuthToken());
         GameData gameData = gameDataDAO.getGame(gameID);
 
@@ -60,22 +59,12 @@ public class WebSocketHandler {
         ChessGame game = gameData.game();
 
         game.makeMove(chessMove);
-
+        gameDataDAO.updateGame(gameData);
         ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
 
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
-        sendLoadGameMessage(authToken, loadGameMessage, gameID);
+        sendLoadGameMessage(loadGameMessage, gameID);
 
-        try{
-            session.getRemote().sendString(gson.toJson(loadGameMessage));
-        } catch (IOException e) {
-            ErrorMessage errorMessage = new ErrorMessage("Failed to send notification: " + e.getMessage());
-            try {
-                session.getRemote().sendString(new Gson().toJson(errorMessage));
-            } catch (IOException ex) {
-                System.err.println("Failed to send error message: " + ex.getMessage());
-            }
-        }
         notificationText = username + " has moved " +
                 chessPiece.getPieceType() + " from "
                 + command.ChessMove().getStartPosition() + " to "
@@ -195,10 +184,10 @@ public class WebSocketHandler {
         });
     }
 
-    public static void sendLoadGameMessage(String authToken, LoadGameMessage loadGameMessage, Integer gameID) {
+    public static void sendLoadGameMessage(LoadGameMessage loadGameMessage, Integer gameID) {
         connections.forEach((token, session) -> {
             Integer sessionID = sessionGameID.get(session);
-            if (!token.equals(authToken) && sessionID.equals(gameID)) {
+            if (sessionID != null && sessionID.equals(gameID)) {
                 try {
                     session.getRemote().sendString(gson.toJson(loadGameMessage));
                 } catch (IOException e) {

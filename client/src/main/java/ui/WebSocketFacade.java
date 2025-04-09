@@ -23,6 +23,7 @@ public class WebSocketFacade{
     public boolean observer;
 
     private ChessGame chessGame;
+    private StringBuilder[][] chessBoard;
 
     public WebSocketFacade(NotificationHandler notificationHandler,
                            String authToken, boolean observer, String username,
@@ -58,10 +59,10 @@ public class WebSocketFacade{
                 LoadGameMessage loadGameMessage = gson.fromJson(message, LoadGameMessage.class);
                 ChessGame updatedGame =  loadGameMessage.getChessGame();
                 this.chessGame = updatedGame;
-                StringBuilder[][] chessBoard = new StringBuilder[10][10];
-                chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
+                this.chessBoard = DrawChessBoard.drawChessBoard(playerColor,
+                        new StringBuilder[10][10], updatedGame.getBoard());
                 System.out.print('\n');
-                DrawChessBoard.printBoard(chessBoard);
+                DrawChessBoard.printBoard(this.chessBoard);
                 System.out.print("Drew chessBoard from server\n");
                 printPrompt();
             }
@@ -94,6 +95,10 @@ public class WebSocketFacade{
 
     public ChessGame getChessGame() {
         return this.chessGame;
+    }
+
+    public StringBuilder[][] getChessBoard(){
+        return this.chessBoard;
     }
 
 }

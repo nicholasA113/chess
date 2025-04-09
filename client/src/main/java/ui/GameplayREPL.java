@@ -81,7 +81,12 @@ public class GameplayREPL {
         var request = (tokens.length > 0) ? tokens[0] : "help";
         var parameters = Arrays.copyOfRange(tokens, 1, tokens.length);
         return switch (request){
-            case "redraw" -> redraw();
+            case "redraw" -> {
+                String message = redraw();
+                System.out.print(message + '\n');
+                printPrompt();
+                yield "";
+            }
             case "move" -> {
                 String message = makeMove(parameters);
                 System.out.print(message + '\n');
@@ -118,6 +123,7 @@ public class GameplayREPL {
 
     public String makeMove(String ... parameters) throws Exception{
         this.chessGame = connection.getChessGame();
+        this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
         if (!observer && parameters.length == 2){
             if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
                 DrawChessBoard.printBoard(chessBoard);
@@ -242,17 +248,18 @@ public class GameplayREPL {
         return "Invalid input. Please try again.";
     }
 
-    public String redraw(){
-        if (!observer){
-            chessGame.getBoard().resetBoard();
-            chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
+    public String redraw() {
+        if (!observer) {
+            this.chessGame = new ChessGame();
+            this.chessGame.getBoard().resetBoard();
+            this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
             DrawChessBoard.printBoard(chessBoard);
-            return "Redrew the chessboard";
-        }
-        else{
+            return "Reset and redrew the chessboard to a new game";
+        } else {
             return "You are only an observer. You cannot interfere with gameplay.";
         }
     }
+
 
     public String leave(){
         UserGameCommand leaveCommand = new UserGameCommand(UserGameCommand.CommandType.LEAVE,

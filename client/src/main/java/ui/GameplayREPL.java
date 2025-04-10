@@ -125,7 +125,7 @@ public class GameplayREPL {
     public String makeMove(String ... parameters) throws Exception{
         this.chessGame = connection.getChessGame();
         this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
-        if (!observer && parameters.length == 2 && !resignedGame){
+        if (!observer && (parameters.length == 2 || parameters.length == 3) && !resignedGame){
             if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
                 DrawChessBoard.printBoard(chessBoard);
                 return "It is not your turn. Please wait until it is your turn to make a move.";
@@ -150,34 +150,45 @@ public class GameplayREPL {
             ChessPosition position = new ChessPosition(rowStart, colStart);
             ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = board.getPiece(position);
+            if (chessPiece.getTeamColor() != chessGame.getTeamTurn()){
+                DrawChessBoard.printBoard(chessBoard);
+                return "You cannot move the other player's piece. Please select " +
+                        "one of your own.";
+            }
             if (chessPiece == null){
                 DrawChessBoard.printBoard(chessBoard);
                 return "No piece at selected position. Please enter a valid position.";
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             ChessPosition endPosition = new ChessPosition(rowEnd, colEnd);
-            boolean isValidMove = false;
-            ChessMove chessMove = null;
-            for (ChessMove move : validMoves) {
-                if (move.getEndPosition().equals(endPosition)) {
-                    isValidMove = true;
-                    chessMove = move;
-                    break;
+
+            ChessPiece.PieceType promotionPiece = null;
+            if (parameters.length == 3) {
+                String pieceToPromote = parameters[2].toLowerCase();
+                promotionPiece = switch (pieceToPromote) {
+                    case "q" -> ChessPiece.PieceType.QUEEN;
+                    case "r" -> ChessPiece.PieceType.ROOK;
+                    case "b" -> ChessPiece.PieceType.BISHOP;
+                    case "n" -> ChessPiece.PieceType.KNIGHT;
+                    default -> null;
+                };
+                if (promotionPiece == null) {
+                    DrawChessBoard.printBoard(chessBoard);
+                    return "Invalid promotion piece. Use q, r, b, or n.";
                 }
             }
-            if (isValidMove) {
-                MakeMoveCommand makeMoveCommand = new MakeMoveCommand(authToken, gameID, chessMove);
-                String command = gson.toJson(makeMoveCommand);
-                try {
-                    connection.sendCommand(command);
-                } catch (Exception e) {
-                    System.out.print(e.getMessage());
-                }
-                return "Moved chess piece successfully";
-            }
-            else {
+
+            ChessMove chessMove = new ChessMove(position, endPosition, promotionPiece);
+            if (!validMoves.contains(chessMove)) {
                 DrawChessBoard.printBoard(chessBoard);
                 return "Move is not valid. Please enter a valid move.";
+            }
+            MakeMoveCommand makeMoveCommand = new MakeMoveCommand(authToken, gameID, chessMove);
+            String command = gson.toJson(makeMoveCommand);
+            try {
+                connection.sendCommand(command);
+            } catch (Exception e) {
+                System.out.print(e.getMessage());
             }
         }
         else if (parameters.length != 2){
@@ -192,6 +203,7 @@ public class GameplayREPL {
             DrawChessBoard.printBoard(chessBoard);
             return "You are an observer. You cannot make a move.";
         }
+        return "";
     }
 
     public String highlight(String ... parameters){

@@ -33,13 +33,10 @@ public class WebSocketFacade{
             URI url = new URI("ws://localhost:8080/ws");
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             this.session = container.connectToServer(this, url);
-            System.out.print("Connected to WebSocket\n");
-
             this.chessGame = chessGame;
             this.observer = observer;
             this.playerColor = playerColor;
             this.games = games;
-
             this.notificationHandler = notificationHandler;
             UserGameCommand connectCommand =
                     new UserGameCommand(UserGameCommand.CommandType.CONNECT,
@@ -63,7 +60,6 @@ public class WebSocketFacade{
                         new StringBuilder[10][10], updatedGame.getBoard());
                 System.out.print('\n');
                 DrawChessBoard.printBoard(this.chessBoard);
-                System.out.print("Drew chessBoard from server\n");
                 printPrompt();
             }
             case NOTIFICATION -> {

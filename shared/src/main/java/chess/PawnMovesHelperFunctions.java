@@ -61,6 +61,10 @@ public class PawnMovesHelperFunctions {
 
     public void promotionMove(int currentRow, int currentCol, ChessBoard board,
                               ArrayList<ChessMove> moves, ChessPosition myPosition){
+        ChessPiece myPiece = board.getPiece(new ChessPosition(currentRow, currentCol));
+        if (myPiece == null){
+            return;
+        }
         int[] colMoves = {1, -2};
         for (int colMove : colMoves) {
             currentCol += colMove;
@@ -68,7 +72,7 @@ public class PawnMovesHelperFunctions {
                 continue;
             }
             ChessPiece possiblePiece2 = board.getPiece(new ChessPosition(currentRow, currentCol));
-            if (possiblePiece2 != null) {
+            if (possiblePiece2 != null && possiblePiece2.getTeamColor() != myPiece.getTeamColor()) {
                 moves.add(new ChessMove(myPosition,
                         new ChessPosition(currentRow, currentCol),
                         null));

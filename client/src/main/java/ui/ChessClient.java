@@ -116,7 +116,7 @@ public class ChessClient {
                 getUpdateGames();
             }
             catch (Exception e){
-                throw new ResponseException(400, "Error creating game - " + e.getMessage());
+                return "Game name is invalid or already exists.";
             }
             return "Successfully created game";
         }

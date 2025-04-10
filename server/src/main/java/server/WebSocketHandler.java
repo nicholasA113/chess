@@ -121,7 +121,25 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
+
+
         ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
+        if (chessPiece.getTeamColor() != currentTurn) {
+            ErrorMessage errorMessage = new ErrorMessage("You cannot move the other player's piece.");
+            session.getRemote().sendString(new Gson().toJson(errorMessage));
+            return;
+        }
+
+
+        if (chessPiece.getPieceType() == ChessPiece.PieceType.PAWN) {
+            boolean ableToPromote = (chessPiece.getTeamColor() == ChessGame.TeamColor.WHITE && chessMove.getEndPosition().getRow() == 8) ||
+                    (chessPiece.getTeamColor() == ChessGame.TeamColor.BLACK && chessMove.getEndPosition().getRow() == 1);
+            if (chessMove.getPromotionPiece() != null && !ableToPromote) {
+                ErrorMessage errorMessage = new ErrorMessage("You can only promote a pawn on the last row");
+                session.getRemote().sendString(new Gson().toJson(errorMessage));
+                return;
+            }
+        }
         try {
             game.makeMove(chessMove);
             gameDataDAO.updateGame(gameData);
@@ -133,16 +151,7 @@ public class WebSocketHandler {
         ChessGame.TeamColor opponentColor = (currentTurn == ChessGame.TeamColor.WHITE)
                 ? ChessGame.TeamColor.BLACK
                 : ChessGame.TeamColor.WHITE;
-        if (game.isInCheckmate(opponentColor)) {
-            String notificationText = username + " is in checkmate";
-            Notification notification = new Notification(notificationText);
-            sendNotificationAll(notification, gameID);
-        }
-        else if (game.isInCheck(opponentColor)) {
-            String notificationText = username + " is in check.";
-            Notification notification = new Notification(notificationText);
-            sendNotificationAll(notification, gameID);
-        }
+
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(loadGameMessage, gameID);
         ChessPosition startPosition = command.getChessMove().getStartPosition();
@@ -155,9 +164,26 @@ public class WebSocketHandler {
                 endPositionCol + endPosition.getRow() + ".";
         Notification notification = new Notification(notificationText);
         sendNotification(authToken, notification, gameID);
+
+        String checkMatePlayer = "";
+        if (opponentColor == ChessGame.TeamColor.BLACK){
+            checkMatePlayer = gameData.blackUsername();
+        }
+        else if (opponentColor == ChessGame.TeamColor.WHITE){
+            checkMatePlayer = gameData.whiteUsername();
+        }
+
+        if (game.isInCheckmate(opponentColor)) {
+            notificationText = checkMatePlayer + " is in checkmate. The game is over.";
+            notification = new Notification(notificationText);
+            sendNotificationAll(notification, gameID);
+        }
+        else if (game.isInCheck(opponentColor)) {
+            notificationText = checkMatePlayer + " is in check.";
+            notification = new Notification(notificationText);
+            sendNotificationAll(notification, gameID);
+        }
     }
-
-
 
     public static void connect(Session session, UserGameCommand command) throws DataAccessException, IOException {
         resignedGame = false;

@@ -150,14 +150,14 @@ public class GameplayREPL {
             ChessPosition position = new ChessPosition(rowStart, colStart);
             ChessBoard board = chessGame.getBoard();
             ChessPiece chessPiece = board.getPiece(position);
+            if (chessPiece == null){
+                DrawChessBoard.printBoard(chessBoard);
+                return "No piece at selected position. Please enter a valid position.";
+            }
             if (chessPiece.getTeamColor() != chessGame.getTeamTurn()){
                 DrawChessBoard.printBoard(chessBoard);
                 return "You cannot move the other player's piece. Please select " +
                         "one of your own.";
-            }
-            if (chessPiece == null){
-                DrawChessBoard.printBoard(chessBoard);
-                return "No piece at selected position. Please enter a valid position.";
             }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             ChessPosition endPosition = new ChessPosition(rowEnd, colEnd);

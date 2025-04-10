@@ -74,16 +74,13 @@ public class WebSocketHandler {
         String authToken = command.getAuthToken();
         int gameID = command.getGameID();
         ChessMove chessMove = command.getChessMove();
-
         SQLAuthDataDAO authDataDAO = new SQLAuthDataDAO();
         SQLGameDataDAO gameDataDAO = new SQLGameDataDAO();
-
         if (chessMove == null) {
             ErrorMessage errorMessage = new ErrorMessage("Chess move is missing or invalid.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         try {
             authData = authDataDAO.getAuth(authToken);
             gameData = gameDataDAO.getGame(gameID);
@@ -102,34 +99,28 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         String username = authData.username();
         ChessGame game = gameData.game();
-
         if (resignedGame){
             ErrorMessage errorMessage = new ErrorMessage("A player has resigned. You cannot make any more moves.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         ChessGame.TeamColor currentTurn = game.getTeamTurn();
         boolean isWhite = username.equals(gameData.whiteUsername());
         boolean isBlack = username.equals(gameData.blackUsername());
-
         if ((currentTurn == ChessGame.TeamColor.WHITE && !isWhite) ||
                 (currentTurn == ChessGame.TeamColor.BLACK && !isBlack)) {
             ErrorMessage errorMessage = new ErrorMessage("It is not your turn.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         Collection<ChessMove> validMoves = game.validMoves(chessMove.getStartPosition());
         if (!validMoves.contains(chessMove)) {
             ErrorMessage errorMessage = new ErrorMessage("Invalid move.");
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         ChessPiece chessPiece = game.getBoard().getPiece(chessMove.getStartPosition());
         try {
             game.makeMove(chessMove);
@@ -139,12 +130,9 @@ public class WebSocketHandler {
             session.getRemote().sendString(new Gson().toJson(errorMessage));
             return;
         }
-
         ChessGame.TeamColor opponentColor = (currentTurn == ChessGame.TeamColor.WHITE)
                 ? ChessGame.TeamColor.BLACK
                 : ChessGame.TeamColor.WHITE;
-
-
         if (game.isInCheckmate(opponentColor)) {
             String notificationText = username + " is in checkmate";
             Notification notification = new Notification(notificationText);
@@ -155,17 +143,12 @@ public class WebSocketHandler {
             Notification notification = new Notification(notificationText);
             sendNotificationAll(notification, gameID);
         }
-
-
         LoadGameMessage loadGameMessage = new LoadGameMessage(gameData.game());
         sendLoadGameMessage(loadGameMessage, gameID);
-
         ChessPosition startPosition = command.getChessMove().getStartPosition();
         ChessPosition endPosition = command.getChessMove().getEndPosition();
-
         String startPositionCol = positionToLetter.get(startPosition.getColumn());
         String endPositionCol = positionToLetter.get(endPosition.getColumn());
-
         String notificationText = username + " has moved " +
                 chessPiece.getPieceType() + " from " +
                 startPositionCol + startPosition.getRow() + " to " +

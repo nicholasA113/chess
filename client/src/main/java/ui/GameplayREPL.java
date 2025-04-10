@@ -53,7 +53,6 @@ public class GameplayREPL {
         this.observer = observer;
         this.playerColor = playerColor;
         this.games = games;
-
         this.chessGame = chessGame;
     }
 
@@ -62,7 +61,8 @@ public class GameplayREPL {
             System.out.println(notification);
             System.out.print("\n>>> ");
         };
-        connection = new WebSocketFacade(handler, authToken, observer, username, chessGame, gameID, games, playerColor);
+        connection = new WebSocketFacade(handler, authToken, observer, resignedGame,
+                chessGame, gameID, games, playerColor);
         userInput();
     }
 
@@ -122,14 +122,14 @@ public class GameplayREPL {
         };
     }
 
-    public String makeMove(String ... parameters) throws Exception{
+    public String makeMove(String ... parameters) {
+        if (resignedGame || connection.getResignStatus()) {
+            DrawChessBoard.printBoard(chessBoard);
+            return "The game has ended due to a player resigning. You cannot make any moves.";
+        }
         this.chessGame = connection.getChessGame();
         this.chessBoard = DrawChessBoard.drawChessBoard(playerColor, new StringBuilder[10][10], chessGame.getBoard());
-        if (!observer && (parameters.length == 2 || parameters.length == 3) && !resignedGame){
-            if (!playerColor.equalsIgnoreCase(chessGame.getTeamTurn().toString())){
-                DrawChessBoard.printBoard(chessBoard);
-                return "It is not your turn. Please wait until it is your turn to make a move.";
-            }
+        if (!observer && (parameters.length == 2 || parameters.length == 3)){
             int colStart = 0;
             int rowStart = 0;
             int colEnd = 0;
@@ -154,11 +154,6 @@ public class GameplayREPL {
                 DrawChessBoard.printBoard(chessBoard);
                 return "No piece at selected position. Please enter a valid position.";
             }
-            if (chessPiece.getTeamColor() != chessGame.getTeamTurn()){
-                DrawChessBoard.printBoard(chessBoard);
-                return "You cannot move the other player's piece. Please select " +
-                        "one of your own.";
-            }
             Collection<ChessMove> validMoves = chessGame.validMoves(position);
             ChessPosition endPosition = new ChessPosition(rowEnd, colEnd);
 
@@ -177,7 +172,6 @@ public class GameplayREPL {
                     return "Invalid promotion piece. Use q, r, b, or n.";
                 }
             }
-
             ChessMove chessMove = new ChessMove(position, endPosition, promotionPiece);
             if (!validMoves.contains(chessMove)) {
                 DrawChessBoard.printBoard(chessBoard);
@@ -195,10 +189,6 @@ public class GameplayREPL {
             DrawChessBoard.printBoard(chessBoard);
             return "Too many/Too few inputs. Please enter in the correct number of inputs.";
         }
-        else if (resignedGame){
-            DrawChessBoard.printBoard(chessBoard);
-            return "The game has ended due to a player resigned. You cannot make any moves.";
-        }
         else{
             DrawChessBoard.printBoard(chessBoard);
             return "You are an observer. You cannot make a move.";
@@ -209,7 +199,7 @@ public class GameplayREPL {
     public String highlight(String ... parameters){
         this.chessGame = connection.getChessGame();
         chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
-        if (parameters.length == 1){
+        if (parameters.length == 1 && !(resignedGame || connection.getResignStatus())){
             char colChar = parameters[0].charAt(0);
             char rowChar = parameters[0].charAt(1);
             int col = colChar - 'a' + 1;
@@ -262,6 +252,10 @@ public class GameplayREPL {
             chessBoard = DrawChessBoard.drawChessBoard(playerColor, chessBoard, chessGame.getBoard());
             return "Highlighted moves for piece at requested position";
         }
+        else if (resignedGame || connection.getResignStatus()){
+            DrawChessBoard.printBoard(chessBoard);
+            return "Player has resigned. No valid moves can be highlighted.";
+        }
         return "Invalid input. Please try again.";
     }
 
@@ -304,8 +298,9 @@ public class GameplayREPL {
                     catch (Exception e){
                         System.out.print(e.getMessage());
                     }
-                    DrawChessBoard.printBoard(chessBoard);
+                    //DrawChessBoard.printBoard(chessBoard);
                     resignedGame = true;
+                    connection.setResignStatus(resignedGame);
                     return "You have admitted defeat. Other player wins.";
                 }
                 else if (result.equalsIgnoreCase("no")){

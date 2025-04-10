@@ -22,11 +22,13 @@ public class WebSocketFacade{
     public String playerColor;
     public boolean observer;
 
+    public boolean resignedGame;
+
     private ChessGame chessGame;
     private StringBuilder[][] chessBoard;
 
     public WebSocketFacade(NotificationHandler notificationHandler,
-                           String authToken, boolean observer, String username,
+                           String authToken, boolean observer, boolean resignedGame,
                            ChessGame chessGame, int gameID, List<GameData> games,
                            String playerColor) throws ResponseException {
         try{
@@ -37,6 +39,9 @@ public class WebSocketFacade{
             this.observer = observer;
             this.playerColor = playerColor;
             this.games = games;
+
+            this.resignedGame = resignedGame;
+
             this.notificationHandler = notificationHandler;
             UserGameCommand connectCommand =
                     new UserGameCommand(UserGameCommand.CommandType.CONNECT,
@@ -95,8 +100,12 @@ public class WebSocketFacade{
         return this.chessGame;
     }
 
-    public StringBuilder[][] getChessBoard(){
-        return this.chessBoard;
+    public Boolean getResignStatus(){
+        return this.resignedGame;
+    }
+
+    public void setResignStatus(Boolean resignedGame){
+        this.resignedGame = resignedGame;
     }
 
 }

@@ -8,4 +8,9 @@ public class ErrorMessage extends ServerMessage{
         super(ServerMessageType.ERROR);
         this.errorMessage = errorMessage;
     }
+
+    @Override
+    public String toString() {
+        return errorMessage;
+    }
 }

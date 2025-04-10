@@ -34,6 +34,8 @@ public class WebSocketHandler {
 
     private static Boolean resignedGame = false;
 
+    private static List<Integer> resignedGames = new ArrayList<>();
+
     public static Map<Integer, String> positionToLetter = new HashMap<>() {{
         put(1, "a");
         put(2, "b");
@@ -68,7 +70,6 @@ public class WebSocketHandler {
             }
         }
     }
-
 
     public static void makeMove(Session session, MakeMoveCommand command) throws DataAccessException, IOException {
         String authToken = command.getAuthToken();
@@ -319,13 +320,14 @@ public class WebSocketHandler {
             return;
         }
 
-        String notificationText = username + " has resigned.";
+        String notificationText = username + " has resigned. The game is over.";
         Notification notification = new Notification(notificationText);
 
         sendNotificationAll(notification, gameID);
 
         connections.remove(authToken, session);
         sessionGameID.remove(session, gameID);
+        resignedGames.add(gameID);
 
         resignedGame = true;
     }
